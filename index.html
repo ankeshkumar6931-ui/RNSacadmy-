@@ -113,7 +113,7 @@
       flex: 1;
       overflow-y: auto;
       padding: 16px;
-      padding-bottom: 140px;
+      padding-bottom: 160px; /* Extra bottom space to prevent chat input overlap */
       scroll-behavior: smooth;
       z-index: 10;
       -webkit-overflow-scrolling: touch;
@@ -248,14 +248,26 @@
     }
     .video-thumb { width: 100%; height: 180px; object-fit: cover; background: #9cb3a8; display: block; }
 
-    /* Chat Styling */
-    .chat-container { display: flex; flex-direction: column; gap: 12px; }
+    /* Chat Styling & Avatar Badges */
+    .chat-container { display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; }
     .chat-message { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; position: relative; }
     .chat-message.my-message { align-self: flex-end; flex-direction: row-reverse; }
     .chat-message.other-message { align-self: flex-start; }
     .chat-message.admin-message { align-self: flex-start; max-width: 90%; }
     
-    .chat-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); flex-shrink: 0; cursor: pointer; }
+    .chat-avatar-wrapper { position: relative; flex-shrink: 0; }
+    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; }
+    
+    /* Rank Badges on Avatar */
+    .chat-avatar-badge {
+      position: absolute; bottom: -2px; right: -4px; width: 18px; height: 18px; border-radius: 50%;
+      font-size: 0.65rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+      border: 1.5px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .rank-badge-1 { background: #eab308; color: #000; } /* Gold Crown */
+    .rank-badge-2 { background: #94a3b8; color: #fff; } /* Silver */
+    .rank-badge-3 { background: #d97706; color: #fff; } /* Bronze */
+
     .chat-bubble-wrapper { display: flex; flex-direction: column; max-width: 100%; position: relative; }
     
     .chat-bubble {
@@ -287,7 +299,7 @@
     .delete-msg-btn.show { display: inline-flex; align-items: center; gap: 5px; }
 
     .chat-input-bar {
-      display: none; gap: 10px; padding: 12px 16px; background: rgba(220, 242, 225, 0.65);
+      display: none; gap: 10px; padding: 12px 16px; background: rgba(220, 242, 225, 0.85);
       backdrop-filter: blur(16px); border-top: 1.5px solid var(--card-border);
       position: absolute; bottom: 85px; left: 0; right: 0; z-index: 900;
     }
@@ -338,7 +350,7 @@
       <div class="brand-area">
         <h2>Ranjan Sir Academy</h2>
       </div>
-      <div id="user-badge-status" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">Guest</div>
+      <div id="user-badge-status" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">Guest Student</div>
     </div>
 
     <div class="content-area" id="main-content-scroll">
@@ -378,12 +390,21 @@
 
       <!-- 2. LIVE SCREEN -->
       <div id="view-live" class="view-section">
-        <div class="card" style="text-align: center; padding: 40px 15px;" id="no-live-card">
-          <i class="fa-solid fa-tower-broadcast" style="font-size: 3rem; color: var(--text-dark); margin-bottom: 12px;"></i>
-          <h3>No Active Live Class</h3>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; font-weight: 600;">Sir will update when class starts!</p>
+        <div id="current-live-container">
+          <div class="card" style="text-align: center; padding: 30px 15px;" id="no-live-card">
+            <i class="fa-solid fa-tower-broadcast" style="font-size: 2.5rem; color: var(--text-dark); margin-bottom: 10px;"></i>
+            <h3>No Active Live Class</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-weight: 600;">Sir will update when class starts!</p>
+          </div>
+          <div id="live-external-card" style="display: none;"></div>
         </div>
-        <div id="live-external-card" style="display: none;"></div>
+
+        <div class="card" style="margin-top: 15px;">
+          <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-clock-rotate-left" style="color: #15803d;"></i> Past Live Classes</h3>
+          <div id="past-lives-container">
+            <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">No recorded live classes yet.</p>
+          </div>
+        </div>
       </div>
 
       <!-- 3. CHAT SCREEN -->
@@ -519,7 +540,8 @@
       board: 'Bihar Board',
       dp: 'https://api.dicebear.com/7.x/micah/svg?seed=StudentAlpha',
       score: 0,
-      isBlocked: false
+      isBlocked: false,
+      answeredQuizzes: {} // Tracks answered quiz impact locally e.g. { quizId: +1 or -1 }
     };
 
     let userProfilesMap = {};
@@ -527,6 +549,7 @@
     let quizzesList = [];
     let pollsList = [];
     let currentChatList = [];
+    let pastLiveList = [];
     let lastRenderedChatJson = "";
     let userRankMap = {};
 
@@ -535,6 +558,13 @@
       document.getElementById('toast-message').innerText = msg;
       toast.classList.add('show');
       setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    function scrollToBottom() {
+      const scrollArea = document.getElementById('main-content-scroll');
+      if (scrollArea) {
+        scrollArea.scrollTop = scrollArea.scrollHeight;
+      }
     }
 
     function initAvatarSelector() {
@@ -550,13 +580,12 @@
 
         const img = document.createElement('img');
         img.src = url;
-        // Check selection based on current user dp
         img.className = 'avatar-option' + (currentUser.dp === url ? ' selected' : '');
         img.loading = 'lazy';
         img.onclick = () => {
           document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
           img.classList.add('selected');
-          currentUser.dp = url; // Directly update current user avatar
+          currentUser.dp = url;
           document.getElementById('p-dp-img').src = url;
         };
         grid.appendChild(img);
@@ -600,11 +629,11 @@
           if (data.UsersMap) {
             userProfilesMap = data.UsersMap;
             if (userProfilesMap[currentUser.id]) {
-              // Preserve locally selected DP if just changed, else sync
               let activeDp = currentUser.dp;
+              let localAnsMap = currentUser.answeredQuizzes || {};
               currentUser = { ...currentUser, ...userProfilesMap[currentUser.id] };
-              // If firebase has older DP but user just changed it locally before sync, keep local
               if (activeDp) currentUser.dp = activeDp;
+              currentUser.answeredQuizzes = localAnsMap;
             }
             renderRankings();
           }
@@ -614,11 +643,11 @@
           }
           if (data.Quizzes) {
             let newQuizzes = Array.isArray(data.Quizzes) ? data.Quizzes : Object.values(data.Quizzes);
-            checkQuizUndoScore(newQuizzes);
+            checkQuizUndoScoreAccurate(newQuizzes);
             quizzesList = newQuizzes;
             renderQuizzesList();
           } else {
-            checkQuizUndoScore([]);
+            checkQuizUndoScoreAccurate([]);
             quizzesList = [];
             renderQuizzesList();
           }
@@ -636,8 +665,12 @@
               renderChatMessages(currentChatList);
             }
           }
+          if (data.pastLives) {
+            pastLiveList = Array.isArray(data.pastLives) ? data.pastLives : Object.values(data.pastLives);
+            renderPastLivesUI();
+          }
           if (data.liveVideoData) {
-            updateLiveStreamUI(data.liveVideoData.videoId);
+            updateLiveStreamUI(data.liveVideoData.videoId, data.liveVideoData.title);
           } else {
             hideLiveStreamUI();
           }
@@ -648,24 +681,24 @@
     fetchFirebaseData();
     setInterval(fetchFirebaseData, 1500);
 
-    function checkQuizUndoScore(newQuizzesList) {
+    /* ACCURATE UNDO SCORE LOGIC */
+    function checkQuizUndoScoreAccurate(newQuizzesList) {
+      currentUser.answeredQuizzes = currentUser.answeredQuizzes || {};
       let scoreChanged = false;
-      quizzesList.forEach(oldQ => {
-        const myOldAns = (oldQ.responses || {})[currentUser.id];
-        if (myOldAns !== undefined) {
-          const matchingNewQ = newQuizzesList.find(q => q.id === oldQ.id);
-          const myNewAns = matchingNewQ ? (matchingNewQ.responses || {})[currentUser.id] : undefined;
-          
-          if (myNewAns === undefined) {
-            if (myOldAns === oldQ.correctIndex) {
-              currentUser.score = (currentUser.score || 0) - 1;
-            } else {
-              currentUser.score = (currentUser.score || 0) + 1;
-            }
-            scoreChanged = true;
-          }
+
+      Object.keys(currentUser.answeredQuizzes).forEach(quizId => {
+        const impact = currentUser.answeredQuizzes[quizId];
+        const existsInNew = newQuizzesList.some(q => q.id === quizId);
+
+        if (!existsInNew) {
+          // Quiz was deleted! Revert exact impact
+          currentUser.score = (currentUser.score || 0) - impact;
+          delete currentUser.answeredQuizzes[quizId];
+          scoreChanged = true;
+          showToast('Deleted Quiz score reverted');
         }
       });
+
       if (scoreChanged) {
         fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
       }
@@ -715,7 +748,7 @@
             <div class="podium-card ${podiumClass}">
               <div class="podium-badge ${badgeClass}">${rankLabel}</div>
               <img src="${u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
-              <div style="font-size:0.8rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.name}</div>
+              <div style="font-size:0.8rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.name || 'Guest Student'}</div>
               <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.score} pts</div>
             </div>
           `;
@@ -729,7 +762,7 @@
             <span style="font-weight:800; width:24px; color:${idx < 3 ? '#b45309':'var(--text-muted)'};">#${idx + 1}</span>
             <img src="${u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
             <div style="flex:1;">
-              <div style="font-size:0.88rem; font-weight:800;">${u.name} ${isMe ? '(You)':''}</div>
+              <div style="font-size:0.88rem; font-weight:800;">${u.name || 'Guest Student'} ${isMe ? '(You)':''}</div>
               <div style="font-size:0.7rem; color:var(--text-muted);">Roll: ${u.roll || 'N/A'} | ${u.classVal || 'N/A'} | ${u.board || 'Bihar Board'}</div>
             </div>
             <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.score} pts</div>
@@ -741,7 +774,7 @@
     function showStudentProfileModal(uid) {
       const u = userProfilesMap[uid];
       if (!u) return;
-      document.getElementById('m-name').innerText = u.name || 'Student';
+      document.getElementById('m-name').innerText = u.name || 'Guest Student';
       document.getElementById('m-role').innerText = 'Student';
       document.getElementById('m-roll').innerText = u.roll || 'N/A';
       document.getElementById('m-class').innerText = u.classVal || 'N/A';
@@ -766,11 +799,11 @@
         container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No one else has seen this yet.</p>';
       } else {
         viewers.forEach(uid => {
-          const uProf = userProfilesMap[uid] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:6px; background:rgba(255,255,255,0.5); border-radius:14px; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
               <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
-              <span style="font-size:0.85rem; font-weight:800;">${uProf.name}</span>
+              <span style="font-size:0.85rem; font-weight:800;">${uProf.name || 'Guest Student'}</span>
             </div>
           `;
         });
@@ -807,12 +840,15 @@
       if (quiz.responses[currentUser.id] !== undefined) { showToast('Already answered!'); return; }
 
       quiz.responses[currentUser.id] = optIdx;
+      currentUser.answeredQuizzes = currentUser.answeredQuizzes || {};
 
       if (optIdx === quiz.correctIndex) {
         currentUser.score = (currentUser.score || 0) + 1;
+        currentUser.answeredQuizzes[quizId] = 1; // +1 Recorded
         showToast('Correct Answer! +1 Point');
       } else {
         currentUser.score = (currentUser.score || 0) - 1;
+        currentUser.answeredQuizzes[quizId] = -1; // -1 Recorded
         showToast('Wrong Answer! -1 Point');
       }
 
@@ -876,7 +912,7 @@
       });
     }
 
-    function updateLiveStreamUI(videoId) {
+    function updateLiveStreamUI(videoId, title) {
       if (!videoId) return;
       const dot = document.getElementById('live-nav-dot');
       const noLive = document.getElementById('no-live-card');
@@ -886,12 +922,13 @@
       if (liveExtCard) {
         liveExtCard.style.display = 'block';
         liveExtCard.innerHTML = `
-          <div class="card" style="text-align: center; padding: 25px; cursor: pointer;" onclick="openVideoExternally('${videoId}')">
-            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: #ef4444; font-size: 1.5rem;">
+          <div class="card" style="text-align: center; padding: 22px; cursor: pointer;" onclick="openVideoExternally('${videoId}')">
+            <div style="width: 55px; height: 55px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: #ef4444; font-size: 1.4rem;">
               <i class="fa-solid fa-play"></i>
             </div>
-            <h3 style="margin-bottom: 6px;">Live Class is Active!</h3>
-            <p style="font-size: 0.85rem; color: #2e6618; font-weight: 800;">Click here to watch live on YouTube</p>
+            <h3 style="margin-bottom: 4px;">🔴 Live Class Active!</h3>
+            <p style="font-size:0.85rem; font-weight:800; margin-bottom:6px;">${title || 'Ranjan Sir Live'}</p>
+            <p style="font-size: 0.78rem; color: #2e6618; font-weight: 800;">Click to join live class on YouTube</p>
           </div>
         `;
       }
@@ -904,6 +941,28 @@
       if (dot) dot.style.display = 'none';
       if (noLive) noLive.style.display = 'block';
       if (liveExtCard) liveExtCard.style.display = 'none';
+    }
+
+    function renderPastLivesUI() {
+      const container = document.getElementById('past-lives-container');
+      if (!container) return;
+      if (!pastLiveList || pastLiveList.length === 0) {
+        container.innerHTML = '<p style="text-align:center; font-size:0.8rem; color:var(--text-muted); font-weight:600;">No recorded live classes yet.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      pastLiveList.forEach(item => {
+        container.innerHTML += `
+          <div style="display:flex; align-items:center; gap:12px; padding:10px; background:rgba(255,255,255,0.5); border:1px solid var(--card-border); border-radius:18px; margin-bottom:10px; cursor:pointer;" onclick="openVideoExternally('${item.videoId}')">
+            <img src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg" style="width:70px; height:48px; border-radius:12px; object-fit:cover;">
+            <div style="flex:1;">
+              <div style="font-size:0.85rem; font-weight:800;">${item.title || 'Recorded Class'}</div>
+              <div style="font-size:0.7rem; color:var(--text-muted); font-weight:700;">${item.date || 'Past Session'}</div>
+            </div>
+            <i class="fa-solid fa-circle-play" style="font-size:1.2rem; color:#15803d;"></i>
+          </div>
+        `;
+      });
     }
 
     let pressTimer = null;
@@ -970,8 +1029,7 @@
 
     function renderChatMessages(messages) {
       const container = document.getElementById('chat-messages-container');
-      const scrollArea = document.getElementById('main-content-scroll');
-      if (!container || !scrollArea) return;
+      if (!container) return;
       container.innerHTML = '';
 
       messages.forEach(msg => {
@@ -979,6 +1037,17 @@
         const isMy = (msg.senderId === currentUser.id);
         const uProf = userProfilesMap[msg.senderId] || {};
         const dpDisplay = msg.isAdmin ? 'https://api.dicebear.com/7.x/bottts/svg?seed=MaleTeacherRanjanPro' : (uProf.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User');
+
+        // Rank Badge on Avatar Logic
+        const rank = userRankMap[msg.senderId];
+        let avatarBadgeHtml = '';
+        if (rank === 1) {
+          avatarBadgeHtml = `<div class="chat-avatar-badge rank-badge-1" title="Rank 1">👑</div>`;
+        } else if (rank === 2) {
+          avatarBadgeHtml = `<div class="chat-avatar-badge rank-badge-2" title="Rank 2">🥈</div>`;
+        } else if (rank === 3) {
+          avatarBadgeHtml = `<div class="chat-avatar-badge rank-badge-3" title="Rank 3">🥉</div>`;
+        }
 
         const seenByMap = msg.seenBy || {};
         const otherViewers = Object.keys(seenByMap).filter(uid => uid !== currentUser.id);
@@ -1002,7 +1071,10 @@
         msgDiv.className = `chat-message ${isMy ? 'my-message' : (msg.isAdmin ? 'admin-message' : 'other-message')}`;
         
         msgDiv.innerHTML = `
-          <img src="${dpDisplay}" class="chat-avatar" onclick="showStudentProfileModal('${msg.senderId}')">
+          <div class="chat-avatar-wrapper">
+            <img src="${dpDisplay}" class="chat-avatar" onclick="showStudentProfileModal('${msg.senderId}')">
+            ${avatarBadgeHtml}
+          </div>
           <div class="chat-bubble-wrapper">
             <div class="chat-bubble" 
                  ${isMy ? `
@@ -1022,7 +1094,8 @@
         `;
         container.appendChild(msgDiv);
       });
-      scrollArea.scrollTop = scrollArea.scrollHeight;
+      
+      scrollToBottom();
     }
 
     function checkBlockStatusUI() {
@@ -1078,8 +1151,7 @@
       document.getElementById('chat-bar-wrapper').style.display = (tabName === 'chat') ? 'flex' : 'none';
       if (tabName === 'chat') {
         checkBlockStatusUI();
-        const scrollArea = document.getElementById('main-content-scroll');
-        scrollArea.scrollTop = scrollArea.scrollHeight;
+        setTimeout(scrollToBottom, 100);
       }
     }
 
@@ -1094,12 +1166,12 @@
         }
       } catch (e) {}
 
-      document.getElementById('p-name').innerText = currentUser.name;
+      document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
       document.getElementById('p-board-class').innerText = `${currentUser.classVal} | ${currentUser.board}`;
-      document.getElementById('user-badge-status').innerText = currentUser.name;
+      document.getElementById('user-badge-status').innerText = currentUser.name || 'Guest Student';
       document.getElementById('p-dp-img').src = currentUser.dp;
       
-      document.getElementById('prof-input-name').value = currentUser.name;
+      document.getElementById('prof-input-name').value = (currentUser.name === 'Guest Student') ? '' : currentUser.name;
       document.getElementById('prof-input-roll').value = currentUser.roll;
       document.getElementById('prof-input-class').value = currentUser.classVal;
       document.getElementById('prof-input-board').value = currentUser.board;
