@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <!-- Cache Prevention Headers (ताकि नया कोड तुरंत दिखे) -->
+  <!-- Cache Prevention Headers -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -513,7 +513,7 @@
       </div>
     </div>
 
-    <!-- About Modal (App Inventor Custom Link trigger) -->
+    <!-- About Modal (Standard YouTube Link with target="_blank") -->
     <div id="about-modal" class="modal-overlay" onclick="closeAboutModal()">
       <div class="modal-card" onclick="event.stopPropagation()" style="text-align: center;">
         <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(200, 240, 210, 0.85); border: 1.5px solid rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: #1f3a2b; font-size: 1.4rem; font-weight: 800;"><i class="fa-solid fa-users-gear"></i></div>
@@ -522,7 +522,7 @@
           This application is proudly created and developed by <strong>Ankesh Kumar</strong>.<br><br>
           Visit official YouTube Channel:
         </p>
-        <a href="appinventor://youtube" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px;">
+        <a href="https://www.youtube.com/@mrankesh-z3t" target="_blank" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px;">
           <i class="fa-brands fa-youtube"></i> Visit YouTube Channel
         </a>
         <button class="btn-submit" style="background: rgba(255,255,255,0.6); border: 1px solid var(--card-border); padding: 10px;" type="button" onclick="closeAboutModal()">Close</button>
