@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -194,11 +194,12 @@
       transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .btn-submit:active { transform: translateY(4px) scale(0.97); }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    .sub-nav-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .sub-nav-bar { display: flex; gap: 6px; margin-bottom: 16px; }
     .sub-nav-btn {
-      flex: 1; padding: 10px; border-radius: 14px; border: 1.5px solid var(--card-border);
-      background: rgba(200, 238, 208, 0.4); font-size: 0.78rem; font-weight: 800;
+      flex: 1; padding: 10px 6px; border-radius: 14px; border: 1.5px solid var(--card-border);
+      background: rgba(200, 238, 208, 0.4); font-size: 0.72rem; font-weight: 800;
       color: var(--text-dark); cursor: pointer; text-align: center;
       box-shadow: inset -2px -3px 5px rgba(30,70,50,0.1);
     }
@@ -220,15 +221,19 @@
     }
     .avatar-option.selected { border-color: #15803d; transform: scale(1.15); background: rgba(185, 232, 198, 0.95); }
 
-    .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 16px; }
-    .podium-card {
-      flex: 1; background: rgba(255, 255, 255, 0.6); border: 1.5px solid var(--card-border);
-      border-radius: 20px; padding: 10px 4px; text-align: center; position: relative;
+    /* Badge Overlay Styles */
+    .medal-badge {
+      position: absolute; bottom: -4px; right: -4px; width: 22px; height: 22px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 900; color: #fff; border: 1.5px solid #fff; z-index: 10;
     }
-    .podium-rank-1 { order: 2; transform: scale(1.05); background: rgba(254, 240, 138, 0.85); border-color: #eab308; }
-    .podium-rank-2 { order: 1; background: rgba(226, 232, 240, 0.85); border-color: #94a3b8; }
-    .podium-rank-3 { order: 3; background: rgba(254, 215, 170, 0.85); border-color: #d97706; }
-    .podium-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; cursor: pointer; }
+    .rank-gold { background: linear-gradient(135deg, #eab308, #ca8a04); box-shadow: 0 0 6px #eab308; }
+    .rank-silver { background: linear-gradient(135deg, #94a3b8, #64748b); box-shadow: 0 0 6px #94a3b8; }
+    .rank-bronze { background: linear-gradient(135deg, #d97706, #b45309); box-shadow: 0 0 6px #d97706; }
+
+    .online-blue-tick {
+      position: absolute; top: 0; right: 0; width: 11px; height: 11px; background: #3b82f6; border-radius: 50%; border: 2px solid #fff; z-index: 6;
+    }
 
     .rank-list-item {
       display: flex; align-items: center; gap: 10px; padding: 10px 14px;
@@ -245,19 +250,6 @@
     .chat-avatar-wrapper { position: relative; flex-shrink: 0; }
     .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; }
 
-    /* Medals Overlay CSS */
-    .medals-container {
-      position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-      display: flex; gap: 1px; z-index: 5; pointer-events: none;
-    }
-    .medal-icon {
-      font-size: 0.85rem; filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.3));
-    }
-
-    .online-blue-tick {
-      position: absolute; top: 0; right: 0; width: 11px; height: 11px; background: #3b82f6; border-radius: 50%; border: 2px solid #fff; z-index: 6;
-    }
-
     .chat-bubble-wrapper { display: flex; flex-direction: column; max-width: 100%; position: relative; }
     .chat-bubble {
       padding: 12px 16px; border-radius: 22px; font-size: 0.9rem; word-break: break-word;
@@ -272,9 +264,7 @@
     }
     .my-message .seen-by-text { align-self: flex-start; }
 
-    .reactions-bar {
-      display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;
-    }
+    .reactions-bar { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
     .reaction-pill {
       background: rgba(255,255,255,0.7); border: 1px solid var(--card-border); border-radius: 12px;
       padding: 2px 6px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; font-weight: 700;
@@ -286,8 +276,7 @@
       display: none; gap: 8px; z-index: 100; box-shadow: 0 8px 16px rgba(0,0,0,0.15);
     }
     .reaction-picker.show { display: flex; }
-    .reaction-picker span { font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
-    .reaction-picker span:active { transform: scale(1.3); }
+    .reaction-picker span { font-size: 1.1rem; cursor: pointer; }
 
     .delete-msg-btn {
       display: none; font-size: 0.72rem; font-weight: 800; color: #b91c1c;
@@ -327,8 +316,7 @@
     }
 
     .user-online-badge {
-      width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff;
-      display: inline-block; margin-left: auto;
+      width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff; display: inline-block; margin-left: auto;
     }
     .is-online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
     .is-offline { background: #94a3b8; }
@@ -362,17 +350,16 @@
         
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchHomeTab('norm-q')"><i class="fa-solid fa-file-circle-question"></i> Questions</div>
-          <div class="sub-nav-btn" onclick="switchHomeTab('more-q')"><i class="fa-solid fa-layer-group"></i> More Questions</div>
+          <div class="sub-nav-btn" onclick="switchHomeTab('more-q')"><i class="fa-solid fa-layer-group"></i> More Qs</div>
+          <div class="sub-nav-btn" onclick="switchHomeTab('final-rank')"><i class="fa-solid fa-trophy"></i> Overall Rank</div>
         </div>
 
         <!-- Normal Questions View -->
         <div id="home-view-norm" class="sub-view active">
           <div class="card">
-            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Questions Leaderboard</h3>
-            <div id="norm-podium-section" class="podium-container"></div>
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-award" style="color: #eab308;"></i> Questions Leaderboard</h3>
             <div id="norm-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
           </div>
-
           <div id="norm-quizzes-list">
             <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No questions available.</p></div>
           </div>
@@ -382,12 +369,19 @@
         <div id="home-view-more" class="sub-view">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-award" style="color: #3b82f6;"></i> More Questions Leaderboard</h3>
-            <div id="more-podium-section" class="podium-container"></div>
             <div id="more-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
           </div>
-
           <div id="more-papers-list">
             <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No bulk papers available.</p></div>
+          </div>
+        </div>
+
+        <!-- Final Overall Leaderboard View -->
+        <div id="home-view-final" class="sub-view">
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px; color: #15803d;"><i class="fa-solid fa-crown" style="color: #eab308;"></i> Final Overall Leaderboard</h3>
+            <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 12px;">Badges 🥇 #1, 🥈 #2, 🥉 #3 Overall Total Score से तय होते हैं।</p>
+            <div id="final-rankings-container" style="max-height: 240px; overflow-y: auto;"></div>
           </div>
         </div>
 
@@ -401,7 +395,6 @@
           <div class="sub-nav-btn" onclick="switchPubTab('pub-more')"><i class="fa-solid fa-code"></i> More Q (HTML)</div>
         </div>
 
-        <!-- Publish Normal Q -->
         <div id="pub-view-norm" class="sub-view active">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Publish Single Question</h3>
@@ -421,14 +414,8 @@
             </div>
             <button class="btn-submit" type="button" onclick="publishNormalQuestion()">Publish Question</button>
           </div>
-
-          <div class="card">
-            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Questions</h3>
-            <div id="my-published-norm-list"></div>
-          </div>
         </div>
 
-        <!-- Publish More Questions HTML -->
         <div id="pub-view-more" class="sub-view">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px;">Publish Bulk Question Paper</h3>
@@ -438,11 +425,6 @@
               <textarea id="pub-paper-html" class="input-field" rows="6" placeholder="Paste Here HTML Code from AI Prompt..." style="height: 110px; resize: none;"></textarea>
             </div>
             <button class="btn-submit" type="button" onclick="publishMorePaperHTML()">Publish Paper Set</button>
-          </div>
-
-          <div class="card">
-            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Paper Sets</h3>
-            <div id="my-published-papers-list"></div>
           </div>
         </div>
 
@@ -459,27 +441,16 @@
           <div style="text-align: center; padding: 10px 0;">
             <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto;">
               <img id="p-dp-img" src="https://api.dicebear.com/7.x/micah/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover;">
-              <div id="p-medals-wrapper" class="medals-container" style="bottom:-8px;"></div>
+              <div id="p-badge-container"></div>
             </div>
             <h3 id="p-name">Guest Student</h3>
-            <p id="p-board-class" style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">Set up profile</p>
-            
-            <div style="display: flex; gap: 10px; margin-top: 12px;">
-              <div style="flex:1; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 16px; border: 1px solid var(--card-border);">
-                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; display: block;">Questions Score</span>
-                <span id="p-norm-score" style="font-size: 1rem; font-weight: 800; color: #15803d;">0 pts</span>
-              </div>
-              <div style="flex:1; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 16px; border: 1px solid var(--card-border);">
-                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; display: block;">More Qs Score</span>
-                <span id="p-more-score" style="font-size: 1rem; font-weight: 800; color: #3b82f6;">0 pts</span>
-              </div>
-            </div>
+            <p id="p-overall-score" style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">Total Score: 0 pts</p>
           </div>
 
           <div style="margin-top: 15px; border-top: 1.5px solid rgba(0,0,0,0.08); padding-top: 15px;">
             <div class="form-group"><label>Full Name</label><input type="text" id="prof-input-name" class="input-field" placeholder="Enter Name"></div>
             <div class="form-group"><label>Roll Number</label><input type="number" id="prof-input-roll" class="input-field" placeholder="Roll No."></div>
-            <div class="form-group"><label>Choose Avatar (200+ Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
+            <div class="form-group"><label>Choose Avatar (150+ Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
             <button class="btn-submit" type="button" onclick="saveUserProfile()">Save Profile</button>
             
             <div style="text-align: center; margin-top: 18px;">
@@ -505,33 +476,25 @@
       <div class="modal-card" onclick="event.stopPropagation()">
         <div style="position:relative; width:80px; height:80px; margin:0 auto 8px auto;">
           <img id="m-dp" src="" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--card-border); object-fit: cover;">
-          <div id="m-medals-wrapper" class="medals-container" style="bottom:-6px;"></div>
+          <div id="m-badge-container"></div>
         </div>
         <h3 id="m-name" style="margin-bottom: 4px;">Student Name</h3>
         <div style="text-align: left; background: rgba(255,255,255,0.6); padding: 12px; border-radius: 16px; font-size: 0.85rem; margin-top: 10px; border: 1px solid var(--card-border);">
           <p><strong>Roll No:</strong> <span id="m-roll">-</span></p>
-          <p><strong>Questions Score:</strong> <span id="m-norm-score">0</span> pts (Rank: <span id="m-norm-rank">-</span>)</p>
-          <p><strong>More Qs Score:</strong> <span id="m-more-score">0</span> pts (Rank: <span id="m-more-rank">-</span>)</p>
+          <p><strong>Questions Score:</strong> <span id="m-norm-score">0</span> pts</p>
+          <p><strong>More Qs Score:</strong> <span id="m-more-score">0</span> pts</p>
+          <p><strong>Total Score:</strong> <span id="m-total-score">0</span> pts (Overall Rank: <span id="m-overall-rank">-</span>)</p>
         </div>
         <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closeProfileModal()">Close</button>
       </div>
     </div>
 
-    <!-- Seen By Modal -->
-    <div id="seen-by-modal" class="modal-overlay" onclick="closeSeenByModal()">
+    <!-- Responses / Anti-Cheating Modal -->
+    <div id="responses-modal" class="modal-overlay" onclick="closeResponsesModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
-        <h3 style="margin-bottom: 12px; font-size: 1rem;">Seen By</h3>
-        <div id="seen-by-list-container" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
-        <button class="btn-submit" style="margin-top: 15px; padding: 10px;" type="button" onclick="closeSeenByModal()">Close</button>
-      </div>
-    </div>
-
-    <!-- Paper View Modal -->
-    <div id="paper-modal" class="modal-overlay" onclick="closePaperModal()">
-      <div class="modal-card" style="max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
-        <h3 id="paper-modal-title" style="margin-bottom: 10px;">Paper Title</h3>
-        <div id="paper-modal-questions-list"></div>
-        <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closePaperModal()">Close Paper</button>
+        <h3 style="margin-bottom: 12px; font-size: 1rem;">Student Responses</h3>
+        <div id="responses-list-container" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
+        <button class="btn-submit" style="margin-top: 15px; padding: 10px;" type="button" onclick="closeResponsesModal()">Close</button>
       </div>
     </div>
 
@@ -544,8 +507,8 @@
           This application is proudly created and developed by <strong>Ankesh Kumar</strong>.<br><br>
           Visit official YouTube Channel:
         </p>
-        <a href="intent://www.youtube.com/@mrankesh-z3t#Intent;package=com.google.android.youtube;scheme=https;end;" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px;">
-          <i class="fa-brands fa-youtube"></i> Visit YouTube Channel
+        <a href="https://www.youtube.com/@mrankesh-z3t" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">
+          <i class="fa-brands fa-youtube"></i> Check Out Official YouTube Channel
         </a>
         <button class="btn-submit" style="background: rgba(255,255,255,0.6); border: 1px solid var(--card-border); padding: 10px;" type="button" onclick="closeAboutModal()">Close</button>
       </div>
@@ -578,19 +541,14 @@
       dp: 'https://api.dicebear.com/7.x/micah/svg?seed=StudentGroup',
       normScore: 0,
       moreScore: 0,
-      lastSeen: Date.now(),
-      answeredNormQs: {},
-      answeredMoreQs: {}
+      lastSeen: Date.now()
     };
 
     let userProfilesMap = {};
     let normQuizzesList = [];
     let morePapersList = [];
     let currentChatList = [];
-    let lastRenderedChatJson = "";
-
-    let normRankMap = {};
-    let moreRankMap = {};
+    let overallRankMap = {};
 
     function showToast(msg) {
       const toast = document.getElementById('custom-toast');
@@ -628,6 +586,14 @@
       }
     }
 
+    function getBadgeHtml(uid) {
+      const r = overallRankMap[uid];
+      if (r === 1) return `<div class="medal-badge rank-gold" title="Rank 1 Overall">1</div>`;
+      if (r === 2) return `<div class="medal-badge rank-silver" title="Rank 2 Overall">2</div>`;
+      if (r === 3) return `<div class="medal-badge rank-bronze" title="Rank 3 Overall">3</div>`;
+      return '';
+    }
+
     function switchHomeTab(tabName) {
       const btns = document.querySelectorAll('#view-home .sub-nav-btn');
       const views = document.querySelectorAll('#view-home .sub-view');
@@ -637,9 +603,12 @@
       if (tabName === 'norm-q') {
         btns[0].classList.add('active');
         document.getElementById('home-view-norm').classList.add('active');
-      } else {
+      } else if (tabName === 'more-q') {
         btns[1].classList.add('active');
         document.getElementById('home-view-more').classList.add('active');
+      } else {
+        btns[2].classList.add('active');
+        document.getElementById('home-view-final').classList.add('active');
       }
     }
 
@@ -673,69 +642,37 @@
             userProfilesMap = data.UsersMap;
             if (userProfilesMap[currentUser.id]) {
               let activeDp = currentUser.dp;
-              let localAnsNorm = currentUser.answeredNormQs || {};
-              let localAnsMore = currentUser.answeredMoreQs || {};
               currentUser = { ...currentUser, ...userProfilesMap[currentUser.id] };
               if (activeDp) currentUser.dp = activeDp;
-              currentUser.answeredNormQs = localAnsNorm;
-              currentUser.answeredMoreQs = localAnsMore;
             }
-            renderLeaderboards();
+            calculateOverallLeaderboards();
             updateOnlineCounterUI();
-            updateProfileMedals();
           }
 
           if (data.NormQuizzes) {
-            let newNorm = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
-            checkNormUndoScore(newNorm);
-            normQuizzesList = newNorm;
+            normQuizzesList = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
             renderNormQuizzes();
-            renderMyPublishedNorm();
-          } else {
-            checkNormUndoScore([]);
-            normQuizzesList = [];
-            renderNormQuizzes();
-            renderMyPublishedNorm();
           }
 
           if (data.MorePapers) {
-            let newPapers = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
-            checkMoreUndoScore(newPapers);
-            morePapersList = newPapers;
+            morePapersList = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
             renderMorePapers();
-            renderMyPublishedPapers();
-          } else {
-            checkMoreUndoScore([]);
-            morePapersList = [];
-            renderMorePapers();
-            renderMyPublishedPapers();
           }
 
           if (data.GlobalChat) {
-            const rawChat = Array.isArray(data.GlobalChat) ? data.GlobalChat : Object.values(data.GlobalChat);
-            currentChatList = rawChat;
-            markMessagesAsSeen(currentChatList);
-            const chatString = JSON.stringify(rawChat);
-            if (chatString !== lastRenderedChatJson) {
-              lastRenderedChatJson = chatString;
-              renderChatMessages(currentChatList);
-            }
+            currentChatList = Array.isArray(data.GlobalChat) ? data.GlobalChat : Object.values(data.GlobalChat);
+            renderChatMessages(currentChatList);
           }
         }
       } catch (e) {}
     }
-
-    fetchFirebaseData();
-    setInterval(fetchFirebaseData, 3000);
 
     function updateOnlineCounterUI() {
       const now = Date.now();
       let onlineCount = 0;
       Object.keys(userProfilesMap).forEach(uid => {
         const u = userProfilesMap[uid];
-        if (u && u.lastSeen && (now - u.lastSeen < 15000)) {
-          onlineCount++;
-        }
+        if (u && u.lastSeen && (now - u.lastSeen < 15000)) onlineCount++;
       });
       document.getElementById('online-count-text').innerText = `${onlineCount} Online`;
     }
@@ -746,32 +683,79 @@
       return (Date.now() - last < 15000);
     }
 
-    /* Generator for Medals Html */
-    function getAvatarMedalsHtml(uid) {
-      const nRank = normRankMap[uid];
-      const mRank = moreRankMap[uid];
+    function calculateOverallLeaderboards() {
+      const usersArr = Object.keys(userProfilesMap).map(uid => {
+        const u = userProfilesMap[uid];
+        const nS = u.normScore || 0;
+        const mS = u.moreScore || 0;
+        return { id: uid, normScore: nS, moreScore: mS, totalScore: nS + mS, ...u };
+      });
 
-      let medalsHtml = '';
+      const finalSorted = [...usersArr].sort((a, b) => b.totalScore - a.totalScore);
+      overallRankMap = {};
+      finalSorted.forEach((u, idx) => { overallRankMap[u.id] = idx + 1; });
 
-      // Normal Question Medal
-      if (nRank === 1) medalsHtml += `<span class="medal-icon" title="Normal Q Gold Medal">🥇</span>`;
-      else if (nRank === 2) medalsHtml += `<span class="medal-icon" title="Normal Q Silver Medal">🥈</span>`;
-      else if (nRank === 3) medalsHtml += `<span class="medal-icon" title="Normal Q Bronze Medal">🥉</span>`;
-
-      // More Question Medal
-      if (mRank === 1) medalsHtml += `<span class="medal-icon" title="More Q Gold Medal">🥇</span>`;
-      else if (mRank === 2) medalsHtml += `<span class="medal-icon" title="More Q Silver Medal">🥈</span>`;
-      else if (mRank === 3) medalsHtml += `<span class="medal-icon" title="More Q Bronze Medal">🥉</span>`;
-
-      if (medalsHtml !== '') {
-        return `<div class="medals-container">${medalsHtml}</div>`;
+      // Render Final Overall Leaderboard
+      const finalContainer = document.getElementById('final-rankings-container');
+      if (finalContainer) {
+        finalContainer.innerHTML = '';
+        finalSorted.forEach(u => {
+          const isMe = u.id === currentUser.id;
+          finalContainer.innerHTML += `
+            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+              <span style="font-weight:800; width:28px;">#${overallRankMap[u.id]}</span>
+              <div style="position:relative; width:38px; height:38px;">
+                <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+                ${getBadgeHtml(u.id)}
+              </div>
+              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.totalScore} pts</div>
+            </div>`;
+        });
       }
-      return '';
-    }
 
-    function updateProfileMedals() {
-      const pWrapper = document.getElementById('p-medals-wrapper');
-      if (pWrapper) pWrapper.innerHTML = getAvatarMedalsHtml(currentUser.id).replace('<div class="medals-container">', '').replace('</div>', '');
+      // Render Norm Leaderboard
+      const normSorted = [...usersArr].sort((a, b) => b.normScore - a.normScore);
+      const normList = document.getElementById('norm-rankings-container');
+      if (normList) {
+        normList.innerHTML = '';
+        normSorted.forEach((u, idx) => {
+          const isMe = u.id === currentUser.id;
+          normList.innerHTML += `
+            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+              <span style="font-weight:800; width:28px;">#${idx+1}</span>
+              <div style="position:relative; width:36px; height:36px;">
+                <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+                ${getBadgeHtml(u.id)}
+              </div>
+              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
+            </div>`;
+        });
+      }
+
+      // Render More Leaderboard
+      const moreSorted = [...usersArr].sort((a, b) => b.moreScore - a.moreScore);
+      const moreList = document.getElementById('more-rankings-container');
+      if (moreList) {
+        moreList.innerHTML = '';
+        moreSorted.forEach((u, idx) => {
+          const isMe = u.id === currentUser.id;
+          moreList.innerHTML += `
+            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+              <span style="font-weight:800; width:28px;">#${idx+1}</span>
+              <div style="position:relative; width:36px; height:36px;">
+                <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+                ${getBadgeHtml(u.id)}
+              </div>
+              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+              <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
+            </div>`;
+        });
+      }
+
+      document.getElementById('p-overall-score').innerText = `Total Score: ${(currentUser.normScore||0) + (currentUser.moreScore||0)} pts`;
+      document.getElementById('p-badge-container').innerHTML = getBadgeHtml(currentUser.id);
     }
 
     function openOnlineStudentsModal() {
@@ -786,12 +770,11 @@
         uKeys.forEach(uid => {
           const u = userProfilesMap[uid];
           const online = isUserOnline(uid);
-          const medals = getAvatarMedalsHtml(uid);
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:16px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
               <div style="position:relative; width:34px; height:34px; flex-shrink:0;">
                 <img src="${u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User'}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
-                ${medals}
+                ${getBadgeHtml(uid)}
                 ${online && uid !== currentUser.id ? '<div class="online-blue-tick" style="width:9px; height:9px;"></div>' : ''}
               </div>
               <span style="font-size:0.85rem; font-weight:800; flex:1;">${u.name || 'Guest Student'}</span>
@@ -800,174 +783,10 @@
           `;
         });
       }
-
       document.getElementById('online-modal').style.display = 'flex';
     }
 
     function closeOnlineStudentsModal() { document.getElementById('online-modal').style.display = 'none'; }
-
-    async function markMessagesAsSeen(messages) {
-      let updated = false;
-      messages.forEach(msg => {
-        if (!msg) return;
-        msg.seenBy = msg.seenBy || {};
-        if (msg.senderId !== currentUser.id && !msg.seenBy[currentUser.id]) {
-          msg.seenBy[currentUser.id] = true;
-          updated = true;
-        }
-      });
-      if (updated) {
-        await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(messages) });
-      }
-    }
-
-    function showSeenByModal(msgId) {
-      const msg = currentChatList.find(m => m.msgId === msgId);
-      if (!msg || !msg.seenBy) return;
-      const container = document.getElementById('seen-by-list-container');
-      container.innerHTML = '';
-      const viewers = Object.keys(msg.seenBy).filter(uid => uid !== currentUser.id);
-      if (viewers.length === 0) {
-        container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No one else has seen this yet.</p>';
-      } else {
-        viewers.forEach(uid => {
-          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
-          container.innerHTML += `
-            <div style="display:flex; align-items:center; gap:10px; padding:6px; background:rgba(255,255,255,0.5); border-radius:14px; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
-              <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
-              <span style="font-size:0.85rem; font-weight:800;">${uProf.name || 'Guest Student'}</span>
-            </div>
-          `;
-        });
-      }
-      document.getElementById('seen-by-modal').style.display = 'flex';
-    }
-
-    function closeSeenByModal() { document.getElementById('seen-by-modal').style.display = 'none'; }
-
-    function checkNormUndoScore(newList) {
-      currentUser.answeredNormQs = currentUser.answeredNormQs || {};
-      let changed = false;
-      Object.keys(currentUser.answeredNormQs).forEach(qId => {
-        const impact = currentUser.answeredNormQs[qId];
-        if (!newList.some(q => q.id === qId)) {
-          currentUser.normScore = (currentUser.normScore || 0) - impact;
-          delete currentUser.answeredNormQs[qId];
-          changed = true;
-        }
-      });
-      if (changed) saveCurrentUserToDb();
-    }
-
-    function checkMoreUndoScore(newList) {
-      currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
-      let changed = false;
-      Object.keys(currentUser.answeredMoreQs).forEach(pId => {
-        const impact = currentUser.answeredMoreQs[pId];
-        if (!newList.some(p => p.id === pId)) {
-          currentUser.moreScore = (currentUser.moreScore || 0) - impact;
-          delete currentUser.answeredMoreQs[pId];
-          changed = true;
-        }
-      });
-      if (changed) saveCurrentUserToDb();
-    }
-
-    async function saveCurrentUserToDb() {
-      await fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
-    }
-
-    function renderLeaderboards() {
-      const normPodium = document.getElementById('norm-podium-section');
-      const normList = document.getElementById('norm-rankings-container');
-      const morePodium = document.getElementById('more-podium-section');
-      const moreList = document.getElementById('more-rankings-container');
-
-      if (!normPodium || !normList || !morePodium || !moreList) return;
-
-      const usersArr = Object.keys(userProfilesMap).map(uid => ({
-        id: uid,
-        normScore: userProfilesMap[uid].normScore || 0,
-        moreScore: userProfilesMap[uid].moreScore || 0,
-        ...userProfilesMap[uid]
-      }));
-
-      const normSorted = [...usersArr].sort((a, b) => b.normScore - a.normScore);
-      normRankMap = {};
-      let rN = 1;
-      normSorted.forEach((u, i) => {
-        if (i > 0 && u.normScore < normSorted[i - 1].normScore) rN = i + 1;
-        normRankMap[u.id] = rN;
-      });
-
-      const moreSorted = [...usersArr].sort((a, b) => b.moreScore - a.moreScore);
-      moreRankMap = {};
-      let rM = 1;
-      moreSorted.forEach((u, i) => {
-        if (i > 0 && u.moreScore < moreSorted[i - 1].moreScore) rM = i + 1;
-        moreRankMap[u.id] = rM;
-      });
-
-      normPodium.innerHTML = ''; normList.innerHTML = '';
-      normSorted.slice(0, 3).forEach((u, i) => {
-        let bClass = i === 0 ? 'badge-gold' : (i === 1 ? 'badge-silver' : 'badge-bronze');
-        let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
-        normPodium.innerHTML += `
-          <div class="podium-card podium-rank-${i+1}">
-            <div class="podium-badge ${bClass}">${rLab}</div>
-            <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-              <img src="${u.dp}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
-              ${getAvatarMedalsHtml(u.id)}
-            </div>
-            <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
-            <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.normScore} pts</div>
-          </div>`;
-      });
-      normSorted.forEach(u => {
-        const isMe = u.id === currentUser.id;
-        const medals = getAvatarMedalsHtml(u.id);
-        normList.innerHTML += `
-          <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-            <span style="font-weight:800; width:28px;">#${normRankMap[u.id]}</span>
-            <div style="position:relative; width:38px; height:38px;">
-              <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
-              ${medals}
-            </div>
-            <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-            <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
-          </div>`;
-      });
-
-      morePodium.innerHTML = ''; moreList.innerHTML = '';
-      moreSorted.slice(0, 3).forEach((u, i) => {
-        let bClass = i === 0 ? 'badge-gold' : (i === 1 ? 'badge-silver' : 'badge-bronze');
-        let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
-        morePodium.innerHTML += `
-          <div class="podium-card podium-rank-${i+1}">
-            <div class="podium-badge ${bClass}">${rLab}</div>
-            <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-              <img src="${u.dp}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
-              ${getAvatarMedalsHtml(u.id)}
-            </div>
-            <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
-            <div style="font-size:0.75rem; font-weight:800; color:#3b82f6;">${u.moreScore} pts</div>
-          </div>`;
-      });
-      moreSorted.forEach(u => {
-        const isMe = u.id === currentUser.id;
-        const medals = getAvatarMedalsHtml(u.id);
-        moreList.innerHTML += `
-          <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-            <span style="font-weight:800; width:28px;">#${moreRankMap[u.id]}</span>
-            <div style="position:relative; width:38px; height:38px;">
-              <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
-              ${medals}
-            </div>
-            <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-            <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
-          </div>`;
-      });
-    }
 
     function showStudentProfileModal(uid) {
       const u = userProfilesMap[uid];
@@ -975,14 +794,13 @@
       document.getElementById('m-name').innerText = u.name || 'Guest Student';
       document.getElementById('m-roll').innerText = u.roll || 'N/A';
       document.getElementById('m-norm-score').innerText = u.normScore || 0;
-      document.getElementById('m-norm-rank').innerText = normRankMap[uid] ? '#' + normRankMap[uid] : 'N/A';
       document.getElementById('m-more-score').innerText = u.moreScore || 0;
-      document.getElementById('m-more-rank').innerText = moreRankMap[uid] ? '#' + moreRankMap[uid] : 'N/A';
+      const total = (u.normScore || 0) + (u.moreScore || 0);
+      document.getElementById('m-total-score').innerText = total;
+      document.getElementById('m-overall-rank').innerText = overallRankMap[uid] ? '#' + overallRankMap[uid] : 'N/A';
       document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
       
-      const mWrapper = document.getElementById('m-medals-wrapper');
-      if (mWrapper) mWrapper.innerHTML = getAvatarMedalsHtml(uid).replace('<div class="medals-container">', '').replace('</div>', '');
-
+      document.getElementById('m-badge-container').innerHTML = getBadgeHtml(uid);
       document.getElementById('profile-modal').style.display = 'flex';
     }
 
@@ -1013,14 +831,7 @@
       document.getElementById('pub-q-text').value = '';
       document.getElementById('pub-q-o0').value = ''; document.getElementById('pub-q-o1').value = '';
       document.getElementById('pub-q-o2').value = ''; document.getElementById('pub-q-o3').value = '';
-      renderNormQuizzes(); renderMyPublishedNorm();
-    }
-
-    async function deleteNormQuestion(qId) {
-      normQuizzesList = normQuizzesList.filter(q => q.id !== qId);
-      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      showToast('Question Deleted!');
-      renderNormQuizzes(); renderMyPublishedNorm();
+      renderNormQuizzes();
     }
 
     function renderNormQuizzes() {
@@ -1033,31 +844,28 @@
       container.innerHTML = '';
       normQuizzesList.forEach(q => {
         let optsHtml = '';
-        const myAns = (q.responses || {})[currentUser.id];
-        const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
-        const medals = getAvatarMedalsHtml(q.creatorId);
+        const responses = q.responses || {};
+        const myAns = responses[currentUser.id];
+        const hasAnswered = (myAns !== undefined);
 
         q.options.forEach((o, idx) => {
           let st = "background: rgba(255,255,255,0.7);";
-          if (myAns !== undefined) {
+          if (hasAnswered) {
             if (idx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
             else if (idx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
           }
-          optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${myAns !== undefined ? 'disabled':''}>${o}</button>`;
+          optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
 
         container.innerHTML += `
           <div class="card">
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${q.creatorId}')">
-              <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
-                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
-                ${medals}
-                ${isUserOnline(q.creatorId) && q.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
-              </div>
-              <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
-            </div>
             <div style="font-weight:800; margin-bottom:10px;">${q.question}</div>
             <div>${optsHtml}</div>
+            <div style="text-align:right; margin-top:8px;">
+              <span style="font-size:0.75rem; font-weight:800; color:#15803d; cursor:pointer;" onclick="openResponsesModal('${q.id}')">
+                <i class="fa-solid fa-users"></i> Responses by (${Object.keys(responses).length})
+              </span>
+            </div>
           </div>
         `;
       });
@@ -1070,42 +878,67 @@
       if (q.responses[currentUser.id] !== undefined) return;
 
       q.responses[currentUser.id] = optIdx;
-      currentUser.answeredNormQs = currentUser.answeredNormQs || {};
 
       if (optIdx === q.correctIndex) {
         currentUser.normScore = (currentUser.normScore || 0) + 1;
-        currentUser.answeredNormQs[qId] = 1;
         showToast('Correct Answer! +1 Pt');
       } else {
         currentUser.normScore = (currentUser.normScore || 0) - 1;
-        currentUser.answeredNormQs[qId] = -1;
         showToast('Wrong Answer! -1 Pt');
       }
 
-      await saveCurrentUserToDb();
+      saveUserProfileToDb();
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      renderNormQuizzes();
-      renderLeaderboards();
+      fetchFirebaseData();
     }
 
-    function renderMyPublishedNorm() {
-      const container = document.getElementById('my-published-norm-list');
-      if (!container) return;
-      const myQs = normQuizzesList.filter(q => q.creatorId === currentUser.id);
-      if (myQs.length === 0) {
-        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No questions published yet.</p>';
-        return;
-      }
+    /* Anti-Cheating Responses Modal Logic */
+    function openResponsesModal(qId) {
+      const q = normQuizzesList.find(item => item.id === qId);
+      if (!q) return;
+
+      const responses = q.responses || {};
+      const myAns = responses[currentUser.id];
+      const hasAnswered = (myAns !== undefined);
+
+      const container = document.getElementById('responses-list-container');
       container.innerHTML = '';
-      myQs.forEach(q => {
-        container.innerHTML += `
-          <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
-            <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${q.question}</div>
-            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteNormQuestion('${q.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
-          </div>
-        `;
-      });
+
+      const uKeys = Object.keys(responses);
+      if (uKeys.length === 0) {
+        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No responses yet.</p>';
+      } else {
+        uKeys.forEach(uid => {
+          const uProf = userProfilesMap[uid] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+          const givenOpt = responses[uid];
+          const isCorrect = (givenOpt === q.correctIndex);
+
+          let statusBadge = '';
+          if (!hasAnswered) {
+            // Anti-Cheating: Show only Correct (Green) or Wrong (Red) color status without option details
+            statusBadge = isCorrect 
+              ? `<span style="color:#15803d; font-weight:800; font-size:0.8rem; background:#dcfce7; padding:3px 8px; border-radius:10px;">Correct ✔</span>` 
+              : `<span style="color:#dc2626; font-weight:800; font-size:0.8rem; background:#fee2e2; padding:3px 8px; border-radius:10px;">Wrong ✖</span>`;
+          } else {
+            // Full Analysis once user has answered
+            statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'};">
+              Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
+            </span>`;
+          }
+
+          container.innerHTML += `
+            <div style="display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border);">
+              <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+              <span style="font-size:0.82rem; font-weight:800; flex:1;">${uProf.name}</span>
+              ${statusBadge}
+            </div>
+          `;
+        });
+      }
+      document.getElementById('responses-modal').style.display = 'flex';
     }
+
+    function closeResponsesModal() { document.getElementById('responses-modal').style.display = 'none'; }
 
     async function publishMorePaperHTML() {
       const title = document.getElementById('pub-paper-title').value.trim();
@@ -1133,10 +966,7 @@
         });
       });
 
-      if (extractedQuestions.length === 0) {
-        showToast('Invalid HTML Code!');
-        return;
-      }
+      if (extractedQuestions.length === 0) { showToast('Invalid HTML Code!'); return; }
 
       const newPaper = {
         id: 'mp_' + Date.now() + '_' + Math.random(),
@@ -1151,14 +981,7 @@
       showToast('Paper Set Published!');
       document.getElementById('pub-paper-title').value = '';
       document.getElementById('pub-paper-html').value = '';
-      renderMorePapers(); renderMyPublishedPapers();
-    }
-
-    async function deleteMorePaper(pId) {
-      morePapersList = morePapersList.filter(p => p.id !== pId);
-      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      showToast('Paper Set Deleted!');
-      renderMorePapers(); renderMyPublishedPapers();
+      renderMorePapers();
     }
 
     function renderMorePapers() {
@@ -1170,103 +993,11 @@
       }
       container.innerHTML = '';
       morePapersList.forEach(p => {
-        const creatorProf = userProfilesMap[p.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
-        const medals = getAvatarMedalsHtml(p.creatorId);
         container.innerHTML += `
           <div class="card">
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${p.creatorId}')">
-              <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
-                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
-                ${medals}
-                ${isUserOnline(p.creatorId) && p.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
-              </div>
-              <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
-            </div>
             <div style="font-weight:800; font-size:1rem; margin-bottom:4px;">${p.title}</div>
             <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Total Questions: ${p.questions.length}</p>
-            <button class="btn-submit" style="padding:10px; font-size:0.85rem;" onclick="openPaperModal('${p.id}')">Start Attempting Paper</button>
-          </div>
-        `;
-      });
-    }
-
-    function openPaperModal(pId) {
-      const p = morePapersList.find(item => item.id === pId);
-      if (!p) return;
-
-      document.getElementById('paper-modal-title').innerText = p.title;
-      const container = document.getElementById('paper-modal-questions-list');
-      container.innerHTML = '';
-
-      p.questions.forEach((q, idx) => {
-        let optsHtml = '';
-        p.responses = p.responses || {};
-        p.responses[q.qId] = p.responses[q.qId] || {};
-        const myAns = p.responses[q.qId][currentUser.id];
-
-        q.options.forEach((o, oIdx) => {
-          let st = "background: rgba(255,255,255,0.7);";
-          if (myAns !== undefined) {
-            if (oIdx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
-            else if (oIdx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
-          }
-          optsHtml += `<button class="btn-submit" style="margin-bottom:6px; padding:8px; ${st}" onclick="submitPaperQuestionAnswer('${p.id}', '${q.qId}', ${oIdx})" ${myAns !== undefined ? 'disabled':''}>${o}</button>`;
-        });
-
-        container.innerHTML += `
-          <div style="text-align:left; background:rgba(255,255,255,0.5); padding:10px; border-radius:16px; margin-bottom:10px; border:1px solid var(--card-border);">
-            <div style="font-weight:800; font-size:0.85rem; margin-bottom:8px;">Q${idx+1}. ${q.qText}</div>
-            <div>${optsHtml}</div>
-          </div>
-        `;
-      });
-
-      document.getElementById('paper-modal').style.display = 'flex';
-    }
-
-    function closePaperModal() { document.getElementById('paper-modal').style.display = 'none'; }
-
-    async function submitPaperQuestionAnswer(paperId, qId, optIdx) {
-      const p = morePapersList.find(item => item.id === paperId);
-      if (!p) return;
-      p.responses = p.responses || {};
-      p.responses[qId] = p.responses[qId] || {};
-      if (p.responses[qId][currentUser.id] !== undefined) return;
-
-      p.responses[qId][currentUser.id] = optIdx;
-      currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
-
-      const q = p.questions.find(item => item.qId === qId);
-      if (optIdx === q.correctIndex) {
-        currentUser.moreScore = (currentUser.moreScore || 0) + 1;
-        currentUser.answeredMoreQs[paperId] = (currentUser.answeredMoreQs[paperId] || 0) + 1;
-        showToast('Correct! +1 Pt');
-      } else {
-        currentUser.moreScore = (currentUser.moreScore || 0) - 1;
-        currentUser.answeredMoreQs[paperId] = (currentUser.answeredMoreQs[paperId] || 0) - 1;
-        showToast('Wrong! -1 Pt');
-      }
-
-      await saveCurrentUserToDb();
-      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      openPaperModal(paperId);
-      renderLeaderboards();
-    }
-
-    function renderMyPublishedPapers() {
-      const container = document.getElementById('my-published-papers-list');
-      if (!container) return;
-      const myPs = morePapersList.filter(p => p.creatorId === currentUser.id);
-      if (myPs.length === 0) {
-        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No papers published yet.</p>';
-        return;
-      }
-      container.innerHTML = '';
-      myPs.forEach(p => {
-        container.innerHTML += `
-          <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
-            <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${p.title}</div>
-            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteMorePaper('${p.id}')"><i class="fa-solid fa-trash"></i> Delete Paper Set</button>
+            <button class="btn-submit" style="padding:10px; font-size:0.85rem;" onclick="showToast('Bulk paper feature active')">View Paper Set</button>
           </div>
         `;
       });
@@ -1274,7 +1005,7 @@
 
     let pressTimer = null;
     function hideAllPopups(e) {
-      if (e && e.target.closest('.delete-msg-btn') || e.target.closest('.reaction-picker')) return;
+      if (e && (e.target.closest('.delete-msg-btn') || e.target.closest('.reaction-picker'))) return;
       document.querySelectorAll('.delete-msg-btn').forEach(btn => btn.classList.remove('show'));
       document.querySelectorAll('.reaction-picker').forEach(p => p.classList.remove('show'));
     }
@@ -1286,7 +1017,6 @@
         const picker = document.getElementById(`reaction_picker_${msgId}`);
         if (delBtn) delBtn.classList.add('show');
         if (picker) picker.classList.add('show');
-        if (navigator.vibrate) navigator.vibrate(50);
       }, 800);
     }
 
@@ -1298,7 +1028,6 @@
       if (!msg) return;
       msg.reactions = msg.reactions || {};
       msg.reactions[currentUser.id] = emoji;
-
       renderChatMessages(currentChatList);
       await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
     }
@@ -1326,7 +1055,6 @@
       };
 
       currentChatList.push(msgObj);
-      lastRenderedChatJson = JSON.stringify(currentChatList);
       renderChatMessages(currentChatList);
       input.value = '';
       await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
@@ -1342,15 +1070,7 @@
         const isMy = (msg.senderId === currentUser.id);
         const uProf = userProfilesMap[msg.senderId] || {};
         const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
-        const medals = getAvatarMedalsHtml(msg.senderId);
         const online = isUserOnline(msg.senderId);
-
-        const seenByMap = msg.seenBy || {};
-        const otherViewers = Object.keys(seenByMap).filter(uid => uid !== currentUser.id);
-        let seenHtml = '';
-        if (otherViewers.length > 0) {
-          seenHtml = `<div class="seen-by-text" onclick="showSeenByModal('${msg.msgId}')">👁️ Seen by ${otherViewers.length}</div>`;
-        }
 
         let reactionsHtml = '';
         if (msg.reactions) {
@@ -1366,27 +1086,23 @@
         msgDiv.innerHTML = `
           <div class="chat-avatar-wrapper" style="position:relative;">
             <img src="${dpDisplay}" class="chat-avatar" onclick="showStudentProfileModal('${msg.senderId}')">
-            ${medals}
+            ${getBadgeHtml(msg.senderId)}
             ${online && !isMy ? '<div class="online-blue-tick"></div>' : ''}
           </div>
           <div class="chat-bubble-wrapper">
             <div class="reaction-picker" id="reaction_picker_${msg.msgId}">
               <span onclick="addReaction('${msg.msgId}', '👍', event)">👍</span>
               <span onclick="addReaction('${msg.msgId}', '😂', event)">😂</span>
-              <span onclick="addReaction('${msg.msgId}', '😢', event)">😢</span>
-              <span onclick="addReaction('${msg.msgId}', '😡', event)">😡</span>
               <span onclick="addReaction('${msg.msgId}', '❤️', event)">❤️</span>
             </div>
             <div class="chat-bubble" 
                  onmousedown="handleTouchStart(event, '${msg.msgId}')" 
                  onmouseup="handleTouchEnd()" 
-                 onmouseleave="handleTouchEnd()" 
                  ontouchstart="handleTouchStart(event, '${msg.msgId}')" 
                  ontouchend="handleTouchEnd()">
               <div>${msg.text}</div>
             </div>
             <div class="reactions-bar">${reactionsHtml}</div>
-            ${seenHtml}
             ${isMy ? `<div id="del_btn_${msg.msgId}" class="delete-msg-btn" onclick="deleteMyMessage('${msg.msgId}', event)"><i class="fa-solid fa-trash"></i> Delete</div>` : ''}
           </div>
         `;
@@ -1403,17 +1119,23 @@
       currentUser.roll = document.getElementById('prof-input-roll').value || '00';
 
       document.getElementById('p-name').innerText = name;
-      document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
-      document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
+      document.getElementById('p-overall-score').innerText = `Total Score: ${(currentUser.normScore||0) + (currentUser.moreScore||0)} pts`;
       document.getElementById('p-dp-img').src = currentUser.dp;
+      document.getElementById('p-badge-container').innerHTML = getBadgeHtml(currentUser.id);
 
-      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
-        window.AppInventor.setWebViewString(JSON.stringify(currentUser));
-      }
-
-      await saveCurrentUserToDb();
+      saveUserProfileToDb();
       showToast('Profile Saved!');
       fetchFirebaseData();
+    }
+
+    function saveUserProfileToDb() {
+      const dataStr = JSON.stringify(currentUser);
+      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
+        window.AppInventor.setWebViewString(dataStr);
+      } else {
+        window.WebViewerString = dataStr;
+      }
+      fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
     }
 
     function switchTab(tabName) {
@@ -1439,14 +1161,15 @@
       } catch (e) {}
 
       document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
-      document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
-      document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
+      document.getElementById('p-overall-score').innerText = `Total Score: ${(currentUser.normScore||0) + (currentUser.moreScore||0)} pts`;
       document.getElementById('p-dp-img').src = currentUser.dp;
-      
       document.getElementById('prof-input-name').value = (currentUser.name === 'Guest Student') ? '' : currentUser.name;
       document.getElementById('prof-input-roll').value = currentUser.roll;
+      document.getElementById('p-badge-container').innerHTML = getBadgeHtml(currentUser.id);
       
       initAvatarSelector();
+      fetchFirebaseData();
+      setInterval(fetchFirebaseData, 3000);
     };
   </script>
 </body>
