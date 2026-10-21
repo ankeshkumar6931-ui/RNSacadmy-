@@ -105,6 +105,7 @@
       box-shadow: 0 0 8px #22c55e;
     }
 
+    /* Toast Alert Customization */
     #custom-toast {
       position: fixed;
       top: -70px;
@@ -120,14 +121,15 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: inset -4px -5px 8px rgba(30, 70, 50, 0.2), inset 4px 5px 8px rgba(255, 255, 255, 0.9), 0 12px 20px rgba(15, 35, 15, 0.15);
+      box-shadow: 0 12px 20px rgba(15, 35, 15, 0.15);
       backdrop-filter: blur(16px);
       z-index: 9999999;
       transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
     }
     #custom-toast.show { top: 20px; }
-    #custom-toast i { color: #2e6618; font-size: 1.1rem; }
+    #custom-toast.toast-success { background: rgba(220, 252, 231, 0.95); border-color: #22c55e; color: #166534; }
+    #custom-toast.toast-error { background: rgba(254, 226, 226, 0.95); border-color: #ef4444; color: #991b1b; }
 
     .content-area {
       flex: 1;
@@ -324,7 +326,7 @@
 <body onclick="hideAllPopups(event)">
 
   <div id="custom-toast">
-    <i class="fa-solid fa-circle-check"></i>
+    <i id="toast-icon" class="fa-solid fa-circle-check"></i>
     <span id="toast-message">Success!</span>
   </div>
 
@@ -373,7 +375,7 @@
           </div>
         </div>
 
-        <!-- 3. Global Rank Tab (Combined Score) -->
+        <!-- 3. Global Rank Tab -->
         <div id="home-view-global" class="sub-view">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-globe" style="color: #15803d;"></i> Global Final Leaderboard</h3>
@@ -587,9 +589,20 @@
     let normRankMap = {};
     let moreRankMap = {};
 
-    function showToast(msg) {
+    function showToast(msg, isSuccess = true) {
       const toast = document.getElementById('custom-toast');
+      const icon = document.getElementById('toast-icon');
       document.getElementById('toast-message').innerText = msg;
+      
+      toast.className = '';
+      if (isSuccess) {
+        toast.classList.add('toast-success');
+        icon.className = 'fa-solid fa-circle-check';
+      } else {
+        toast.classList.add('toast-error');
+        icon.className = 'fa-solid fa-circle-xmark';
+      }
+      
       toast.classList.add('show');
       setTimeout(() => { toast.classList.remove('show'); }, 3000);
     }
@@ -1025,7 +1038,7 @@
       const o3 = document.getElementById('pub-q-o3').value.trim();
       const ans = parseInt(document.getElementById('pub-q-ans').value);
 
-      if (!qText || !o0 || !o1) { showToast('Enter Question and Options!'); return; }
+      if (!qText || !o0 || !o1) { showToast('Enter Question and Options!', false); return; }
 
       const newQ = {
         id: 'nq_' + Date.now() + '_' + Math.random(),
@@ -1038,7 +1051,7 @@
 
       normQuizzesList.push(newQ);
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      showToast('Question Published!');
+      showToast('Question Published Successfully!', true);
       document.getElementById('pub-q-text').value = '';
       document.getElementById('pub-q-o0').value = ''; document.getElementById('pub-q-o1').value = '';
       document.getElementById('pub-q-o2').value = ''; document.getElementById('pub-q-o3').value = '';
@@ -1048,7 +1061,7 @@
     async function deleteNormQuestion(qId) {
       normQuizzesList = normQuizzesList.filter(q => q.id !== qId);
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      showToast('Question Deleted!');
+      showToast('Question Deleted!', false);
       renderNormQuizzes(); renderMyPublishedNorm();
     }
 
@@ -1078,7 +1091,6 @@
           optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
 
-        // केवल तभी "View Responses" बटन दिखेगा जब यूजर ने खुद उत्तर दे दिया हो
         let viewRespBtnHtml = hasAnswered ? `<span style="font-size:0.7rem; font-weight:800; color:#15803d; cursor:pointer; text-decoration:underline;" onclick="openQuestionResponsesModal('${q.id}')">View Responses</span>` : `<span style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">Answer to view responses</span>`;
 
         container.innerHTML += `
@@ -1117,15 +1129,17 @@
           const ansIdx = respMap[uid];
           const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
           const isCorrect = (ansIdx === q.correctIndex);
-          const chosenOptText = q.options[ansIdx] || 'Unknown';
+          const optLabels = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+          const chosenOptLabel = optLabels[ansIdx] || `Option ${ansIdx + 1}`;
+          const chosenOptText = q.options[ansIdx] || '';
 
           container.innerHTML += `
-            <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
-              <img src="${uProf.dp}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; background:#fff;">
-              <div style="flex:1; font-size:0.8rem;">
+            <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border);">
+              <img src="${uProf.dp}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; background:#fff; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
+              <div style="flex:1; font-size:0.8rem; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
                 <div style="font-weight:800;">${uProf.name}</div>
-                <div style="font-size:0.7rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
-                  ${isCorrect ? '✅ Correct' : '❌ Wrong'} (${chosenOptText})
+                <div style="font-size:0.72rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
+                  ${isCorrect ? '✅ Correct' : '❌ Wrong'} • Chose: <strong>${chosenOptLabel}</strong> (${chosenOptText})
                 </div>
               </div>
             </div>
@@ -1149,15 +1163,16 @@
       if (optIdx === q.correctIndex) {
         currentUser.normScore = (currentUser.normScore || 0) + 1;
         currentUser.answeredNormQs[qId] = 1;
-        showToast('Correct Answer! +1 Pt');
+        showToast('Correct Answer! +1 Pt', true);
       } else {
         currentUser.normScore = (currentUser.normScore || 0) - 1;
         currentUser.answeredNormQs[qId] = -1;
-        showToast('Wrong Answer! -1 Pt');
+        showToast('Wrong Answer! -1 Pt', false);
       }
 
       renderNormQuizzes();
       renderLeaderboards();
+      updateProfileUI();
 
       await Promise.all([
         saveCurrentUserToDb(),
@@ -1187,7 +1202,7 @@
     async function publishMorePaperHTML() {
       const title = document.getElementById('pub-paper-title').value.trim();
       const htmlText = document.getElementById('pub-paper-html').value.trim();
-      if (!title || !htmlText) { showToast('Enter Title and Paste HTML Code!'); return; }
+      if (!title || !htmlText) { showToast('Enter Title and Paste HTML Code!', false); return; }
 
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlText;
@@ -1208,7 +1223,7 @@
         });
       });
 
-      if (extractedQuestions.length === 0) { showToast('Invalid HTML Code!'); return; }
+      if (extractedQuestions.length === 0) { showToast('Invalid HTML Code!', false); return; }
 
       const newPaper = {
         id: 'mp_' + Date.now() + '_' + Math.random(),
@@ -1220,7 +1235,7 @@
 
       morePapersList.push(newPaper);
       await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      showToast('Paper Set Published!');
+      showToast('Paper Set Published!', true);
       document.getElementById('pub-paper-title').value = '';
       document.getElementById('pub-paper-html').value = '';
       renderMorePapers(); renderMyPublishedPapers();
@@ -1229,7 +1244,7 @@
     async function deleteMorePaper(pId) {
       morePapersList = morePapersList.filter(p => p.id !== pId);
       await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      showToast('Paper Set Deleted!');
+      showToast('Paper Set Deleted!', false);
       renderMorePapers(); renderMyPublishedPapers();
     }
 
@@ -1311,15 +1326,16 @@
       if (optIdx === q.correctIndex) {
         currentUser.moreScore = (currentUser.moreScore || 0) + 1;
         currentUser.answeredMoreQs[paperId] = (currentUser.answeredMoreQs[paperId] || 0) + 1;
-        showToast('Correct! +1 Pt');
+        showToast('Correct! +1 Pt', true);
       } else {
         currentUser.moreScore = (currentUser.moreScore || 0) - 1;
         currentUser.answeredMoreQs[paperId] = (currentUser.answeredMoreQs[paperId] || 0) - 1;
-        showToast('Wrong! -1 Pt');
+        showToast('Wrong! -1 Pt', false);
       }
 
       openPaperModal(paperId);
       renderLeaderboards();
+      updateProfileUI();
 
       await Promise.all([
         saveCurrentUserToDb(),
@@ -1383,7 +1399,7 @@
       currentChatList = currentChatList.filter(m => m.msgId !== msgId);
       renderChatMessages(currentChatList);
       await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
-      showToast('Message Deleted');
+      showToast('Message Deleted', false);
     }
 
     async function sendChatMessage() {
@@ -1470,19 +1486,20 @@
 
     async function saveUserProfile() {
       const name = document.getElementById('prof-input-name').value.trim();
-      if (!name) { showToast('Enter your name'); return; }
+      if (!name) { showToast('Enter your name', false); return; }
 
       currentUser.name = name;
       currentUser.roll = document.getElementById('prof-input-roll').value || '00';
 
       updateProfileUI();
 
+      // MIT App Inventor TinyDB sync via WebViewString (UserProfile Tag)
       if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
         window.AppInventor.setWebViewString(JSON.stringify(currentUser));
       }
 
       await saveCurrentUserToDb();
-      showToast('Profile Saved!');
+      showToast('Profile Saved Successfully!', true);
       fetchFirebaseData();
     }
 
@@ -1514,6 +1531,7 @@
       document.getElementById('prof-input-roll').value = currentUser.roll;
       
       initAvatarSelector();
+      updateProfileUI();
     };
   </script>
 </body>
