@@ -120,15 +120,14 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 12px 20px rgba(15, 35, 15, 0.15);
+      box-shadow: inset -4px -5px 8px rgba(30, 70, 50, 0.2), inset 4px 5px 8px rgba(255, 255, 255, 0.9), 0 12px 20px rgba(15, 35, 15, 0.15);
       backdrop-filter: blur(16px);
       z-index: 9999999;
       transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
     }
     #custom-toast.show { top: 20px; }
-    #custom-toast.toast-success { background: rgba(220, 252, 231, 0.95); border-color: #22c55e; color: #166534; }
-    #custom-toast.toast-error { background: rgba(254, 226, 226, 0.95); border-color: #ef4444; color: #991b1b; }
+    #custom-toast i { color: #2e6618; font-size: 1.1rem; }
 
     .content-area {
       flex: 1;
@@ -244,10 +243,15 @@
     .chat-message.other-message { align-self: flex-start; }
 
     .chat-avatar-wrapper { position: relative; flex-shrink: 0; }
-    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; background: #fff; }
+    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; }
 
-    .medal-badge {
-      position: absolute; bottom: -4px; right: -4px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 1.5px solid var(--card-border); font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 800; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    /* Medals Overlay CSS */
+    .medals-container {
+      position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 1px; z-index: 5; pointer-events: none;
+    }
+    .medal-icon {
+      font-size: 0.85rem; filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.3));
     }
 
     .online-blue-tick {
@@ -268,7 +272,9 @@
     }
     .my-message .seen-by-text { align-self: flex-start; }
 
-    .reactions-bar { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+    .reactions-bar {
+      display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;
+    }
     .reaction-pill {
       background: rgba(255,255,255,0.7); border: 1px solid var(--card-border); border-radius: 12px;
       padding: 2px 6px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; font-weight: 700;
@@ -280,7 +286,8 @@
       display: none; gap: 8px; z-index: 100; box-shadow: 0 8px 16px rgba(0,0,0,0.15);
     }
     .reaction-picker.show { display: flex; }
-    .reaction-picker span { font-size: 1.1rem; cursor: pointer; }
+    .reaction-picker span { font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
+    .reaction-picker span:active { transform: scale(1.3); }
 
     .delete-msg-btn {
       display: none; font-size: 0.72rem; font-weight: 800; color: #b91c1c;
@@ -292,7 +299,7 @@
     .chat-input-bar {
       display: none; gap: 10px; padding: 12px 16px; background: rgba(220, 242, 225, 0.85);
       backdrop-filter: blur(16px); border-top: 1.5px solid var(--card-border);
-      position: absolute; bottom: 75px; left: 0; right: 0; z-index: 900;
+      position: absolute; bottom: 85px; left: 0; right: 0; z-index: 900;
     }
     .send-btn {
       width: 48px; height: 48px; border-radius: 50%; background: rgba(200, 240, 210, 0.85);
@@ -300,15 +307,16 @@
     }
 
     .nav-bar {
-      position: absolute; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(220, 242, 225, 0.55);
+      position: absolute; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(220, 242, 225, 0.55);
       backdrop-filter: blur(20px); border-top: 1.5px solid var(--card-border); display: flex; justify-content: space-around; align-items: center; z-index: 99999; padding: 0 12px;
     }
     .nav-item {
       display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dark);
-      cursor: pointer; width: 50px; height: 50px; position: relative; border: 1.5px solid var(--card-border);
-      background: rgba(200, 238, 208, 0.55); border-radius: 50%;
+      cursor: pointer; width: 58px; height: 54px; position: relative; border: 1.5px solid var(--card-border);
+      background: rgba(200, 238, 208, 0.55); border-radius: 48% 52% 45% 55% / 53% 47% 53% 47%;
     }
     .nav-item i { font-size: 1.2rem; pointer-events: none; }
+    .nav-item span { font-size: 0.6rem; margin-top: 2px; font-weight: 800; pointer-events: none; }
     .nav-item.active { transform: translateY(-3px) scale(1.05); border-color: rgba(255, 255, 255, 0.95); background: rgba(185, 232, 198, 0.85); }
 
     .modal-overlay {
@@ -317,7 +325,11 @@
     .modal-card {
       background: rgba(225, 248, 230, 0.95); border: 1.5px solid var(--card-border); padding: 22px; border-radius: 32px; width: 85%; max-width: 330px; text-align: center;
     }
-    .user-online-badge { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff; display: inline-block; margin-left: auto; }
+
+    .user-online-badge {
+      width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff;
+      display: inline-block; margin-left: auto;
+    }
     .is-online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
     .is-offline { background: #94a3b8; }
   </style>
@@ -325,11 +337,12 @@
 <body onclick="hideAllPopups(event)">
 
   <div id="custom-toast">
-    <i id="toast-icon" class="fa-solid fa-circle-check"></i>
+    <i class="fa-solid fa-circle-check"></i>
     <span id="toast-message">Success!</span>
   </div>
 
   <div class="app-container">
+    <!-- Top Bar -->
     <div class="top-bar">
       <div class="brand-area">
         <i class="fa-solid fa-users-gear" style="font-size: 1.2rem; color: #15803d;"></i>
@@ -341,56 +354,54 @@
       </div>
     </div>
 
+    <!-- Main Content Area -->
     <div class="content-area" id="main-content-scroll">
-      <!-- HOME -->
+      
+      <!-- 1. HOME SCREEN -->
       <div id="view-home" class="view-section active">
+        
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchHomeTab('norm-q')"><i class="fa-solid fa-file-circle-question"></i> Questions</div>
           <div class="sub-nav-btn" onclick="switchHomeTab('more-q')"><i class="fa-solid fa-layer-group"></i> More Questions</div>
-          <div class="sub-nav-btn" onclick="switchHomeTab('global-q')"><i class="fa-solid fa-globe"></i> Global Rank</div>
         </div>
 
-        <!-- 1. Normal Questions Tab -->
+        <!-- Normal Questions View -->
         <div id="home-view-norm" class="sub-view active">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Questions Leaderboard</h3>
             <div id="norm-podium-section" class="podium-container"></div>
-            <div id="norm-rankings-container" style="max-height: 180px; overflow-y: auto;"></div>
+            <div id="norm-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
           </div>
+
           <div id="norm-quizzes-list">
             <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No questions available.</p></div>
           </div>
         </div>
 
-        <!-- 2. More Questions Tab -->
+        <!-- More Questions View -->
         <div id="home-view-more" class="sub-view">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-award" style="color: #3b82f6;"></i> More Questions Leaderboard</h3>
             <div id="more-podium-section" class="podium-container"></div>
-            <div id="more-rankings-container" style="max-height: 180px; overflow-y: auto;"></div>
+            <div id="more-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
           </div>
+
           <div id="more-papers-list">
             <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No bulk papers available.</p></div>
           </div>
         </div>
 
-        <!-- 3. Global Rank Tab -->
-        <div id="home-view-global" class="sub-view">
-          <div class="card">
-            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-globe" style="color: #15803d;"></i> Global Final Leaderboard</h3>
-            <div id="global-podium-section" class="podium-container"></div>
-            <div id="global-rankings-container" style="max-height: 250px; overflow-y: auto;"></div>
-          </div>
-        </div>
       </div>
 
-      <!-- PUBLISH -->
+      <!-- 2. PUBLISH SCREEN -->
       <div id="view-publish" class="view-section">
+        
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchPubTab('pub-norm')"><i class="fa-solid fa-plus"></i> Normal Q</div>
           <div class="sub-nav-btn" onclick="switchPubTab('pub-more')"><i class="fa-solid fa-code"></i> More Q (HTML)</div>
         </div>
 
+        <!-- Publish Normal Q -->
         <div id="pub-view-norm" class="sub-view active">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Publish Single Question</h3>
@@ -410,12 +421,14 @@
             </div>
             <button class="btn-submit" type="button" onclick="publishNormalQuestion()">Publish Question</button>
           </div>
+
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Questions</h3>
             <div id="my-published-norm-list"></div>
           </div>
         </div>
 
+        <!-- Publish More Questions HTML -->
         <div id="pub-view-more" class="sub-view">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px;">Publish Bulk Question Paper</h3>
@@ -426,41 +439,39 @@
             </div>
             <button class="btn-submit" type="button" onclick="publishMorePaperHTML()">Publish Paper Set</button>
           </div>
+
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Paper Sets</h3>
             <div id="my-published-papers-list"></div>
           </div>
         </div>
+
       </div>
 
-      <!-- CHAT -->
+      <!-- 3. CHAT SCREEN -->
       <div id="view-chat" class="view-section">
         <div class="chat-container" id="chat-messages-container"></div>
       </div>
 
-      <!-- PROFILE -->
+      <!-- 4. PROFILE SCREEN -->
       <div id="view-profile" class="view-section">
         <div class="card">
           <div style="text-align: center; padding: 10px 0;">
             <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto;">
-              <img id="p-dp-img" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Motu" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover; background:#fff;">
-              <div id="p-medal-badge" class="medal-badge" style="bottom:-2px; right:5px; display:none;"></div>
+              <img id="p-dp-img" src="https://api.dicebear.com/7.x/micah/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover;">
+              <div id="p-medals-wrapper" class="medals-container" style="bottom:-8px;"></div>
             </div>
             <h3 id="p-name">Guest Student</h3>
             <p id="p-board-class" style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">Set up profile</p>
             
-            <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <div style="display: flex; gap: 10px; margin-top: 12px;">
               <div style="flex:1; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 16px; border: 1px solid var(--card-border);">
-                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 800; display: block;">Q Score</span>
-                <span id="p-norm-score" style="font-size: 0.9rem; font-weight: 800; color: #15803d;">0 pts</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; display: block;">Questions Score</span>
+                <span id="p-norm-score" style="font-size: 1rem; font-weight: 800; color: #15803d;">0 pts</span>
               </div>
               <div style="flex:1; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 16px; border: 1px solid var(--card-border);">
-                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 800; display: block;">More Qs Score</span>
-                <span id="p-more-score" style="font-size: 0.9rem; font-weight: 800; color: #3b82f6;">0 pts</span>
-              </div>
-              <div style="flex:1; background: rgba(185, 232, 198, 0.85); padding: 8px; border-radius: 16px; border: 1.5px solid #15803d;">
-                <span style="font-size: 0.65rem; color: var(--text-dark); font-weight: 800; display: block;">Total Score</span>
-                <span id="p-total-score" style="font-size: 0.9rem; font-weight: 800; color: #15803d;">0 pts</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; display: block;">More Qs Score</span>
+                <span id="p-more-score" style="font-size: 1rem; font-weight: 800; color: #3b82f6;">0 pts</span>
               </div>
             </div>
           </div>
@@ -468,7 +479,7 @@
           <div style="margin-top: 15px; border-top: 1.5px solid rgba(0,0,0,0.08); padding-top: 15px;">
             <div class="form-group"><label>Full Name</label><input type="text" id="prof-input-name" class="input-field" placeholder="Enter Name"></div>
             <div class="form-group"><label>Roll Number</label><input type="number" id="prof-input-roll" class="input-field" placeholder="Roll No."></div>
-            <div class="form-group"><label>Choose Avatar (200+ Human & Cartoon Characters)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
+            <div class="form-group"><label>Choose Avatar (200+ Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
             <button class="btn-submit" type="button" onclick="saveUserProfile()">Save Profile</button>
             
             <div style="text-align: center; margin-top: 18px;">
@@ -477,9 +488,10 @@
           </div>
         </div>
       </div>
+
     </div>
 
-    <!-- Modals -->
+    <!-- Online Students Modal -->
     <div id="online-modal" class="modal-overlay" onclick="closeOnlineStudentsModal()">
       <div class="modal-card" style="max-width: 340px;" onclick="event.stopPropagation()">
         <h3 style="margin-bottom: 12px; font-size: 1rem;">👥 Registered Students</h3>
@@ -488,25 +500,24 @@
       </div>
     </div>
 
+    <!-- Student Details Modal -->
     <div id="profile-modal" class="modal-overlay" onclick="closeProfileModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
         <div style="position:relative; width:80px; height:80px; margin:0 auto 8px auto;">
-          <img id="m-dp" src="" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--card-border); object-fit: cover; background:#fff;">
-          <div id="m-medal-badge" class="medal-badge" style="display:none;"></div>
+          <img id="m-dp" src="" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--card-border); object-fit: cover;">
+          <div id="m-medals-wrapper" class="medals-container" style="bottom:-6px;"></div>
         </div>
         <h3 id="m-name" style="margin-bottom: 4px;">Student Name</h3>
         <div style="text-align: left; background: rgba(255,255,255,0.6); padding: 12px; border-radius: 16px; font-size: 0.85rem; margin-top: 10px; border: 1px solid var(--card-border);">
           <p><strong>Roll No:</strong> <span id="m-roll">-</span></p>
-          <p><strong>Normal Qs Score:</strong> <span id="m-norm-score">0</span> pts (Rank: <span id="m-norm-rank">-</span>)</p>
+          <p><strong>Questions Score:</strong> <span id="m-norm-score">0</span> pts (Rank: <span id="m-norm-rank">-</span>)</p>
           <p><strong>More Qs Score:</strong> <span id="m-more-score">0</span> pts (Rank: <span id="m-more-rank">-</span>)</p>
-          <hr style="margin: 8px 0; border: 0; border-top: 1px solid rgba(0,0,0,0.1);">
-          <p><strong>Total Score:</strong> <span id="m-total-score">0</span> pts</p>
-          <p><strong>Global Rank:</strong> <span id="m-global-rank">-</span></p>
         </div>
         <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closeProfileModal()">Close</button>
       </div>
     </div>
 
+    <!-- Seen By Modal -->
     <div id="seen-by-modal" class="modal-overlay" onclick="closeSeenByModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
         <h3 style="margin-bottom: 12px; font-size: 1rem;">Seen By</h3>
@@ -515,6 +526,7 @@
       </div>
     </div>
 
+    <!-- Paper View Modal -->
     <div id="paper-modal" class="modal-overlay" onclick="closePaperModal()">
       <div class="modal-card" style="max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
         <h3 id="paper-modal-title" style="margin-bottom: 10px;">Paper Title</h3>
@@ -523,14 +535,7 @@
       </div>
     </div>
 
-    <div id="responses-modal" class="modal-overlay" onclick="closeResponsesModal()">
-      <div class="modal-card" style="max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
-        <h3 style="margin-bottom: 10px; font-size: 1rem;">👥 Student Answers</h3>
-        <div id="responses-modal-list" style="display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
-        <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closeResponsesModal()">Close</button>
-      </div>
-    </div>
-
+    <!-- About Modal -->
     <div id="about-modal" class="modal-overlay" onclick="closeAboutModal()">
       <div class="modal-card" onclick="event.stopPropagation()" style="text-align: center;">
         <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(200, 240, 210, 0.85); border: 1.5px solid rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: #1f3a2b; font-size: 1.4rem; font-weight: 800;"><i class="fa-solid fa-users-gear"></i></div>
@@ -539,7 +544,7 @@
           This application is proudly created and developed by <strong>Ankesh Kumar</strong>.<br><br>
           Visit official YouTube Channel:
         </p>
-        <a href="https://www.youtube.com/@mrankesh-z3t" target="_blank" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px;">
+        <a href="intent://www.youtube.com/@mrankesh-z3t#Intent;package=com.google.android.youtube;scheme=https;end;" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px;">
           <i class="fa-brands fa-youtube"></i> Visit YouTube Channel
         </a>
         <button class="btn-submit" style="background: rgba(255,255,255,0.6); border: 1px solid var(--card-border); padding: 10px;" type="button" onclick="closeAboutModal()">Close</button>
@@ -556,22 +561,21 @@
 
     <!-- Navigation Bar -->
     <div class="nav-bar">
-      <div class="nav-item active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i></div>
-      <div class="nav-item" onclick="switchTab('publish')"><i class="fa-solid fa-circle-plus"></i></div>
-      <div class="nav-item" onclick="switchTab('chat')"><i class="fa-solid fa-comment-dots"></i></div>
-      <div class="nav-item" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i></div>
+      <div class="nav-item active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>Home</span></div>
+      <div class="nav-item" onclick="switchTab('publish')"><i class="fa-solid fa-circle-plus"></i><span>Publish</span></div>
+      <div class="nav-item" onclick="switchTab('chat')"><i class="fa-solid fa-comment-dots"></i><span>Chat</span></div>
+      <div class="nav-item" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i><span>Profile</span></div>
     </div>
   </div>
 
   <script>
-    // Verified Firebase Realtime Database URL
     const FIREBASE_URL = "https://question-project-1b8bf-default-rtdb.firebaseio.com/";
 
     let currentUser = {
       id: 'usr_' + Math.floor(100000 + Math.random() * 900000),
       name: 'Guest Student',
       roll: '00',
-      dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu',
+      dp: 'https://api.dicebear.com/7.x/micah/svg?seed=StudentGroup',
       normScore: 0,
       moreScore: 0,
       lastSeen: Date.now(),
@@ -584,25 +588,13 @@
     let morePapersList = [];
     let currentChatList = [];
     let lastRenderedChatJson = "";
-    
-    let globalRankMap = {};
+
     let normRankMap = {};
     let moreRankMap = {};
 
-    function showToast(msg, isSuccess = true) {
+    function showToast(msg) {
       const toast = document.getElementById('custom-toast');
-      const icon = document.getElementById('toast-icon');
       document.getElementById('toast-message').innerText = msg;
-      
-      toast.className = '';
-      if (isSuccess) {
-        toast.classList.add('toast-success');
-        icon.className = 'fa-solid fa-circle-check';
-      } else {
-        toast.classList.add('toast-error');
-        icon.className = 'fa-solid fa-circle-xmark';
-      }
-      
       toast.classList.add('show');
       setTimeout(() => { toast.classList.remove('show'); }, 3000);
     }
@@ -616,26 +608,11 @@
       const grid = document.getElementById('avatar-selector-grid');
       if (!grid) return;
       grid.innerHTML = '';
-      
-      const cartoonStyles = ['adventurer', 'big-smile', 'fun-emoji', 'lorelei', 'avataaars'];
-      const specialAvatars = ['Motu', 'Patlu'];
-      specialAvatars.forEach((name) => {
-        const url = `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`;
-        const img = document.createElement('img');
-        img.src = url;
-        img.className = 'avatar-option' + (currentUser.dp === url ? ' selected' : '');
-        img.onclick = () => {
-          document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
-          img.classList.add('selected');
-          currentUser.dp = url;
-          document.getElementById('p-dp-img').src = url;
-        };
-        grid.appendChild(img);
-      });
+      const styles = ['micah', 'adventurer', 'fun-emoji', 'avataaars', 'personas'];
 
-      for (let i = 3; i <= 210; i++) {
-        const style = cartoonStyles[i % cartoonStyles.length];
-        const seed = `CartoonHero_${i}`;
+      for (let i = 1; i <= 150; i++) {
+        const style = styles[i % styles.length];
+        const seed = `WeAreGroup_${i}`;
         const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
 
         const img = document.createElement('img');
@@ -660,12 +637,9 @@
       if (tabName === 'norm-q') {
         btns[0].classList.add('active');
         document.getElementById('home-view-norm').classList.add('active');
-      } else if (tabName === 'more-q') {
+      } else {
         btns[1].classList.add('active');
         document.getElementById('home-view-more').classList.add('active');
-      } else if (tabName === 'global-q') {
-        btns[2].classList.add('active');
-        document.getElementById('home-view-global').classList.add('active');
       }
     }
 
@@ -687,7 +661,6 @@
     function openAboutModal() { document.getElementById('about-modal').style.display = 'flex'; }
     function closeAboutModal() { document.getElementById('about-modal').style.display = 'none'; }
 
-    // Robust Real-time Communication & Data Synchronization
     async function fetchFirebaseData() {
       try {
         currentUser.lastSeen = Date.now();
@@ -695,37 +668,44 @@
 
         let response = await fetch(`${FIREBASE_URL}/.json`);
         let data = await response.json();
-        
         if (data) {
           if (data.UsersMap) {
             userProfilesMap = data.UsersMap;
             if (userProfilesMap[currentUser.id]) {
+              let activeDp = currentUser.dp;
               let localAnsNorm = currentUser.answeredNormQs || {};
               let localAnsMore = currentUser.answeredMoreQs || {};
               currentUser = { ...currentUser, ...userProfilesMap[currentUser.id] };
+              if (activeDp) currentUser.dp = activeDp;
               currentUser.answeredNormQs = localAnsNorm;
               currentUser.answeredMoreQs = localAnsMore;
             }
             renderLeaderboards();
             updateOnlineCounterUI();
-            updateProfileUI();
+            updateProfileMedals();
           }
 
           if (data.NormQuizzes) {
-            normQuizzesList = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
+            let newNorm = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
+            checkNormUndoScore(newNorm);
+            normQuizzesList = newNorm;
             renderNormQuizzes();
             renderMyPublishedNorm();
           } else {
+            checkNormUndoScore([]);
             normQuizzesList = [];
             renderNormQuizzes();
             renderMyPublishedNorm();
           }
 
           if (data.MorePapers) {
-            morePapersList = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
+            let newPapers = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
+            checkMoreUndoScore(newPapers);
+            morePapersList = newPapers;
             renderMorePapers();
             renderMyPublishedPapers();
           } else {
+            checkMoreUndoScore([]);
             morePapersList = [];
             renderMorePapers();
             renderMyPublishedPapers();
@@ -746,48 +726,52 @@
     }
 
     fetchFirebaseData();
-    setInterval(fetchFirebaseData, 2500); // 2.5 seconds ultra-fast sync interval
+    setInterval(fetchFirebaseData, 3000);
 
     function updateOnlineCounterUI() {
       const now = Date.now();
       let onlineCount = 0;
       Object.keys(userProfilesMap).forEach(uid => {
         const u = userProfilesMap[uid];
-        if (u && u.lastSeen && (now - u.lastSeen < 15000)) onlineCount++;
+        if (u && u.lastSeen && (now - u.lastSeen < 15000)) {
+          onlineCount++;
+        }
       });
       document.getElementById('online-count-text').innerText = `${onlineCount} Online`;
     }
 
     function isUserOnline(uid) {
       if (!userProfilesMap[uid]) return false;
-      return (Date.now() - (userProfilesMap[uid].lastSeen || 0) < 15000);
+      const last = userProfilesMap[uid].lastSeen || 0;
+      return (Date.now() - last < 15000);
     }
 
-    function getSingleMedalHtml(rank) {
-      if (rank === 1) return `<div class="medal-badge" style="background:#fef08a; border-color:#eab308;" title="1st Place">🏆</div>`;
-      if (rank === 2) return `<div class="medal-badge" style="background:#e2e8f0; border-color:#94a3b8;" title="2nd Place">🥈</div>`;
-      if (rank === 3) return `<div class="medal-badge" style="background:#fed7aa; border-color:#d97706;" title="3rd Place">🥉</div>`;
+    /* Generator for Medals Html */
+    function getAvatarMedalsHtml(uid) {
+      const nRank = normRankMap[uid];
+      const mRank = moreRankMap[uid];
+
+      let medalsHtml = '';
+
+      // Normal Question Medal
+      if (nRank === 1) medalsHtml += `<span class="medal-icon" title="Normal Q Gold Medal">🥇</span>`;
+      else if (nRank === 2) medalsHtml += `<span class="medal-icon" title="Normal Q Silver Medal">🥈</span>`;
+      else if (nRank === 3) medalsHtml += `<span class="medal-icon" title="Normal Q Bronze Medal">🥉</span>`;
+
+      // More Question Medal
+      if (mRank === 1) medalsHtml += `<span class="medal-icon" title="More Q Gold Medal">🥇</span>`;
+      else if (mRank === 2) medalsHtml += `<span class="medal-icon" title="More Q Silver Medal">🥈</span>`;
+      else if (mRank === 3) medalsHtml += `<span class="medal-icon" title="More Q Bronze Medal">🥉</span>`;
+
+      if (medalsHtml !== '') {
+        return `<div class="medals-container">${medalsHtml}</div>`;
+      }
       return '';
     }
 
-    function updateProfileUI() {
-      const totalScore = (currentUser.normScore || 0) + (currentUser.moreScore || 0);
-      document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
-      document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
-      document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
-      document.getElementById('p-total-score').innerText = `${totalScore} pts`;
-      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu';
-      
-      const myRank = globalRankMap[currentUser.id] || '-';
-      document.getElementById('p-global-rank').innerText = myRank !== '-' ? `#${myRank}` : '-';
-
-      const badge = document.getElementById('p-medal-badge');
-      if (myRank <= 3 && myRank >= 1) {
-        badge.innerHTML = myRank === 1 ? '🏆' : (myRank === 2 ? '🥈' : '🥉');
-        badge.style.display = 'flex';
-      } else {
-        badge.style.display = 'none';
-      }
+    function updateProfileMedals() {
+      const pWrapper = document.getElementById('p-medals-wrapper');
+      if (pWrapper) pWrapper.innerHTML = getAvatarMedalsHtml(currentUser.id).replace('<div class="medals-container">', '').replace('</div>', '');
     }
 
     function openOnlineStudentsModal() {
@@ -802,13 +786,12 @@
         uKeys.forEach(uid => {
           const u = userProfilesMap[uid];
           const online = isUserOnline(uid);
-          const rank = globalRankMap[uid] || 999;
-          const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
+          const medals = getAvatarMedalsHtml(uid);
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:16px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
               <div style="position:relative; width:34px; height:34px; flex-shrink:0;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; background:#fff;">
-                ${medal}
+                <img src="${u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User'}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
+                ${medals}
                 ${online && uid !== currentUser.id ? '<div class="online-blue-tick" style="width:9px; height:9px;"></div>' : ''}
               </div>
               <span style="font-size:0.85rem; font-weight:800; flex:1;">${u.name || 'Guest Student'}</span>
@@ -817,6 +800,7 @@
           `;
         });
       }
+
       document.getElementById('online-modal').style.display = 'flex';
     }
 
@@ -847,10 +831,10 @@
         container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No one else has seen this yet.</p>';
       } else {
         viewers.forEach(uid => {
-          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
+          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:6px; background:rgba(255,255,255,0.5); border-radius:14px; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
-              <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; background:#fff;">
+              <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
               <span style="font-size:0.85rem; font-weight:800;">${uProf.name || 'Guest Student'}</span>
             </div>
           `;
@@ -861,27 +845,52 @@
 
     function closeSeenByModal() { document.getElementById('seen-by-modal').style.display = 'none'; }
 
+    function checkNormUndoScore(newList) {
+      currentUser.answeredNormQs = currentUser.answeredNormQs || {};
+      let changed = false;
+      Object.keys(currentUser.answeredNormQs).forEach(qId => {
+        const impact = currentUser.answeredNormQs[qId];
+        if (!newList.some(q => q.id === qId)) {
+          currentUser.normScore = (currentUser.normScore || 0) - impact;
+          delete currentUser.answeredNormQs[qId];
+          changed = true;
+        }
+      });
+      if (changed) saveCurrentUserToDb();
+    }
+
+    function checkMoreUndoScore(newList) {
+      currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
+      let changed = false;
+      Object.keys(currentUser.answeredMoreQs).forEach(pId => {
+        const impact = currentUser.answeredMoreQs[pId];
+        if (!newList.some(p => p.id === pId)) {
+          currentUser.moreScore = (currentUser.moreScore || 0) - impact;
+          delete currentUser.answeredMoreQs[pId];
+          changed = true;
+        }
+      });
+      if (changed) saveCurrentUserToDb();
+    }
+
     async function saveCurrentUserToDb() {
-      userProfilesMap[currentUser.id] = { ...currentUser };
       await fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
     }
 
     function renderLeaderboards() {
+      const normPodium = document.getElementById('norm-podium-section');
+      const normList = document.getElementById('norm-rankings-container');
+      const morePodium = document.getElementById('more-podium-section');
+      const moreList = document.getElementById('more-rankings-container');
+
+      if (!normPodium || !normList || !morePodium || !moreList) return;
+
       const usersArr = Object.keys(userProfilesMap).map(uid => ({
         id: uid,
         normScore: userProfilesMap[uid].normScore || 0,
         moreScore: userProfilesMap[uid].moreScore || 0,
-        totalScore: (userProfilesMap[uid].normScore || 0) + (userProfilesMap[uid].moreScore || 0),
         ...userProfilesMap[uid]
       }));
-
-      const globalSorted = [...usersArr].sort((a, b) => b.totalScore - a.totalScore);
-      globalRankMap = {};
-      let rG = 1;
-      globalSorted.forEach((u, i) => {
-        if (i > 0 && u.totalScore < globalSorted[i - 1].totalScore) rG = i + 1;
-        globalRankMap[u.id] = rG;
-      });
 
       const normSorted = [...usersArr].sort((a, b) => b.normScore - a.normScore);
       normRankMap = {};
@@ -899,125 +908,80 @@
         moreRankMap[u.id] = rM;
       });
 
-      // Render Normal Leaderboard
-      const normPod = document.getElementById('norm-podium-section');
-      const normList = document.getElementById('norm-rankings-container');
-      if (normPod && normList) {
-        normPod.innerHTML = ''; normList.innerHTML = '';
-        normSorted.slice(0, 3).forEach((u, i) => {
-          let rLab = i === 0 ? '🏆 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
-          normPod.innerHTML += `
-            <div class="podium-card podium-rank-${i+1}">
-              <div class="podium-badge">${rLab}</div>
-              <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
-              </div>
-              <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
-              <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.normScore} pts</div>
-            </div>`;
-        });
-        normSorted.forEach(u => {
-          const isMe = u.id === currentUser.id;
-          normList.innerHTML += `
-            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-              <span style="font-weight:800; width:28px;">#${normRankMap[u.id]}</span>
-              <div style="position:relative; width:38px; height:38px;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
-              </div>
-              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
-            </div>`;
-        });
-      }
+      normPodium.innerHTML = ''; normList.innerHTML = '';
+      normSorted.slice(0, 3).forEach((u, i) => {
+        let bClass = i === 0 ? 'badge-gold' : (i === 1 ? 'badge-silver' : 'badge-bronze');
+        let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
+        normPodium.innerHTML += `
+          <div class="podium-card podium-rank-${i+1}">
+            <div class="podium-badge ${bClass}">${rLab}</div>
+            <div style="position:relative; width:42px; height:42px; margin:0 auto;">
+              <img src="${u.dp}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+              ${getAvatarMedalsHtml(u.id)}
+            </div>
+            <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
+            <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.normScore} pts</div>
+          </div>`;
+      });
+      normSorted.forEach(u => {
+        const isMe = u.id === currentUser.id;
+        const medals = getAvatarMedalsHtml(u.id);
+        normList.innerHTML += `
+          <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+            <span style="font-weight:800; width:28px;">#${normRankMap[u.id]}</span>
+            <div style="position:relative; width:38px; height:38px;">
+              <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+              ${medals}
+            </div>
+            <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+            <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
+          </div>`;
+      });
 
-      // Render More Leaderboard
-      const morePod = document.getElementById('more-podium-section');
-      const moreList = document.getElementById('more-rankings-container');
-      if (morePod && moreList) {
-        morePod.innerHTML = ''; moreList.innerHTML = '';
-        moreSorted.slice(0, 3).forEach((u, i) => {
-          let rLab = i === 0 ? '🏆 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
-          morePod.innerHTML += `
-            <div class="podium-card podium-rank-${i+1}">
-              <div class="podium-badge">${rLab}</div>
-              <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
-              </div>
-              <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
-              <div style="font-size:0.75rem; font-weight:800; color:#3b82f6;">${u.moreScore} pts</div>
-            </div>`;
-        });
-        moreSorted.forEach(u => {
-          const isMe = u.id === currentUser.id;
-          moreList.innerHTML += `
-            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-              <span style="font-weight:800; width:28px;">#${moreRankMap[u.id]}</span>
-              <div style="position:relative; width:38px; height:38px;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
-              </div>
-              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-              <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
-            </div>`;
-        });
-      }
-
-      // Render Global Leaderboard
-      const globalPod = document.getElementById('global-podium-section');
-      const globalList = document.getElementById('global-rankings-container');
-      if (globalPod && globalList) {
-        globalPod.innerHTML = ''; globalList.innerHTML = '';
-        globalSorted.slice(0, 3).forEach((u, i) => {
-          let rLab = i === 0 ? '🏆 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
-          globalPod.innerHTML += `
-            <div class="podium-card podium-rank-${i+1}">
-              <div class="podium-badge">${rLab}</div>
-              <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
-              </div>
-              <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
-              <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.totalScore} pts</div>
-            </div>`;
-        });
-        globalSorted.forEach(u => {
-          const isMe = u.id === currentUser.id;
-          globalList.innerHTML += `
-            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-              <span style="font-weight:800; width:28px;">#${globalRankMap[u.id]}</span>
-              <div style="position:relative; width:38px; height:38px;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
-              </div>
-              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.totalScore} pts</div>
-            </div>`;
-        });
-      }
-
-      updateProfileUI();
+      morePodium.innerHTML = ''; moreList.innerHTML = '';
+      moreSorted.slice(0, 3).forEach((u, i) => {
+        let bClass = i === 0 ? 'badge-gold' : (i === 1 ? 'badge-silver' : 'badge-bronze');
+        let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
+        morePodium.innerHTML += `
+          <div class="podium-card podium-rank-${i+1}">
+            <div class="podium-badge ${bClass}">${rLab}</div>
+            <div style="position:relative; width:42px; height:42px; margin:0 auto;">
+              <img src="${u.dp}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+              ${getAvatarMedalsHtml(u.id)}
+            </div>
+            <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
+            <div style="font-size:0.75rem; font-weight:800; color:#3b82f6;">${u.moreScore} pts</div>
+          </div>`;
+      });
+      moreSorted.forEach(u => {
+        const isMe = u.id === currentUser.id;
+        const medals = getAvatarMedalsHtml(u.id);
+        moreList.innerHTML += `
+          <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+            <span style="font-weight:800; width:28px;">#${moreRankMap[u.id]}</span>
+            <div style="position:relative; width:38px; height:38px;">
+              <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+              ${medals}
+            </div>
+            <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+            <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
+          </div>`;
+      });
     }
 
     function showStudentProfileModal(uid) {
       const u = userProfilesMap[uid];
       if (!u) return;
-      const totalScore = (u.normScore || 0) + (u.moreScore || 0);
-      const globalRank = globalRankMap[uid] || '-';
-
       document.getElementById('m-name').innerText = u.name || 'Guest Student';
       document.getElementById('m-roll').innerText = u.roll || 'N/A';
       document.getElementById('m-norm-score').innerText = u.normScore || 0;
-      document.getElementById('m-norm-rank').innerText = normRankMap[uid] ? '#' + normRankMap[uid] : '-';
+      document.getElementById('m-norm-rank').innerText = normRankMap[uid] ? '#' + normRankMap[uid] : 'N/A';
       document.getElementById('m-more-score').innerText = u.moreScore || 0;
-      document.getElementById('m-more-rank').innerText = moreRankMap[uid] ? '#' + moreRankMap[uid] : '-';
-      document.getElementById('m-total-score').innerText = totalScore;
-      document.getElementById('m-global-rank').innerText = globalRank !== '-' ? `#${globalRank}` : '-';
-      document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User';
+      document.getElementById('m-more-rank').innerText = moreRankMap[uid] ? '#' + moreRankMap[uid] : 'N/A';
+      document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
       
-      const badge = document.getElementById('m-medal-badge');
-      if (globalRank <= 3 && globalRank >= 1) {
-        badge.innerHTML = globalRank === 1 ? '🏆' : (globalRank === 2 ? '🥈' : '🥉');
-        badge.style.display = 'flex';
-      } else {
-        badge.style.display = 'none';
-      }
+      const mWrapper = document.getElementById('m-medals-wrapper');
+      if (mWrapper) mWrapper.innerHTML = getAvatarMedalsHtml(uid).replace('<div class="medals-container">', '').replace('</div>', '');
 
       document.getElementById('profile-modal').style.display = 'flex';
     }
@@ -1032,7 +996,7 @@
       const o3 = document.getElementById('pub-q-o3').value.trim();
       const ans = parseInt(document.getElementById('pub-q-ans').value);
 
-      if (!qText || !o0 || !o1) { showToast('Enter Question and Options!', false); return; }
+      if (!qText || !o0 || !o1) { showToast('Enter Question and Options!'); return; }
 
       const newQ = {
         id: 'nq_' + Date.now() + '_' + Math.random(),
@@ -1045,7 +1009,7 @@
 
       normQuizzesList.push(newQ);
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      showToast('Question Published Successfully!', true);
+      showToast('Question Published!');
       document.getElementById('pub-q-text').value = '';
       document.getElementById('pub-q-o0').value = ''; document.getElementById('pub-q-o1').value = '';
       document.getElementById('pub-q-o2').value = ''; document.getElementById('pub-q-o3').value = '';
@@ -1055,7 +1019,7 @@
     async function deleteNormQuestion(qId) {
       normQuizzesList = normQuizzesList.filter(q => q.id !== qId);
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      showToast('Question Deleted!', false);
+      showToast('Question Deleted!');
       renderNormQuizzes(); renderMyPublishedNorm();
     }
 
@@ -1069,34 +1033,28 @@
       container.innerHTML = '';
       normQuizzesList.forEach(q => {
         let optsHtml = '';
-        q.responses = q.responses || {};
-        const myAns = q.responses[currentUser.id];
-        const hasAnswered = (myAns !== undefined);
-        const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
-        const rank = globalRankMap[q.creatorId] || 999;
-        const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
+        const myAns = (q.responses || {})[currentUser.id];
+        const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+        const medals = getAvatarMedalsHtml(q.creatorId);
 
         q.options.forEach((o, idx) => {
           let st = "background: rgba(255,255,255,0.7);";
-          if (hasAnswered) {
+          if (myAns !== undefined) {
             if (idx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
             else if (idx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
           }
-          optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
+          optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${myAns !== undefined ? 'disabled':''}>${o}</button>`;
         });
 
         container.innerHTML += `
           <div class="card">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-              <div style="display:flex; align-items:center; gap:8px; cursor:pointer;" onclick="showStudentProfileModal('${q.creatorId}')">
-                <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
-                  <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; background:#fff;">
-                  ${medal}
-                  ${isUserOnline(q.creatorId) && q.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
-                </div>
-                <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${q.creatorId}')">
+              <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
+                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+                ${medals}
+                ${isUserOnline(q.creatorId) && q.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
               </div>
-              <span style="font-size:0.7rem; font-weight:800; color:#15803d; cursor:pointer; text-decoration:underline;" onclick="openQuestionResponsesModal('${q.id}')">View Responses</span>
+              <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
             </div>
             <div style="font-weight:800; margin-bottom:10px;">${q.question}</div>
             <div>${optsHtml}</div>
@@ -1104,52 +1062,6 @@
         `;
       });
     }
-
-    function openQuestionResponsesModal(qId) {
-      const q = normQuizzesList.find(item => item.id === qId);
-      if (!q) return;
-      const container = document.getElementById('responses-modal-list');
-      container.innerHTML = '';
-
-      const respMap = q.responses || {};
-      const uIds = Object.keys(respMap);
-      const userHasAnswered = (respMap[currentUser.id] !== undefined);
-
-      if (uIds.length === 0) {
-        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No student has attempted this question yet.</p>';
-      } else {
-        uIds.forEach(uid => {
-          const ansIdx = respMap[uid];
-          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
-          const isCorrect = (ansIdx === q.correctIndex);
-
-          let detailsHtml = '';
-          if (userHasAnswered) {
-            const optionNumberText = `Option ${ansIdx + 1}`;
-            detailsHtml = `<div style="font-size:0.72rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
-              ${isCorrect ? '✅ Correct' : '❌ Wrong'} • Chose: <strong>${optionNumberText}</strong> (${q.options[ansIdx] || ''})
-            </div>`;
-          } else {
-            detailsHtml = `<div style="font-size:0.72rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
-              ${isCorrect ? '✅ Correct' : '❌ Wrong'}
-            </div>`;
-          }
-
-          container.innerHTML += `
-            <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border);">
-              <img src="${uProf.dp}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; background:#fff; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
-              <div style="flex:1; font-size:0.8rem; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
-                <div style="font-weight:800;">${uProf.name}</div>
-                ${detailsHtml}
-              </div>
-            </div>
-          `;
-        });
-      }
-      document.getElementById('responses-modal').style.display = 'flex';
-    }
-
-    function closeResponsesModal() { document.getElementById('responses-modal').style.display = 'none'; }
 
     async function submitNormAnswer(qId, optIdx) {
       const q = normQuizzesList.find(item => item.id === qId);
@@ -1163,21 +1075,17 @@
       if (optIdx === q.correctIndex) {
         currentUser.normScore = (currentUser.normScore || 0) + 1;
         currentUser.answeredNormQs[qId] = 1;
-        showToast('Correct Answer! +1 Pt', true);
+        showToast('Correct Answer! +1 Pt');
       } else {
         currentUser.normScore = (currentUser.normScore || 0) - 1;
         currentUser.answeredNormQs[qId] = -1;
-        showToast('Wrong Answer! -1 Pt', false);
+        showToast('Wrong Answer! -1 Pt');
       }
 
+      await saveCurrentUserToDb();
+      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
       renderNormQuizzes();
       renderLeaderboards();
-      updateProfileUI();
-
-      await Promise.all([
-        saveCurrentUserToDb(),
-        fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) })
-      ]);
     }
 
     function renderMyPublishedNorm() {
@@ -1202,10 +1110,12 @@
     async function publishMorePaperHTML() {
       const title = document.getElementById('pub-paper-title').value.trim();
       const htmlText = document.getElementById('pub-paper-html').value.trim();
-      if (!title || !htmlText) { showToast('Enter Title and Paste HTML Code!', false); return; }
+
+      if (!title || !htmlText) { showToast('Enter Title and Paste HTML Code!'); return; }
 
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlText;
+
       const qNodes = tempDiv.querySelectorAll('.paper-q-item');
       let extractedQuestions = [];
 
@@ -1223,7 +1133,10 @@
         });
       });
 
-      if (extractedQuestions.length === 0) { showToast('Invalid HTML Code!', false); return; }
+      if (extractedQuestions.length === 0) {
+        showToast('Invalid HTML Code!');
+        return;
+      }
 
       const newPaper = {
         id: 'mp_' + Date.now() + '_' + Math.random(),
@@ -1235,7 +1148,7 @@
 
       morePapersList.push(newPaper);
       await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      showToast('Paper Set Published!', true);
+      showToast('Paper Set Published!');
       document.getElementById('pub-paper-title').value = '';
       document.getElementById('pub-paper-html').value = '';
       renderMorePapers(); renderMyPublishedPapers();
@@ -1244,7 +1157,7 @@
     async function deleteMorePaper(pId) {
       morePapersList = morePapersList.filter(p => p.id !== pId);
       await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      showToast('Paper Set Deleted!', false);
+      showToast('Paper Set Deleted!');
       renderMorePapers(); renderMyPublishedPapers();
     }
 
@@ -1257,15 +1170,14 @@
       }
       container.innerHTML = '';
       morePapersList.forEach(p => {
-        const creatorProf = userProfilesMap[p.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
-        const rank = globalRankMap[p.creatorId] || 999;
-        const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
+        const creatorProf = userProfilesMap[p.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+        const medals = getAvatarMedalsHtml(p.creatorId);
         container.innerHTML += `
           <div class="card">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${p.creatorId}')">
               <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
-                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; background:#fff;">
-                ${medal}
+                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+                ${medals}
                 ${isUserOnline(p.creatorId) && p.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
               </div>
               <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
@@ -1281,6 +1193,7 @@
     function openPaperModal(pId) {
       const p = morePapersList.find(item => item.id === pId);
       if (!p) return;
+
       document.getElementById('paper-modal-title').innerText = p.title;
       const container = document.getElementById('paper-modal-questions-list');
       container.innerHTML = '';
@@ -1307,6 +1220,7 @@
           </div>
         `;
       });
+
       document.getElementById('paper-modal').style.display = 'flex';
     }
 
@@ -1326,21 +1240,17 @@
       if (optIdx === q.correctIndex) {
         currentUser.moreScore = (currentUser.moreScore || 0) + 1;
         currentUser.answeredMoreQs[paperId] = (currentUser.answeredMoreQs[paperId] || 0) + 1;
-        showToast('Correct! +1 Pt', true);
+        showToast('Correct! +1 Pt');
       } else {
         currentUser.moreScore = (currentUser.moreScore || 0) - 1;
         currentUser.answeredMoreQs[paperId] = (currentUser.answeredMoreQs[paperId] || 0) - 1;
-        showToast('Wrong! -1 Pt', false);
+        showToast('Wrong! -1 Pt');
       }
 
+      await saveCurrentUserToDb();
+      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
       openPaperModal(paperId);
       renderLeaderboards();
-      updateProfileUI();
-
-      await Promise.all([
-        saveCurrentUserToDb(),
-        fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) })
-      ]);
     }
 
     function renderMyPublishedPapers() {
@@ -1364,22 +1274,20 @@
 
     let pressTimer = null;
     function hideAllPopups(e) {
-      if (e && (e.target.closest('.delete-msg-btn') || e.target.closest('.reaction-picker'))) return;
+      if (e && e.target.closest('.delete-msg-btn') || e.target.closest('.reaction-picker')) return;
       document.querySelectorAll('.delete-msg-btn').forEach(btn => btn.classList.remove('show'));
       document.querySelectorAll('.reaction-picker').forEach(p => p.classList.remove('show'));
     }
 
-    function handleTouchStart(e, msgId, senderId) {
+    function handleTouchStart(e, msgId) {
       e.stopPropagation(); hideAllPopups();
       pressTimer = setTimeout(() => {
-        if (senderId === currentUser.id) {
-          const delBtn = document.getElementById(`del_btn_${msgId}`);
-          if (delBtn) delBtn.classList.add('show');
-        }
+        const delBtn = document.getElementById(`del_btn_${msgId}`);
         const picker = document.getElementById(`reaction_picker_${msgId}`);
+        if (delBtn) delBtn.classList.add('show');
         if (picker) picker.classList.add('show');
         if (navigator.vibrate) navigator.vibrate(50);
-      }, 700);
+      }, 800);
     }
 
     function handleTouchEnd() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
@@ -1390,6 +1298,7 @@
       if (!msg) return;
       msg.reactions = msg.reactions || {};
       msg.reactions[currentUser.id] = emoji;
+
       renderChatMessages(currentChatList);
       await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
     }
@@ -1399,7 +1308,7 @@
       currentChatList = currentChatList.filter(m => m.msgId !== msgId);
       renderChatMessages(currentChatList);
       await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
-      showToast('Message Deleted', false);
+      showToast('Message Deleted');
     }
 
     async function sendChatMessage() {
@@ -1420,7 +1329,6 @@
       lastRenderedChatJson = JSON.stringify(currentChatList);
       renderChatMessages(currentChatList);
       input.value = '';
-      
       await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
     }
 
@@ -1433,14 +1341,16 @@
         if (!msg) return;
         const isMy = (msg.senderId === currentUser.id);
         const uProf = userProfilesMap[msg.senderId] || {};
-        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu';
-        const rank = globalRankMap[msg.senderId] || 999;
-        const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
+        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
+        const medals = getAvatarMedalsHtml(msg.senderId);
         const online = isUserOnline(msg.senderId);
 
         const seenByMap = msg.seenBy || {};
         const otherViewers = Object.keys(seenByMap).filter(uid => uid !== currentUser.id);
-        let seenHtml = otherViewers.length > 0 ? `<div class="seen-by-text" onclick="showSeenByModal('${msg.msgId}')">👁️ Seen by ${otherViewers.length}</div>` : '';
+        let seenHtml = '';
+        if (otherViewers.length > 0) {
+          seenHtml = `<div class="seen-by-text" onclick="showSeenByModal('${msg.msgId}')">👁️ Seen by ${otherViewers.length}</div>`;
+        }
 
         let reactionsHtml = '';
         if (msg.reactions) {
@@ -1456,7 +1366,7 @@
         msgDiv.innerHTML = `
           <div class="chat-avatar-wrapper" style="position:relative;">
             <img src="${dpDisplay}" class="chat-avatar" onclick="showStudentProfileModal('${msg.senderId}')">
-            ${medal}
+            ${medals}
             ${online && !isMy ? '<div class="online-blue-tick"></div>' : ''}
           </div>
           <div class="chat-bubble-wrapper">
@@ -1468,10 +1378,10 @@
               <span onclick="addReaction('${msg.msgId}', '❤️', event)">❤️</span>
             </div>
             <div class="chat-bubble" 
-                 onmousedown="handleTouchStart(event, '${msg.msgId}', '${msg.senderId}')" 
+                 onmousedown="handleTouchStart(event, '${msg.msgId}')" 
                  onmouseup="handleTouchEnd()" 
                  onmouseleave="handleTouchEnd()" 
-                 ontouchstart="handleTouchStart(event, '${msg.msgId}', '${msg.senderId}')" 
+                 ontouchstart="handleTouchStart(event, '${msg.msgId}')" 
                  ontouchend="handleTouchEnd()">
               <div>${msg.text}</div>
             </div>
@@ -1487,19 +1397,22 @@
 
     async function saveUserProfile() {
       const name = document.getElementById('prof-input-name').value.trim();
-      if (!name) { showToast('Enter your name', false); return; }
+      if (!name) { showToast('Enter your name'); return; }
 
       currentUser.name = name;
       currentUser.roll = document.getElementById('prof-input-roll').value || '00';
 
-      updateProfileUI();
+      document.getElementById('p-name').innerText = name;
+      document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
+      document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
+      document.getElementById('p-dp-img').src = currentUser.dp;
 
       if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
         window.AppInventor.setWebViewString(JSON.stringify(currentUser));
       }
 
       await saveCurrentUserToDb();
-      showToast('Profile Saved Successfully!', true);
+      showToast('Profile Saved!');
       fetchFirebaseData();
     }
 
@@ -1526,12 +1439,14 @@
       } catch (e) {}
 
       document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
-      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu';
+      document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
+      document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
+      document.getElementById('p-dp-img').src = currentUser.dp;
+      
       document.getElementById('prof-input-name').value = (currentUser.name === 'Guest Student') ? '' : currentUser.name;
       document.getElementById('prof-input-roll').value = currentUser.roll;
       
       initAvatarSelector();
-      updateProfileUI();
     };
   </script>
 </body>
