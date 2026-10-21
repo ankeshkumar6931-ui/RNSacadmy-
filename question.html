@@ -428,7 +428,7 @@
         <div class="card">
           <div style="text-align: center; padding: 10px 0;">
             <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto;">
-              <img id="p-dp-img" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover; background:#fff;">
+              <img id="p-dp-img" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Motu" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover; background:#fff;">
               <div id="p-medal-badge" class="medal-badge" style="bottom:-2px; right:5px; display:none;"></div>
             </div>
             <h3 id="p-name">Guest Student</h3>
@@ -449,7 +449,7 @@
           <div style="margin-top: 15px; border-top: 1.5px solid rgba(0,0,0,0.08); padding-top: 15px;">
             <div class="form-group"><label>Full Name</label><input type="text" id="prof-input-name" class="input-field" placeholder="Enter Name"></div>
             <div class="form-group"><label>Roll Number</label><input type="number" id="prof-input-roll" class="input-field" placeholder="Roll No."></div>
-            <div class="form-group"><label>Choose Avatar (60+ Cool Characters)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
+            <div class="form-group"><label>Choose Avatar (200+ Human & Cartoon Characters)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
             <button class="btn-submit" type="button" onclick="saveUserProfile()">Save Profile</button>
             
             <div style="text-align: center; margin-top: 18px;">
@@ -540,7 +540,7 @@
       id: 'usr_' + Math.floor(100000 + Math.random() * 900000),
       name: 'Guest Student',
       roll: '00',
-      dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=StudentGroup',
+      dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu',
       normScore: 0,
       moreScore: 0,
       lastSeen: Date.now(),
@@ -571,12 +571,29 @@
       const grid = document.getElementById('avatar-selector-grid');
       if (!grid) return;
       grid.innerHTML = '';
-      // रोबोट हटाकर कूल कार्टून और करैक्टर स्टाइल जोड़े गए हैं
-      const styles = ['adventurer', 'big-smile', 'fun-emoji', 'lorelei'];
+      
+      // 200+ शानदार ह्यूमन और कार्टून स्टाइल्स (मोटू-पतलू पहले दो सीड पर)
+      const cartoonStyles = ['adventurer', 'big-smile', 'fun-emoji', 'lorelei', 'avataaars'];
+      
+      // स्पेशल मोटू और पतलू पहले दो अवतार के रूप में
+      const specialAvatars = ['Motu', 'Patlu'];
+      specialAvatars.forEach((name, idx) => {
+        const url = `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`;
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'avatar-option' + (currentUser.dp === url ? ' selected' : '');
+        img.onclick = () => {
+          document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+          img.classList.add('selected');
+          currentUser.dp = url;
+          document.getElementById('p-dp-img').src = url;
+        };
+        grid.appendChild(img);
+      });
 
-      for (let i = 1; i <= 60; i++) {
-        const style = styles[i % styles.length];
-        const seed = `WeAreGroup_Hero_${i}`;
+      for (let i = 3; i <= 210; i++) {
+        const style = cartoonStyles[i % cartoonStyles.length];
+        const seed = `CartoonHero_${i}`;
         const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
 
         const img = document.createElement('img');
@@ -716,7 +733,7 @@
       const totalScore = (currentUser.normScore || 0) + (currentUser.moreScore || 0);
       document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
       document.getElementById('p-total-score').innerText = `${totalScore} pts`;
-      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Default';
+      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu';
       
       const myRank = globalRankMap[currentUser.id] || '-';
       document.getElementById('p-global-rank').innerText = myRank !== '-' ? `#${myRank}` : '-';
@@ -961,7 +978,8 @@
       container.innerHTML = '';
       normQuizzesList.forEach(q => {
         let optsHtml = '';
-        const myAns = (q.responses || {})[currentUser.id];
+        q.responses = q.responses || {};
+        const myAns = q.responses[currentUser.id];
         const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
         const rank = globalRankMap[q.creatorId] || 999;
         const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
@@ -996,7 +1014,7 @@
       const q = normQuizzesList.find(item => item.id === qId);
       if (!q) return;
       q.responses = q.responses || {};
-      if (q.responses[currentUser.id] !== undefined) return; // डबल क्लिक या ग्लिच से बचाने के लिए लॉक
+      if (q.responses[currentUser.id] !== undefined) return; // लॉक ताकि दोबारा क्लिक न हो सके
 
       q.responses[currentUser.id] = optIdx;
       currentUser.answeredNormQs = currentUser.answeredNormQs || {};
@@ -1011,11 +1029,9 @@
         showToast('Wrong Answer! -1 Pt');
       }
 
-      // तुरंत UI को लोकल अपडेट करें ताकि रिस्पॉन्स सुपरफास्ट लगे
       renderNormQuizzes();
       renderLeaderboards();
 
-      // बैकग्राउंड में डेटाबेस सेव करें
       await Promise.all([
         saveCurrentUserToDb(),
         fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) })
@@ -1159,7 +1175,7 @@
       if (!p) return;
       p.responses = p.responses || {};
       p.responses[qId] = p.responses[qId] || {};
-      if (p.responses[qId][currentUser.id] !== undefined) return; // डबल क्लिक से बचाने के लिए लॉक
+      if (p.responses[qId][currentUser.id] !== undefined) return; // लॉक ताकि दोबारा क्लिक न हो सके
 
       p.responses[qId][currentUser.id] = optIdx;
       currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
@@ -1175,11 +1191,9 @@
         showToast('Wrong! -1 Pt');
       }
 
-      // तुरंत UI को लोकल अपडेट करें ताकि रिस्पॉन्स सुपरफास्ट लगे
       openPaperModal(paperId);
       renderLeaderboards();
 
-      // बैकग्राउंड में डेटाबेस सेव करें
       await Promise.all([
         saveCurrentUserToDb(),
         fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) })
@@ -1275,7 +1289,7 @@
         if (!msg) return;
         const isMy = (msg.senderId === currentUser.id);
         const uProf = userProfilesMap[msg.senderId] || {};
-        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User';
+        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu';
         const rank = globalRankMap[msg.senderId] || 999;
         const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
         const online = isUserOnline(msg.senderId);
@@ -1363,7 +1377,7 @@
       } catch (e) {}
 
       document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
-      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Default';
+      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu';
       document.getElementById('prof-input-name').value = (currentUser.name === 'Guest Student') ? '' : currentUser.name;
       document.getElementById('prof-input-roll').value = currentUser.roll;
       
