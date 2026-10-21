@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -312,7 +312,7 @@
       position: fixed; inset: 0; background: rgba(20, 45, 30, 0.35); display: none; justify-content: center; align-items: center; z-index: 999999; backdrop-filter: blur(8px);
     }
     .modal-card {
-      background: rgba(225, 248, 230, 0.95); border: 1.5px solid var(--card-border); padding: 22px; border-radius: 32px; width: 85%; max-width: 330px; text-align: center;
+      background: rgba(225, 248, 230, 0.95); border: 1.5px solid var(--card-border); padding: 22px; border-radius: 32px; width: 88%; max-width: 360px; text-align: center;
     }
 
     .user-online-badge {
@@ -414,6 +414,11 @@
             </div>
             <button class="btn-submit" type="button" onclick="publishNormalQuestion()">Publish Question</button>
           </div>
+
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Questions</h3>
+            <div id="my-published-norm-list"></div>
+          </div>
         </div>
 
         <div id="pub-view-more" class="sub-view">
@@ -425,6 +430,11 @@
               <textarea id="pub-paper-html" class="input-field" rows="6" placeholder="Paste Here HTML Code from AI Prompt..." style="height: 110px; resize: none;"></textarea>
             </div>
             <button class="btn-submit" type="button" onclick="publishMorePaperHTML()">Publish Paper Set</button>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Paper Sets</h3>
+            <div id="my-published-papers-list"></div>
           </div>
         </div>
 
@@ -495,6 +505,15 @@
         <h3 style="margin-bottom: 12px; font-size: 1rem;">Student Responses</h3>
         <div id="responses-list-container" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
         <button class="btn-submit" style="margin-top: 15px; padding: 10px;" type="button" onclick="closeResponsesModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Paper View Modal (More Questions HTML) -->
+    <div id="paper-modal" class="modal-overlay" onclick="closePaperModal()">
+      <div class="modal-card" style="max-width: 380px; width: 92%; max-height: 82vh; overflow-y: auto;" onclick="event.stopPropagation()">
+        <h3 id="paper-modal-title" style="margin-bottom: 10px; font-size: 1rem;">Paper Title</h3>
+        <div id="paper-modal-questions-list"></div>
+        <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closePaperModal()">Close Paper</button>
       </div>
     </div>
 
@@ -652,11 +671,21 @@
           if (data.NormQuizzes) {
             normQuizzesList = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
             renderNormQuizzes();
+            renderMyPublishedNorm();
+          } else {
+            normQuizzesList = [];
+            renderNormQuizzes();
+            renderMyPublishedNorm();
           }
 
           if (data.MorePapers) {
             morePapersList = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
             renderMorePapers();
+            renderMyPublishedPapers();
+          } else {
+            morePapersList = [];
+            renderMorePapers();
+            renderMyPublishedPapers();
           }
 
           if (data.GlobalChat) {
@@ -831,7 +860,39 @@
       document.getElementById('pub-q-text').value = '';
       document.getElementById('pub-q-o0').value = ''; document.getElementById('pub-q-o1').value = '';
       document.getElementById('pub-q-o2').value = ''; document.getElementById('pub-q-o3').value = '';
-      renderNormQuizzes();
+      renderNormQuizzes(); renderMyPublishedNorm();
+    }
+
+    /* Delete Normal Question with Creator Verification & Score Undo */
+    async function deleteNormQuestion(qId) {
+      const q = normQuizzesList.find(item => item.id === qId);
+      if (!q) return;
+
+      // Verification: Only Creator can delete
+      if (q.creatorId !== currentUser.id) {
+        showToast('You can only delete your own questions!');
+        return;
+      }
+
+      // Undo scores for users who answered this question
+      if (q.responses) {
+        for (let uid of Object.keys(q.responses)) {
+          const ans = q.responses[uid];
+          if (userProfilesMap[uid]) {
+            if (ans === q.correctIndex) {
+              userProfilesMap[uid].normScore = Math.max(0, (userProfilesMap[uid].normScore || 0) - 1);
+            } else {
+              userProfilesMap[uid].normScore = (userProfilesMap[uid].normScore || 0) + 1; // Reverse -1 penalty
+            }
+            await fetch(`${FIREBASE_URL}/UsersMap/${uid}.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap[uid]) });
+          }
+        }
+      }
+
+      normQuizzesList = normQuizzesList.filter(item => item.id !== qId);
+      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
+      showToast('Question Deleted & Scores Updated!');
+      fetchFirebaseData();
     }
 
     function renderNormQuizzes() {
@@ -857,8 +918,10 @@
           optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
 
+        const creatorProf = userProfilesMap[q.creatorId] || { name: 'Student' };
         container.innerHTML += `
           <div class="card">
+            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:800; margin-bottom:4px;">By ${creatorProf.name}</div>
             <div style="font-weight:800; margin-bottom:10px;">${q.question}</div>
             <div>${optsHtml}</div>
             <div style="text-align:right; margin-top:8px;">
@@ -892,7 +955,25 @@
       fetchFirebaseData();
     }
 
-    /* Anti-Cheating Responses Modal Logic */
+    function renderMyPublishedNorm() {
+      const container = document.getElementById('my-published-norm-list');
+      if (!container) return;
+      const myQs = normQuizzesList.filter(q => q.creatorId === currentUser.id);
+      if (myQs.length === 0) {
+        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No questions published yet.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      myQs.forEach(q => {
+        container.innerHTML += `
+          <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
+            <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${q.question}</div>
+            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteNormQuestion('${q.id}')"><i class="fa-solid fa-trash"></i> Delete Question</button>
+          </div>
+        `;
+      });
+    }
+
     function openResponsesModal(qId) {
       const q = normQuizzesList.find(item => item.id === qId);
       if (!q) return;
@@ -915,12 +996,10 @@
 
           let statusBadge = '';
           if (!hasAnswered) {
-            // Anti-Cheating: Show only Correct (Green) or Wrong (Red) color status without option details
             statusBadge = isCorrect 
               ? `<span style="color:#15803d; font-weight:800; font-size:0.8rem; background:#dcfce7; padding:3px 8px; border-radius:10px;">Correct ✔</span>` 
               : `<span style="color:#dc2626; font-weight:800; font-size:0.8rem; background:#fee2e2; padding:3px 8px; border-radius:10px;">Wrong ✖</span>`;
           } else {
-            // Full Analysis once user has answered
             statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'};">
               Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
             </span>`;
@@ -981,7 +1060,44 @@
       showToast('Paper Set Published!');
       document.getElementById('pub-paper-title').value = '';
       document.getElementById('pub-paper-html').value = '';
-      renderMorePapers();
+      renderMorePapers(); renderMyPublishedPapers();
+    }
+
+    /* Delete More Paper with Creator Verification & Score Undo */
+    async function deleteMorePaper(pId) {
+      const p = morePapersList.find(item => item.id === pId);
+      if (!p) return;
+
+      if (p.creatorId !== currentUser.id) {
+        showToast('You can only delete your own paper sets!');
+        return;
+      }
+
+      // Undo scores for users who attempted this paper
+      if (p.responses) {
+        for (let qId of Object.keys(p.responses)) {
+          const qRes = p.responses[qId];
+          const qObj = p.questions.find(item => item.qId === qId);
+          if (qObj) {
+            for (let uid of Object.keys(qRes)) {
+              const ans = qRes[uid];
+              if (userProfilesMap[uid]) {
+                if (ans === qObj.correctIndex) {
+                  userProfilesMap[uid].moreScore = Math.max(0, (userProfilesMap[uid].moreScore || 0) - 1);
+                } else {
+                  userProfilesMap[uid].moreScore = (userProfilesMap[uid].moreScore || 0) + 1;
+                }
+                await fetch(`${FIREBASE_URL}/UsersMap/${uid}.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap[uid]) });
+              }
+            }
+          }
+        }
+      }
+
+      morePapersList = morePapersList.filter(item => item.id !== pId);
+      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
+      showToast('Paper Deleted & Scores Updated!');
+      fetchFirebaseData();
     }
 
     function renderMorePapers() {
@@ -993,11 +1109,93 @@
       }
       container.innerHTML = '';
       morePapersList.forEach(p => {
+        const creatorProf = userProfilesMap[p.creatorId] || { name: 'Student' };
         container.innerHTML += `
           <div class="card">
+            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:800; margin-bottom:4px;">By ${creatorProf.name}</div>
             <div style="font-weight:800; font-size:1rem; margin-bottom:4px;">${p.title}</div>
             <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Total Questions: ${p.questions.length}</p>
-            <button class="btn-submit" style="padding:10px; font-size:0.85rem;" onclick="showToast('Bulk paper feature active')">View Paper Set</button>
+            <button class="btn-submit" style="padding:10px; font-size:0.85rem;" onclick="openPaperModal('${p.id}')">Start Attempting Paper</button>
+          </div>
+        `;
+      });
+    }
+
+    function openPaperModal(pId) {
+      const p = morePapersList.find(item => item.id === pId);
+      if (!p) return;
+
+      document.getElementById('paper-modal-title').innerText = p.title;
+      const container = document.getElementById('paper-modal-questions-list');
+      container.innerHTML = '';
+
+      p.questions.forEach((q, idx) => {
+        let optsHtml = '';
+        p.responses = p.responses || {};
+        p.responses[q.qId] = p.responses[q.qId] || {};
+        const myAns = p.responses[q.qId][currentUser.id];
+        const hasAnswered = (myAns !== undefined);
+
+        q.options.forEach((o, oIdx) => {
+          let st = "background: rgba(255,255,255,0.7);";
+          if (hasAnswered) {
+            if (oIdx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
+            else if (oIdx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
+          }
+          optsHtml += `<button class="btn-submit" style="margin-bottom:6px; padding:8px; ${st}" onclick="submitPaperQuestionAnswer('${p.id}', '${q.qId}', ${oIdx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
+        });
+
+        container.innerHTML += `
+          <div style="text-align:left; background:rgba(255,255,255,0.5); padding:10px; border-radius:16px; margin-bottom:10px; border:1px solid var(--card-border);">
+            <div style="font-weight:800; font-size:0.85rem; margin-bottom:8px;">Q${idx+1}. ${q.qText}</div>
+            <div>${optsHtml}</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('paper-modal').style.display = 'flex';
+    }
+
+    function closePaperModal() { document.getElementById('paper-modal').style.display = 'none'; }
+
+    async function submitPaperQuestionAnswer(paperId, qId, optIdx) {
+      const p = morePapersList.find(item => item.id === paperId);
+      if (!p) return;
+      p.responses = p.responses || {};
+      p.responses[qId] = p.responses[qId] || {};
+      if (p.responses[qId][currentUser.id] !== undefined) return;
+
+      p.responses[qId][currentUser.id] = optIdx;
+
+      const q = p.questions.find(item => item.qId === qId);
+      if (optIdx === q.correctIndex) {
+        currentUser.moreScore = (currentUser.moreScore || 0) + 1;
+        showToast('Correct! +1 Pt');
+      } else {
+        currentUser.moreScore = (currentUser.moreScore || 0) - 1;
+        showToast('Wrong! -1 Pt');
+      }
+
+      saveUserProfileToDb();
+      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
+      openPaperModal(paperId);
+      fetchFirebaseData();
+    }
+
+    function renderMyPublishedPapers() {
+      const container = document.getElementById('my-published-papers-list');
+      if (!container) return;
+      const myPs = morePapersList.filter(p => p.creatorId === currentUser.id);
+      if (myPs.length === 0) {
+        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No papers published yet.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      myPs.forEach(p => {
+        container.innerHTML += `
+          <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
+            <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${p.title}</div>
+            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteMorePaper('${p.id}')"><i class="fa-solid fa-trash"></i> Delete Paper Set</button>
           </div>
         `;
       });
