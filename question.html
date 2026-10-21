@@ -105,7 +105,6 @@
       box-shadow: 0 0 8px #22c55e;
     }
 
-    /* Toast Alert Customization */
     #custom-toast {
       position: fixed;
       top: -70px;
@@ -875,7 +874,6 @@
         ...userProfilesMap[uid]
       }));
 
-      // 1. Global Ranking
       const globalSorted = [...usersArr].sort((a, b) => b.totalScore - a.totalScore);
       globalRankMap = {};
       let rG = 1;
@@ -884,7 +882,6 @@
         globalRankMap[u.id] = rG;
       });
 
-      // 2. Normal Questions Ranking
       const normSorted = [...usersArr].sort((a, b) => b.normScore - a.normScore);
       normRankMap = {};
       let rN = 1;
@@ -893,7 +890,6 @@
         normRankMap[u.id] = rN;
       });
 
-      // 3. More Questions Ranking
       const moreSorted = [...usersArr].sort((a, b) => b.moreScore - a.moreScore);
       moreRankMap = {};
       let rM = 1;
@@ -902,7 +898,6 @@
         moreRankMap[u.id] = rM;
       });
 
-      // Render Normal Qs Leaderboard
       const normPod = document.getElementById('norm-podium-section');
       const normList = document.getElementById('norm-rankings-container');
       if (normPod && normList) {
@@ -934,7 +929,6 @@
         });
       }
 
-      // Render More Qs Leaderboard
       const morePod = document.getElementById('more-podium-section');
       const moreList = document.getElementById('more-rankings-container');
       if (morePod && moreList) {
@@ -966,7 +960,6 @@
         });
       }
 
-      // Render Global Final Leaderboard
       const globalPod = document.getElementById('global-podium-section');
       const globalList = document.getElementById('global-rankings-container');
       if (globalPod && globalList) {
@@ -1091,8 +1084,6 @@
           optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
 
-        let viewRespBtnHtml = hasAnswered ? `<span style="font-size:0.7rem; font-weight:800; color:#15803d; cursor:pointer; text-decoration:underline;" onclick="openQuestionResponsesModal('${q.id}')">View Responses</span>` : `<span style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">Answer to view responses</span>`;
-
         container.innerHTML += `
           <div class="card">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
@@ -1104,7 +1095,7 @@
                 </div>
                 <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
               </div>
-              ${viewRespBtnHtml}
+              <span style="font-size:0.7rem; font-weight:800; color:#15803d; cursor:pointer; text-decoration:underline;" onclick="openQuestionResponsesModal('${q.id}')">View Responses</span>
             </div>
             <div style="font-weight:800; margin-bottom:10px;">${q.question}</div>
             <div>${optsHtml}</div>
@@ -1121,6 +1112,7 @@
 
       const respMap = q.responses || {};
       const uIds = Object.keys(respMap);
+      const userHasAnswered = (respMap[currentUser.id] !== undefined);
 
       if (uIds.length === 0) {
         container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No student has attempted this question yet.</p>';
@@ -1129,18 +1121,27 @@
           const ansIdx = respMap[uid];
           const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
           const isCorrect = (ansIdx === q.correctIndex);
-          const optLabels = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
-          const chosenOptLabel = optLabels[ansIdx] || `Option ${ansIdx + 1}`;
-          const chosenOptText = q.options[ansIdx] || '';
+
+          let detailsHtml = '';
+          if (userHasAnswered) {
+            // यूजर खुद उत्तर दे चुका है, अतः विकल्प का नाम (जैसे Option 1, Option 2...) भी दिखाएं
+            const optionNumberText = `Option ${ansIdx + 1}`;
+            detailsHtml = `<div style="font-size:0.72rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
+              ${isCorrect ? '✅ Correct' : '❌ Wrong'} • Chose: <strong>${optionNumberText}</strong> (${q.options[ansIdx] || ''})
+            </div>`;
+          } else {
+            // यूजर ने खुद उत्तर नहीं दिया है, अतः केवल सही या गलत दिखाएं, विकल्प न दिखाएं
+            detailsHtml = `<div style="font-size:0.72rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
+              ${isCorrect ? '✅ Correct' : '❌ Wrong'}
+            </div>`;
+          }
 
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border);">
               <img src="${uProf.dp}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; background:#fff; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
               <div style="flex:1; font-size:0.8rem; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
                 <div style="font-weight:800;">${uProf.name}</div>
-                <div style="font-size:0.72rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
-                  ${isCorrect ? '✅ Correct' : '❌ Wrong'} • Chose: <strong>${chosenOptLabel}</strong> (${chosenOptText})
-                </div>
+                ${detailsHtml}
               </div>
             </div>
           `;
