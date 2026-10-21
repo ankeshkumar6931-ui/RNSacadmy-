@@ -428,7 +428,7 @@
         <div class="card">
           <div style="text-align: center; padding: 10px 0;">
             <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto;">
-              <img id="p-dp-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover; background:#fff;">
+              <img id="p-dp-img" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover; background:#fff;">
               <div id="p-medal-badge" class="medal-badge" style="bottom:-2px; right:5px; display:none;"></div>
             </div>
             <h3 id="p-name">Guest Student</h3>
@@ -449,7 +449,7 @@
           <div style="margin-top: 15px; border-top: 1.5px solid rgba(0,0,0,0.08); padding-top: 15px;">
             <div class="form-group"><label>Full Name</label><input type="text" id="prof-input-name" class="input-field" placeholder="Enter Name"></div>
             <div class="form-group"><label>Roll Number</label><input type="number" id="prof-input-roll" class="input-field" placeholder="Roll No."></div>
-            <div class="form-group"><label>Choose Avatar (60+ Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
+            <div class="form-group"><label>Choose Avatar (60+ Cool Characters)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
             <button class="btn-submit" type="button" onclick="saveUserProfile()">Save Profile</button>
             
             <div style="text-align: center; margin-top: 18px;">
@@ -540,7 +540,7 @@
       id: 'usr_' + Math.floor(100000 + Math.random() * 900000),
       name: 'Guest Student',
       roll: '00',
-      dp: 'https://api.dicebear.com/7.x/bottts/svg?seed=StudentGroup',
+      dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=StudentGroup',
       normScore: 0,
       moreScore: 0,
       lastSeen: Date.now(),
@@ -571,11 +571,12 @@
       const grid = document.getElementById('avatar-selector-grid');
       if (!grid) return;
       grid.innerHTML = '';
-      const styles = ['bottts', 'avataaars', 'identicon', 'pixel-art'];
+      // रोबोट हटाकर कूल कार्टून और करैक्टर स्टाइल जोड़े गए हैं
+      const styles = ['adventurer', 'big-smile', 'fun-emoji', 'lorelei'];
 
       for (let i = 1; i <= 60; i++) {
         const style = styles[i % styles.length];
-        const seed = `WeAreGroup_Avatar_${i}`;
+        const seed = `WeAreGroup_Hero_${i}`;
         const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
 
         const img = document.createElement('img');
@@ -715,7 +716,7 @@
       const totalScore = (currentUser.normScore || 0) + (currentUser.moreScore || 0);
       document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
       document.getElementById('p-total-score').innerText = `${totalScore} pts`;
-      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=Default';
+      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Default';
       
       const myRank = globalRankMap[currentUser.id] || '-';
       document.getElementById('p-global-rank').innerText = myRank !== '-' ? `#${myRank}` : '-';
@@ -746,7 +747,7 @@
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:16px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
               <div style="position:relative; width:34px; height:34px; flex-shrink:0;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; background:#fff;">
+                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; background:#fff;">
                 ${medal}
                 ${online && uid !== currentUser.id ? '<div class="online-blue-tick" style="width:9px; height:9px;"></div>' : ''}
               </div>
@@ -786,7 +787,7 @@
         container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No one else has seen this yet.</p>';
       } else {
         viewers.forEach(uid => {
-          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/bottts/svg?seed=User' };
+          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:6px; background:rgba(255,255,255,0.5); border-radius:14px; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
               <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; background:#fff;">
@@ -847,7 +848,6 @@
         globalRankMap[u.id] = r;
       });
 
-      // Render both Home tabs with the same Global Leaderboard
       ['global-podium-section', 'global-podium-section-more'].forEach(podId => {
         const pod = document.getElementById(podId);
         if (pod) {
@@ -858,7 +858,7 @@
               <div class="podium-card podium-rank-${i+1}">
                 <div class="podium-badge">${rLab}</div>
                 <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-                  <img src="${u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+                  <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
                   ${getSingleMedalHtml(i+1)}
                 </div>
                 <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
@@ -879,7 +879,7 @@
               <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
                 <span style="font-weight:800; width:28px;">#${rank}</span>
                 <div style="position:relative; width:38px; height:38px;">
-                  <img src="${u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
+                  <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
                   ${rank <= 3 ? getSingleMedalHtml(rank) : ''}
                 </div>
                 <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
@@ -901,7 +901,7 @@
       document.getElementById('m-roll').innerText = u.roll || 'N/A';
       document.getElementById('m-total-score').innerText = totalScore;
       document.getElementById('m-global-rank').innerText = rank !== '-' ? `#${rank}` : '-';
-      document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User';
+      document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User';
       
       const badge = document.getElementById('m-medal-badge');
       if (rank <= 3 && rank >= 1) {
@@ -962,7 +962,7 @@
       normQuizzesList.forEach(q => {
         let optsHtml = '';
         const myAns = (q.responses || {})[currentUser.id];
-        const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/bottts/svg?seed=User' };
+        const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
         const rank = globalRankMap[q.creatorId] || 999;
         const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
 
@@ -996,7 +996,7 @@
       const q = normQuizzesList.find(item => item.id === qId);
       if (!q) return;
       q.responses = q.responses || {};
-      if (q.responses[currentUser.id] !== undefined) return;
+      if (q.responses[currentUser.id] !== undefined) return; // डबल क्लिक या ग्लिच से बचाने के लिए लॉक
 
       q.responses[currentUser.id] = optIdx;
       currentUser.answeredNormQs = currentUser.answeredNormQs || {};
@@ -1011,10 +1011,15 @@
         showToast('Wrong Answer! -1 Pt');
       }
 
-      await saveCurrentUserToDb();
-      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
+      // तुरंत UI को लोकल अपडेट करें ताकि रिस्पॉन्स सुपरफास्ट लगे
       renderNormQuizzes();
       renderLeaderboards();
+
+      // बैकग्राउंड में डेटाबेस सेव करें
+      await Promise.all([
+        saveCurrentUserToDb(),
+        fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) })
+      ]);
     }
 
     function renderMyPublishedNorm() {
@@ -1094,7 +1099,7 @@
       }
       container.innerHTML = '';
       morePapersList.forEach(p => {
-        const creatorProf = userProfilesMap[p.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/bottts/svg?seed=User' };
+        const creatorProf = userProfilesMap[p.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
         const rank = globalRankMap[p.creatorId] || 999;
         const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
         container.innerHTML += `
@@ -1154,7 +1159,7 @@
       if (!p) return;
       p.responses = p.responses || {};
       p.responses[qId] = p.responses[qId] || {};
-      if (p.responses[qId][currentUser.id] !== undefined) return;
+      if (p.responses[qId][currentUser.id] !== undefined) return; // डबल क्लिक से बचाने के लिए लॉक
 
       p.responses[qId][currentUser.id] = optIdx;
       currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
@@ -1170,10 +1175,15 @@
         showToast('Wrong! -1 Pt');
       }
 
-      await saveCurrentUserToDb();
-      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
+      // तुरंत UI को लोकल अपडेट करें ताकि रिस्पॉन्स सुपरफास्ट लगे
       openPaperModal(paperId);
       renderLeaderboards();
+
+      // बैकग्राउंड में डेटाबेस सेव करें
+      await Promise.all([
+        saveCurrentUserToDb(),
+        fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) })
+      ]);
     }
 
     function renderMyPublishedPapers() {
@@ -1265,7 +1275,7 @@
         if (!msg) return;
         const isMy = (msg.senderId === currentUser.id);
         const uProf = userProfilesMap[msg.senderId] || {};
-        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User';
+        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User';
         const rank = globalRankMap[msg.senderId] || 999;
         const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
         const online = isUserOnline(msg.senderId);
@@ -1353,7 +1363,7 @@
       } catch (e) {}
 
       document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
-      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=Default';
+      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Default';
       document.getElementById('prof-input-name').value = (currentUser.name === 'Guest Student') ? '' : currentUser.name;
       document.getElementById('prof-input-roll').value = currentUser.roll;
       
