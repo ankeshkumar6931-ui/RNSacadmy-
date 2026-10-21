@@ -291,7 +291,7 @@
     .chat-input-bar {
       display: none; gap: 10px; padding: 12px 16px; background: rgba(220, 242, 225, 0.85);
       backdrop-filter: blur(16px); border-top: 1.5px solid var(--card-border);
-      position: absolute; bottom: 85px; left: 0; right: 0; z-index: 900;
+      position: absolute; bottom: 75px; left: 0; right: 0; z-index: 900;
     }
     .send-btn {
       width: 48px; height: 48px; border-radius: 50%; background: rgba(200, 240, 210, 0.85);
@@ -299,16 +299,15 @@
     }
 
     .nav-bar {
-      position: absolute; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(220, 242, 225, 0.55);
+      position: absolute; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(220, 242, 225, 0.55);
       backdrop-filter: blur(20px); border-top: 1.5px solid var(--card-border); display: flex; justify-content: space-around; align-items: center; z-index: 99999; padding: 0 12px;
     }
     .nav-item {
       display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dark);
-      cursor: pointer; width: 58px; height: 54px; position: relative; border: 1.5px solid var(--card-border);
-      background: rgba(200, 238, 208, 0.55); border-radius: 48% 52% 45% 55% / 53% 47% 53% 47%;
+      cursor: pointer; width: 50px; height: 50px; position: relative; border: 1.5px solid var(--card-border);
+      background: rgba(200, 238, 208, 0.55); border-radius: 50%;
     }
     .nav-item i { font-size: 1.2rem; pointer-events: none; }
-    .nav-item span { font-size: 0.6rem; margin-top: 2px; font-weight: 800; pointer-events: none; }
     .nav-item.active { transform: translateY(-3px) scale(1.05); border-color: rgba(255, 255, 255, 0.95); background: rgba(185, 232, 198, 0.85); }
 
     .modal-overlay {
@@ -554,12 +553,12 @@
       </div>
     </div>
 
-    <!-- Navigation Bar -->
+    <!-- Navigation Bar (Only Icons, No Labels) -->
     <div class="nav-bar">
-      <div class="nav-item active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>Home</span></div>
-      <div class="nav-item" onclick="switchTab('publish')"><i class="fa-solid fa-circle-plus"></i><span>Publish</span></div>
-      <div class="nav-item" onclick="switchTab('chat')"><i class="fa-solid fa-comment-dots"></i><span>Chat</span></div>
-      <div class="nav-item" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i><span>Profile</span></div>
+      <div class="nav-item active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i></div>
+      <div class="nav-item" onclick="switchTab('publish')"><i class="fa-solid fa-circle-plus"></i></div>
+      <div class="nav-item" onclick="switchTab('chat')"><i class="fa-solid fa-comment-dots"></i></div>
+      <div class="nav-item" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i></div>
     </div>
   </div>
 
@@ -1065,22 +1064,26 @@
         let optsHtml = '';
         q.responses = q.responses || {};
         const myAns = q.responses[currentUser.id];
+        const hasAnswered = (myAns !== undefined);
         const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/adventurer/svg?seed=User' };
         const rank = globalRankMap[q.creatorId] || 999;
         const medal = rank <= 3 ? getSingleMedalHtml(rank) : '';
 
         q.options.forEach((o, idx) => {
           let st = "background: rgba(255,255,255,0.7);";
-          if (myAns !== undefined) {
+          if (hasAnswered) {
             if (idx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
             else if (idx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
           }
-          optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${myAns !== undefined ? 'disabled':''}>${o}</button>`;
+          optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
+
+        // केवल तभी "View Responses" बटन दिखेगा जब यूजर ने खुद उत्तर दे दिया हो
+        let viewRespBtnHtml = hasAnswered ? `<span style="font-size:0.7rem; font-weight:800; color:#15803d; cursor:pointer; text-decoration:underline;" onclick="openQuestionResponsesModal('${q.id}')">View Responses</span>` : `<span style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">Answer to view responses</span>`;
 
         container.innerHTML += `
           <div class="card">
-            <div style="display:flex; align-items:center; justify-content:between; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
               <div style="display:flex; align-items:center; gap:8px; cursor:pointer;" onclick="showStudentProfileModal('${q.creatorId}')">
                 <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
                   <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; background:#fff;">
@@ -1089,7 +1092,7 @@
                 </div>
                 <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
               </div>
-              <span style="font-size:0.7rem; font-weight:800; color:#15803d; cursor:pointer; text-decoration:underline;" onclick="openQuestionResponsesModal('${q.id}')">View Responses</span>
+              ${viewRespBtnHtml}
             </div>
             <div style="font-weight:800; margin-bottom:10px;">${q.question}</div>
             <div>${optsHtml}</div>
@@ -1474,7 +1477,6 @@
 
       updateProfileUI();
 
-      // MIT App Inventor TinyDB sync via WebViewString
       if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
         window.AppInventor.setWebViewString(JSON.stringify(currentUser));
       }
