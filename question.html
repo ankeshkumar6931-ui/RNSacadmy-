@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -105,7 +105,6 @@
       box-shadow: 0 0 8px #22c55e;
     }
 
-    /* Toast Alert Customization */
     #custom-toast {
       position: fixed;
       top: -70px;
@@ -245,7 +244,7 @@
     .chat-message.other-message { align-self: flex-start; }
 
     .chat-avatar-wrapper { position: relative; flex-shrink: 0; }
-    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; }
+    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; background: #fff; }
 
     .medal-badge {
       position: absolute; bottom: -4px; right: -4px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 1.5px solid var(--card-border); font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 800; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -555,7 +554,7 @@
       </div>
     </div>
 
-    <!-- Navigation Bar (Only Icons, No Labels) -->
+    <!-- Navigation Bar -->
     <div class="nav-bar">
       <div class="nav-item active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i></div>
       <div class="nav-item" onclick="switchTab('publish')"><i class="fa-solid fa-circle-plus"></i></div>
@@ -565,6 +564,7 @@
   </div>
 
   <script>
+    // Verified Firebase Realtime Database URL
     const FIREBASE_URL = "https://question-project-1b8bf-default-rtdb.firebaseio.com/";
 
     let currentUser = {
@@ -687,6 +687,7 @@
     function openAboutModal() { document.getElementById('about-modal').style.display = 'flex'; }
     function closeAboutModal() { document.getElementById('about-modal').style.display = 'none'; }
 
+    // Robust Real-time Communication & Data Synchronization
     async function fetchFirebaseData() {
       try {
         currentUser.lastSeen = Date.now();
@@ -694,6 +695,7 @@
 
         let response = await fetch(`${FIREBASE_URL}/.json`);
         let data = await response.json();
+        
         if (data) {
           if (data.UsersMap) {
             userProfilesMap = data.UsersMap;
@@ -710,8 +712,7 @@
           }
 
           if (data.NormQuizzes) {
-            let newNorm = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
-            normQuizzesList = newNorm;
+            normQuizzesList = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
             renderNormQuizzes();
             renderMyPublishedNorm();
           } else {
@@ -721,8 +722,7 @@
           }
 
           if (data.MorePapers) {
-            let newPapers = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
-            morePapersList = newPapers;
+            morePapersList = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
             renderMorePapers();
             renderMyPublishedPapers();
           } else {
@@ -746,7 +746,7 @@
     }
 
     fetchFirebaseData();
-    setInterval(fetchFirebaseData, 3000);
+    setInterval(fetchFirebaseData, 2500); // 2.5 seconds ultra-fast sync interval
 
     function updateOnlineCounterUI() {
       const now = Date.now();
@@ -764,7 +764,7 @@
     }
 
     function getSingleMedalHtml(rank) {
-      if (rank === 1) return `<div class="medal-badge" style="background:#fef08a; border-color:#eab308;" title="1st Place - Trophy">🏆</div>`;
+      if (rank === 1) return `<div class="medal-badge" style="background:#fef08a; border-color:#eab308;" title="1st Place">🏆</div>`;
       if (rank === 2) return `<div class="medal-badge" style="background:#e2e8f0; border-color:#94a3b8;" title="2nd Place">🥈</div>`;
       if (rank === 3) return `<div class="medal-badge" style="background:#fed7aa; border-color:#d97706;" title="3rd Place">🥉</div>`;
       return '';
@@ -899,6 +899,7 @@
         moreRankMap[u.id] = rM;
       });
 
+      // Render Normal Leaderboard
       const normPod = document.getElementById('norm-podium-section');
       const normList = document.getElementById('norm-rankings-container');
       if (normPod && normList) {
@@ -915,7 +916,6 @@
               <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.normScore} pts</div>
             </div>`;
         });
-
         normSorted.forEach(u => {
           const isMe = u.id === currentUser.id;
           normList.innerHTML += `
@@ -930,6 +930,7 @@
         });
       }
 
+      // Render More Leaderboard
       const morePod = document.getElementById('more-podium-section');
       const moreList = document.getElementById('more-rankings-container');
       if (morePod && moreList) {
@@ -946,7 +947,6 @@
               <div style="font-size:0.75rem; font-weight:800; color:#3b82f6;">${u.moreScore} pts</div>
             </div>`;
         });
-
         moreSorted.forEach(u => {
           const isMe = u.id === currentUser.id;
           moreList.innerHTML += `
@@ -961,6 +961,7 @@
         });
       }
 
+      // Render Global Leaderboard
       const globalPod = document.getElementById('global-podium-section');
       const globalList = document.getElementById('global-rankings-container');
       if (globalPod && globalList) {
@@ -977,7 +978,6 @@
               <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.totalScore} pts</div>
             </div>`;
         });
-
         globalSorted.forEach(u => {
           const isMe = u.id === currentUser.id;
           globalList.innerHTML += `
@@ -1125,13 +1125,11 @@
 
           let detailsHtml = '';
           if (userHasAnswered) {
-            // यूजर उत्तर दे चुका है, अतः विकल्प का नाम (जैसे Option 1, Option 2...) भी दिखाएं
             const optionNumberText = `Option ${ansIdx + 1}`;
             detailsHtml = `<div style="font-size:0.72rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
               ${isCorrect ? '✅ Correct' : '❌ Wrong'} • Chose: <strong>${optionNumberText}</strong> (${q.options[ansIdx] || ''})
             </div>`;
           } else {
-            // यूजर ने उत्तर नहीं दिया है, अतः केवल सही या गलत दिखाएं, विकल्प न दिखाएं
             detailsHtml = `<div style="font-size:0.72rem; color:${isCorrect ? '#16a34a':'#dc2626'}; font-weight:700;">
               ${isCorrect ? '✅ Correct' : '❌ Wrong'}
             </div>`;
@@ -1422,6 +1420,7 @@
       lastRenderedChatJson = JSON.stringify(currentChatList);
       renderChatMessages(currentChatList);
       input.value = '';
+      
       await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
     }
 
