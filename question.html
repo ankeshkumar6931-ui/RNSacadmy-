@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <!-- Cache Prevention Headers (ताकि नया कोड तुरंत दिखे) -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -228,7 +230,7 @@
     .podium-rank-1 { order: 2; transform: scale(1.05); background: rgba(254, 240, 138, 0.85); border-color: #eab308; }
     .podium-rank-2 { order: 1; background: rgba(226, 232, 240, 0.85); border-color: #94a3b8; }
     .podium-rank-3 { order: 3; background: rgba(254, 215, 170, 0.85); border-color: #d97706; }
-    .podium-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; cursor: pointer; }
+    .podium-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; cursor: pointer; background: #fff; }
 
     .rank-list-item {
       display: flex; align-items: center; gap: 10px; padding: 10px 14px;
@@ -243,9 +245,8 @@
     .chat-message.other-message { align-self: flex-start; }
 
     .chat-avatar-wrapper { position: relative; flex-shrink: 0; }
-    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; }
+    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; background: #fff; }
 
-    /* Medals Overlay CSS */
     .medals-container {
       position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
       display: flex; gap: 1px; z-index: 5; pointer-events: none;
@@ -342,7 +343,6 @@
   </div>
 
   <div class="app-container">
-    <!-- Top Bar -->
     <div class="top-bar">
       <div class="brand-area">
         <i class="fa-solid fa-users-gear" style="font-size: 1.2rem; color: #15803d;"></i>
@@ -354,54 +354,42 @@
       </div>
     </div>
 
-    <!-- Main Content Area -->
     <div class="content-area" id="main-content-scroll">
-      
-      <!-- 1. HOME SCREEN -->
       <div id="view-home" class="view-section active">
-        
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchHomeTab('norm-q')"><i class="fa-solid fa-file-circle-question"></i> Questions</div>
           <div class="sub-nav-btn" onclick="switchHomeTab('more-q')"><i class="fa-solid fa-layer-group"></i> More Questions</div>
         </div>
 
-        <!-- Normal Questions View -->
         <div id="home-view-norm" class="sub-view active">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Questions Leaderboard</h3>
             <div id="norm-podium-section" class="podium-container"></div>
             <div id="norm-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
           </div>
-
           <div id="norm-quizzes-list">
             <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No questions available.</p></div>
           </div>
         </div>
 
-        <!-- More Questions View -->
         <div id="home-view-more" class="sub-view">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-award" style="color: #3b82f6;"></i> More Questions Leaderboard</h3>
             <div id="more-podium-section" class="podium-container"></div>
             <div id="more-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
           </div>
-
           <div id="more-papers-list">
             <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No bulk papers available.</p></div>
           </div>
         </div>
-
       </div>
 
-      <!-- 2. PUBLISH SCREEN -->
       <div id="view-publish" class="view-section">
-        
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchPubTab('pub-norm')"><i class="fa-solid fa-plus"></i> Normal Q</div>
           <div class="sub-nav-btn" onclick="switchPubTab('pub-more')"><i class="fa-solid fa-code"></i> More Q (HTML)</div>
         </div>
 
-        <!-- Publish Normal Q -->
         <div id="pub-view-norm" class="sub-view active">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Publish Single Question</h3>
@@ -421,14 +409,12 @@
             </div>
             <button class="btn-submit" type="button" onclick="publishNormalQuestion()">Publish Question</button>
           </div>
-
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Questions</h3>
             <div id="my-published-norm-list"></div>
           </div>
         </div>
 
-        <!-- Publish More Questions HTML -->
         <div id="pub-view-more" class="sub-view">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px;">Publish Bulk Question Paper</h3>
@@ -439,26 +425,22 @@
             </div>
             <button class="btn-submit" type="button" onclick="publishMorePaperHTML()">Publish Paper Set</button>
           </div>
-
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Paper Sets</h3>
             <div id="my-published-papers-list"></div>
           </div>
         </div>
-
       </div>
 
-      <!-- 3. CHAT SCREEN -->
       <div id="view-chat" class="view-section">
         <div class="chat-container" id="chat-messages-container"></div>
       </div>
 
-      <!-- 4. PROFILE SCREEN -->
       <div id="view-profile" class="view-section">
         <div class="card">
           <div style="text-align: center; padding: 10px 0;">
             <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto;">
-              <img id="p-dp-img" src="https://api.dicebear.com/7.x/micah/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover;">
+              <img id="p-dp-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover; background:#fff;">
               <div id="p-medals-wrapper" class="medals-container" style="bottom:-8px;"></div>
             </div>
             <h3 id="p-name">Guest Student</h3>
@@ -479,7 +461,7 @@
           <div style="margin-top: 15px; border-top: 1.5px solid rgba(0,0,0,0.08); padding-top: 15px;">
             <div class="form-group"><label>Full Name</label><input type="text" id="prof-input-name" class="input-field" placeholder="Enter Name"></div>
             <div class="form-group"><label>Roll Number</label><input type="number" id="prof-input-roll" class="input-field" placeholder="Roll No."></div>
-            <div class="form-group"><label>Choose Avatar (200+ Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
+            <div class="form-group"><label>Choose Avatar (60+ Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
             <button class="btn-submit" type="button" onclick="saveUserProfile()">Save Profile</button>
             
             <div style="text-align: center; margin-top: 18px;">
@@ -488,10 +470,9 @@
           </div>
         </div>
       </div>
-
     </div>
 
-    <!-- Online Students Modal -->
+    <!-- Modals -->
     <div id="online-modal" class="modal-overlay" onclick="closeOnlineStudentsModal()">
       <div class="modal-card" style="max-width: 340px;" onclick="event.stopPropagation()">
         <h3 style="margin-bottom: 12px; font-size: 1rem;">👥 Registered Students</h3>
@@ -500,11 +481,10 @@
       </div>
     </div>
 
-    <!-- Student Details Modal -->
     <div id="profile-modal" class="modal-overlay" onclick="closeProfileModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
         <div style="position:relative; width:80px; height:80px; margin:0 auto 8px auto;">
-          <img id="m-dp" src="" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--card-border); object-fit: cover;">
+          <img id="m-dp" src="" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--card-border); object-fit: cover; background:#fff;">
           <div id="m-medals-wrapper" class="medals-container" style="bottom:-6px;"></div>
         </div>
         <h3 id="m-name" style="margin-bottom: 4px;">Student Name</h3>
@@ -517,7 +497,6 @@
       </div>
     </div>
 
-    <!-- Seen By Modal -->
     <div id="seen-by-modal" class="modal-overlay" onclick="closeSeenByModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
         <h3 style="margin-bottom: 12px; font-size: 1rem;">Seen By</h3>
@@ -526,7 +505,6 @@
       </div>
     </div>
 
-    <!-- Paper View Modal -->
     <div id="paper-modal" class="modal-overlay" onclick="closePaperModal()">
       <div class="modal-card" style="max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
         <h3 id="paper-modal-title" style="margin-bottom: 10px;">Paper Title</h3>
@@ -535,7 +513,7 @@
       </div>
     </div>
 
-    <!-- About Modal -->
+    <!-- About Modal (App Inventor Custom Link trigger) -->
     <div id="about-modal" class="modal-overlay" onclick="closeAboutModal()">
       <div class="modal-card" onclick="event.stopPropagation()" style="text-align: center;">
         <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(200, 240, 210, 0.85); border: 1.5px solid rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: #1f3a2b; font-size: 1.4rem; font-weight: 800;"><i class="fa-solid fa-users-gear"></i></div>
@@ -544,7 +522,7 @@
           This application is proudly created and developed by <strong>Ankesh Kumar</strong>.<br><br>
           Visit official YouTube Channel:
         </p>
-        <a href="intent://www.youtube.com/@mrankesh-z3t#Intent;package=com.google.android.youtube;scheme=https;end;" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px;">
+        <a href="appinventor://youtube" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px;">
           <i class="fa-brands fa-youtube"></i> Visit YouTube Channel
         </a>
         <button class="btn-submit" style="background: rgba(255,255,255,0.6); border: 1px solid var(--card-border); padding: 10px;" type="button" onclick="closeAboutModal()">Close</button>
@@ -575,7 +553,7 @@
       id: 'usr_' + Math.floor(100000 + Math.random() * 900000),
       name: 'Guest Student',
       roll: '00',
-      dp: 'https://api.dicebear.com/7.x/micah/svg?seed=StudentGroup',
+      dp: 'https://api.dicebear.com/7.x/bottts/svg?seed=StudentGroup',
       normScore: 0,
       moreScore: 0,
       lastSeen: Date.now(),
@@ -608,11 +586,11 @@
       const grid = document.getElementById('avatar-selector-grid');
       if (!grid) return;
       grid.innerHTML = '';
-      const styles = ['micah', 'adventurer', 'fun-emoji', 'avataaars', 'personas'];
+      const styles = ['bottts', 'avataaars', 'identicon', 'pixel-art'];
 
-      for (let i = 1; i <= 150; i++) {
+      for (let i = 1; i <= 60; i++) {
         const style = styles[i % styles.length];
-        const seed = `WeAreGroup_${i}`;
+        const seed = `WeAreGroup_Avatar_${i}`;
         const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
 
         const img = document.createElement('img');
@@ -672,11 +650,9 @@
           if (data.UsersMap) {
             userProfilesMap = data.UsersMap;
             if (userProfilesMap[currentUser.id]) {
-              let activeDp = currentUser.dp;
               let localAnsNorm = currentUser.answeredNormQs || {};
               let localAnsMore = currentUser.answeredMoreQs || {};
               currentUser = { ...currentUser, ...userProfilesMap[currentUser.id] };
-              if (activeDp) currentUser.dp = activeDp;
               currentUser.answeredNormQs = localAnsNorm;
               currentUser.answeredMoreQs = localAnsMore;
             }
@@ -746,22 +722,18 @@
       return (Date.now() - last < 15000);
     }
 
-    /* Generator for Medals Html */
     function getAvatarMedalsHtml(uid) {
       const nRank = normRankMap[uid];
       const mRank = moreRankMap[uid];
-
       let medalsHtml = '';
 
-      // Normal Question Medal
-      if (nRank === 1) medalsHtml += `<span class="medal-icon" title="Normal Q Gold Medal">🥇</span>`;
-      else if (nRank === 2) medalsHtml += `<span class="medal-icon" title="Normal Q Silver Medal">🥈</span>`;
-      else if (nRank === 3) medalsHtml += `<span class="medal-icon" title="Normal Q Bronze Medal">🥉</span>`;
+      if (nRank === 1) medalsHtml += `<span class="medal-icon">🥇</span>`;
+      else if (nRank === 2) medalsHtml += `<span class="medal-icon">🥈</span>`;
+      else if (nRank === 3) medalsHtml += `<span class="medal-icon">🥉</span>`;
 
-      // More Question Medal
-      if (mRank === 1) medalsHtml += `<span class="medal-icon" title="More Q Gold Medal">🥇</span>`;
-      else if (mRank === 2) medalsHtml += `<span class="medal-icon" title="More Q Silver Medal">🥈</span>`;
-      else if (mRank === 3) medalsHtml += `<span class="medal-icon" title="More Q Bronze Medal">🥉</span>`;
+      if (mRank === 1) medalsHtml += `<span class="medal-icon">🥇</span>`;
+      else if (mRank === 2) medalsHtml += `<span class="medal-icon">🥈</span>`;
+      else if (mRank === 3) medalsHtml += `<span class="medal-icon">🥉</span>`;
 
       if (medalsHtml !== '') {
         return `<div class="medals-container">${medalsHtml}</div>`;
@@ -790,7 +762,7 @@
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:16px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
               <div style="position:relative; width:34px; height:34px; flex-shrink:0;">
-                <img src="${u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User'}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
+                <img src="${u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; background:#fff;">
                 ${medals}
                 ${online && uid !== currentUser.id ? '<div class="online-blue-tick" style="width:9px; height:9px;"></div>' : ''}
               </div>
@@ -831,10 +803,10 @@
         container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No one else has seen this yet.</p>';
       } else {
         viewers.forEach(uid => {
-          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/bottts/svg?seed=User' };
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; padding:6px; background:rgba(255,255,255,0.5); border-radius:14px; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
-              <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+              <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; background:#fff;">
               <span style="font-size:0.85rem; font-weight:800;">${uProf.name || 'Guest Student'}</span>
             </div>
           `;
@@ -916,7 +888,7 @@
           <div class="podium-card podium-rank-${i+1}">
             <div class="podium-badge ${bClass}">${rLab}</div>
             <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-              <img src="${u.dp}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+              <img src="${u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
               ${getAvatarMedalsHtml(u.id)}
             </div>
             <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
@@ -930,7 +902,7 @@
           <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
             <span style="font-weight:800; width:28px;">#${normRankMap[u.id]}</span>
             <div style="position:relative; width:38px; height:38px;">
-              <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+              <img src="${u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
               ${medals}
             </div>
             <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
@@ -946,7 +918,7 @@
           <div class="podium-card podium-rank-${i+1}">
             <div class="podium-badge ${bClass}">${rLab}</div>
             <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-              <img src="${u.dp}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+              <img src="${u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
               ${getAvatarMedalsHtml(u.id)}
             </div>
             <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
@@ -960,7 +932,7 @@
           <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
             <span style="font-weight:800; width:28px;">#${moreRankMap[u.id]}</span>
             <div style="position:relative; width:38px; height:38px;">
-              <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+              <img src="${u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
               ${medals}
             </div>
             <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
@@ -978,7 +950,7 @@
       document.getElementById('m-norm-rank').innerText = normRankMap[uid] ? '#' + normRankMap[uid] : 'N/A';
       document.getElementById('m-more-score').innerText = u.moreScore || 0;
       document.getElementById('m-more-rank').innerText = moreRankMap[uid] ? '#' + moreRankMap[uid] : 'N/A';
-      document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
+      document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User';
       
       const mWrapper = document.getElementById('m-medals-wrapper');
       if (mWrapper) mWrapper.innerHTML = getAvatarMedalsHtml(uid).replace('<div class="medals-container">', '').replace('</div>', '');
@@ -1034,7 +1006,7 @@
       normQuizzesList.forEach(q => {
         let optsHtml = '';
         const myAns = (q.responses || {})[currentUser.id];
-        const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+        const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/bottts/svg?seed=User' };
         const medals = getAvatarMedalsHtml(q.creatorId);
 
         q.options.forEach((o, idx) => {
@@ -1050,7 +1022,7 @@
           <div class="card">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${q.creatorId}')">
               <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
-                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; background:#fff;">
                 ${medals}
                 ${isUserOnline(q.creatorId) && q.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
               </div>
@@ -1170,13 +1142,13 @@
       }
       container.innerHTML = '';
       morePapersList.forEach(p => {
-        const creatorProf = userProfilesMap[p.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+        const creatorProf = userProfilesMap[p.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/bottts/svg?seed=User' };
         const medals = getAvatarMedalsHtml(p.creatorId);
         container.innerHTML += `
           <div class="card">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${p.creatorId}')">
               <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
-                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; background:#fff;">
                 ${medals}
                 ${isUserOnline(p.creatorId) && p.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
               </div>
@@ -1341,7 +1313,7 @@
         if (!msg) return;
         const isMy = (msg.senderId === currentUser.id);
         const uProf = userProfilesMap[msg.senderId] || {};
-        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
+        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=User';
         const medals = getAvatarMedalsHtml(msg.senderId);
         const online = isUserOnline(msg.senderId);
 
@@ -1407,10 +1379,6 @@
       document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
       document.getElementById('p-dp-img').src = currentUser.dp;
 
-      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
-        window.AppInventor.setWebViewString(JSON.stringify(currentUser));
-      }
-
       await saveCurrentUserToDb();
       showToast('Profile Saved!');
       fetchFirebaseData();
@@ -1441,7 +1409,7 @@
       document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
       document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
       document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
-      document.getElementById('p-dp-img').src = currentUser.dp;
+      document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/bottts/svg?seed=Default';
       
       document.getElementById('prof-input-name').value = (currentUser.name === 'Guest Student') ? '' : currentUser.name;
       document.getElementById('prof-input-roll').value = currentUser.roll;
