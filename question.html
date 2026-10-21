@@ -191,10 +191,10 @@
       font-size: 0.95rem;
       cursor: pointer;
       box-shadow: inset -4px -5px 8px rgba(30, 70, 50, 0.2), inset 4px 5px 8px rgba(255, 255, 255, 0.9), 0 8px 15px -3px rgba(20, 45, 30, 0.15);
-      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.1s ease, background 0.15s ease;
     }
-    .btn-submit:active { transform: translateY(4px) scale(0.97); }
-    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btn-submit:active { transform: translateY(2px) scale(0.98); }
+    .btn-submit:disabled { opacity: 0.9; cursor: not-allowed; }
 
     .sub-nav-bar { display: flex; gap: 6px; margin-bottom: 16px; }
     .sub-nav-btn {
@@ -258,11 +258,6 @@
     }
     .my-message .chat-bubble { background: rgba(185, 230, 198, 0.85); color: #1f3a2b; border-bottom-right-radius: 4px; }
     .other-message .chat-bubble { background: rgba(255, 255, 255, 0.7); color: var(--text-dark); border-bottom-left-radius: 4px; }
-
-    .seen-by-text {
-      font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-top: 4px; cursor: pointer; align-self: flex-end;
-    }
-    .my-message .seen-by-text { align-self: flex-start; }
 
     .reactions-bar { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
     .reaction-pill {
@@ -868,13 +863,11 @@
       const q = normQuizzesList.find(item => item.id === qId);
       if (!q) return;
 
-      // Verification: Only Creator can delete
       if (q.creatorId !== currentUser.id) {
         showToast('You can only delete your own questions!');
         return;
       }
 
-      // Undo scores for users who answered this question
       if (q.responses) {
         for (let uid of Object.keys(q.responses)) {
           const ans = q.responses[uid];
@@ -882,7 +875,7 @@
             if (ans === q.correctIndex) {
               userProfilesMap[uid].normScore = Math.max(0, (userProfilesMap[uid].normScore || 0) - 1);
             } else {
-              userProfilesMap[uid].normScore = (userProfilesMap[uid].normScore || 0) + 1; // Reverse -1 penalty
+              userProfilesMap[uid].normScore = (userProfilesMap[uid].normScore || 0) + 1;
             }
             await fetch(`${FIREBASE_URL}/UsersMap/${uid}.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap[uid]) });
           }
@@ -912,8 +905,8 @@
         q.options.forEach((o, idx) => {
           let st = "background: rgba(255,255,255,0.7);";
           if (hasAnswered) {
-            if (idx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
-            else if (idx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
+            if (idx === q.correctIndex) st = "background: rgba(34,197,94,0.9); color:#fff; font-weight:800;";
+            else if (idx === myAns) st = "background: rgba(239,68,68,0.9); color:#fff; font-weight:800;";
           }
           optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
@@ -940,6 +933,7 @@
       q.responses = q.responses || {};
       if (q.responses[currentUser.id] !== undefined) return;
 
+      // Instant UI Feedback
       q.responses[currentUser.id] = optIdx;
 
       if (optIdx === q.correctIndex) {
@@ -950,6 +944,7 @@
         showToast('Wrong Answer! -1 Pt');
       }
 
+      renderNormQuizzes();
       saveUserProfileToDb();
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
       fetchFirebaseData();
@@ -1063,7 +1058,6 @@
       renderMorePapers(); renderMyPublishedPapers();
     }
 
-    /* Delete More Paper with Creator Verification & Score Undo */
     async function deleteMorePaper(pId) {
       const p = morePapersList.find(item => item.id === pId);
       if (!p) return;
@@ -1073,7 +1067,6 @@
         return;
       }
 
-      // Undo scores for users who attempted this paper
       if (p.responses) {
         for (let qId of Object.keys(p.responses)) {
           const qRes = p.responses[qId];
@@ -1139,8 +1132,8 @@
         q.options.forEach((o, oIdx) => {
           let st = "background: rgba(255,255,255,0.7);";
           if (hasAnswered) {
-            if (oIdx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
-            else if (oIdx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
+            if (oIdx === q.correctIndex) st = "background: rgba(34,197,94,0.9); color:#fff; font-weight:800;";
+            else if (oIdx === myAns) st = "background: rgba(239,68,68,0.9); color:#fff; font-weight:800;";
           }
           optsHtml += `<button class="btn-submit" style="margin-bottom:6px; padding:8px; ${st}" onclick="submitPaperQuestionAnswer('${p.id}', '${q.qId}', ${oIdx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
@@ -1165,6 +1158,7 @@
       p.responses[qId] = p.responses[qId] || {};
       if (p.responses[qId][currentUser.id] !== undefined) return;
 
+      // Instant UI updates
       p.responses[qId][currentUser.id] = optIdx;
 
       const q = p.questions.find(item => item.qId === qId);
@@ -1176,9 +1170,9 @@
         showToast('Wrong! -1 Pt');
       }
 
-      saveUserProfileToDb();
+      openPaperModal(paperId); // Re-render paper modal instantly with Green/Red color
+      saveUserProfileToDb(); // Live Save More Score to User Profile
       await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      openPaperModal(paperId);
       fetchFirebaseData();
     }
 
