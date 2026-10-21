@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -229,7 +228,7 @@
     .podium-rank-1 { order: 2; transform: scale(1.05); background: rgba(254, 240, 138, 0.85); border-color: #eab308; }
     .podium-rank-2 { order: 1; background: rgba(226, 232, 240, 0.85); border-color: #94a3b8; }
     .podium-rank-3 { order: 3; background: rgba(254, 215, 170, 0.85); border-color: #d97706; }
-    .podium-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; cursor: pointer; background: #fff; }
+    .podium-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; cursor: pointer; }
 
     .rank-list-item {
       display: flex; align-items: center; gap: 10px; padding: 10px 14px;
@@ -244,7 +243,7 @@
     .chat-message.other-message { align-self: flex-start; }
 
     .chat-avatar-wrapper { position: relative; flex-shrink: 0; }
-    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; background: #fff; }
+    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; }
 
     .medal-badge {
       position: absolute; bottom: -4px; right: -4px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 1.5px solid var(--card-border); font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 800; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -343,6 +342,7 @@
     </div>
 
     <div class="content-area" id="main-content-scroll">
+      <!-- HOME -->
       <div id="view-home" class="view-section active">
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchHomeTab('norm-q')"><i class="fa-solid fa-file-circle-question"></i> Questions</div>
@@ -351,9 +351,9 @@
 
         <div id="home-view-norm" class="sub-view active">
           <div class="card">
-            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Global Leaderboard (Total Points)</h3>
-            <div id="global-podium-section" class="podium-container"></div>
-            <div id="global-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Questions Leaderboard</h3>
+            <div id="norm-podium-section" class="podium-container"></div>
+            <div id="norm-rankings-container" style="max-height: 180px; overflow-y: auto;"></div>
           </div>
           <div id="norm-quizzes-list">
             <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No questions available.</p></div>
@@ -362,9 +362,9 @@
 
         <div id="home-view-more" class="sub-view">
           <div class="card">
-            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-award" style="color: #3b82f6;"></i> Global Leaderboard (Total Points)</h3>
-            <div id="global-podium-section-more" class="podium-container"></div>
-            <div id="global-rankings-container-more" style="max-height: 200px; overflow-y: auto;"></div>
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-award" style="color: #3b82f6;"></i> More Questions Leaderboard</h3>
+            <div id="more-podium-section" class="podium-container"></div>
+            <div id="more-rankings-container" style="max-height: 180px; overflow-y: auto;"></div>
           </div>
           <div id="more-papers-list">
             <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No bulk papers available.</p></div>
@@ -372,6 +372,7 @@
         </div>
       </div>
 
+      <!-- PUBLISH -->
       <div id="view-publish" class="view-section">
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchPubTab('pub-norm')"><i class="fa-solid fa-plus"></i> Normal Q</div>
@@ -420,10 +421,12 @@
         </div>
       </div>
 
+      <!-- CHAT -->
       <div id="view-chat" class="view-section">
         <div class="chat-container" id="chat-messages-container"></div>
       </div>
 
+      <!-- PROFILE -->
       <div id="view-profile" class="view-section">
         <div class="card">
           <div style="text-align: center; padding: 10px 0;">
@@ -434,14 +437,18 @@
             <h3 id="p-name">Guest Student</h3>
             <p id="p-board-class" style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">Set up profile</p>
             
-            <div style="display: flex; gap: 10px; margin-top: 12px;">
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
               <div style="flex:1; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 16px; border: 1px solid var(--card-border);">
-                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; display: block;">Total Score</span>
-                <span id="p-total-score" style="font-size: 1rem; font-weight: 800; color: #15803d;">0 pts</span>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 800; display: block;">Q Score</span>
+                <span id="p-norm-score" style="font-size: 0.9rem; font-weight: 800; color: #15803d;">0 pts</span>
               </div>
               <div style="flex:1; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 16px; border: 1px solid var(--card-border);">
-                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; display: block;">Global Rank</span>
-                <span id="p-global-rank" style="font-size: 1rem; font-weight: 800; color: #3b82f6;"># -</span>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 800; display: block;">More Qs Score</span>
+                <span id="p-more-score" style="font-size: 0.9rem; font-weight: 800; color: #3b82f6;">0 pts</span>
+              </div>
+              <div style="flex:1; background: rgba(185, 232, 198, 0.85); padding: 8px; border-radius: 16px; border: 1.5px solid #15803d;">
+                <span style="font-size: 0.65rem; color: var(--text-dark); font-weight: 800; display: block;">Total Score</span>
+                <span id="p-total-score" style="font-size: 0.9rem; font-weight: 800; color: #15803d;">0 pts</span>
               </div>
             </div>
           </div>
@@ -478,7 +485,10 @@
         <h3 id="m-name" style="margin-bottom: 4px;">Student Name</h3>
         <div style="text-align: left; background: rgba(255,255,255,0.6); padding: 12px; border-radius: 16px; font-size: 0.85rem; margin-top: 10px; border: 1px solid var(--card-border);">
           <p><strong>Roll No:</strong> <span id="m-roll">-</span></p>
-          <p><strong>Total Points:</strong> <span id="m-total-score">0</span> pts</p>
+          <p><strong>Normal Qs Score:</strong> <span id="m-norm-score">0</span> pts (Rank: <span id="m-norm-rank">-</span>)</p>
+          <p><strong>More Qs Score:</strong> <span id="m-more-score">0</span> pts (Rank: <span id="m-more-rank">-</span>)</p>
+          <hr style="margin: 8px 0; border: 0; border-top: 1px solid rgba(0,0,0,0.1);">
+          <p><strong>Total Score:</strong> <span id="m-total-score">0</span> pts</p>
           <p><strong>Global Rank:</strong> <span id="m-global-rank">-</span></p>
         </div>
         <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closeProfileModal()">Close</button>
@@ -553,7 +563,10 @@
     let morePapersList = [];
     let currentChatList = [];
     let lastRenderedChatJson = "";
+    
     let globalRankMap = {};
+    let normRankMap = {};
+    let moreRankMap = {};
 
     function showToast(msg) {
       const toast = document.getElementById('custom-toast');
@@ -572,12 +585,10 @@
       if (!grid) return;
       grid.innerHTML = '';
       
-      // 200+ शानदार ह्यूमन और कार्टून स्टाइल्स (मोटू-पतलू पहले दो सीड पर)
       const cartoonStyles = ['adventurer', 'big-smile', 'fun-emoji', 'lorelei', 'avataaars'];
       
-      // स्पेशल मोटू और पतलू पहले दो अवतार के रूप में
       const specialAvatars = ['Motu', 'Patlu'];
-      specialAvatars.forEach((name, idx) => {
+      specialAvatars.forEach((name) => {
         const url = `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`;
         const img = document.createElement('img');
         img.src = url;
@@ -666,12 +677,10 @@
 
           if (data.NormQuizzes) {
             let newNorm = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
-            checkNormUndoScore(newNorm);
             normQuizzesList = newNorm;
             renderNormQuizzes();
             renderMyPublishedNorm();
           } else {
-            checkNormUndoScore([]);
             normQuizzesList = [];
             renderNormQuizzes();
             renderMyPublishedNorm();
@@ -679,12 +688,10 @@
 
           if (data.MorePapers) {
             let newPapers = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
-            checkMoreUndoScore(newPapers);
             morePapersList = newPapers;
             renderMorePapers();
             renderMyPublishedPapers();
           } else {
-            checkMoreUndoScore([]);
             morePapersList = [];
             renderMorePapers();
             renderMyPublishedPapers();
@@ -732,6 +739,8 @@
     function updateProfileUI() {
       const totalScore = (currentUser.normScore || 0) + (currentUser.moreScore || 0);
       document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
+      document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
+      document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
       document.getElementById('p-total-score').innerText = `${totalScore} pts`;
       document.getElementById('p-dp-img').src = currentUser.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=Motu';
       
@@ -818,93 +827,111 @@
 
     function closeSeenByModal() { document.getElementById('seen-by-modal').style.display = 'none'; }
 
-    function checkNormUndoScore(newList) {
-      currentUser.answeredNormQs = currentUser.answeredNormQs || {};
-      let changed = false;
-      Object.keys(currentUser.answeredNormQs).forEach(qId => {
-        const impact = currentUser.answeredNormQs[qId];
-        if (!newList.some(q => q.id === qId)) {
-          currentUser.normScore = (currentUser.normScore || 0) - impact;
-          delete currentUser.answeredNormQs[qId];
-          changed = true;
-        }
-      });
-      if (changed) saveCurrentUserToDb();
-    }
-
-    function checkMoreUndoScore(newList) {
-      currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
-      let changed = false;
-      Object.keys(currentUser.answeredMoreQs).forEach(pId => {
-        const impact = currentUser.answeredMoreQs[pId];
-        if (!newList.some(p => p.id === pId)) {
-          currentUser.moreScore = (currentUser.moreScore || 0) - impact;
-          delete currentUser.answeredMoreQs[pId];
-          changed = true;
-        }
-      });
-      if (changed) saveCurrentUserToDb();
-    }
-
     async function saveCurrentUserToDb() {
+      userProfilesMap[currentUser.id] = { ...currentUser };
       await fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
     }
 
     function renderLeaderboards() {
       const usersArr = Object.keys(userProfilesMap).map(uid => ({
         id: uid,
+        normScore: userProfilesMap[uid].normScore || 0,
+        moreScore: userProfilesMap[uid].moreScore || 0,
         totalScore: (userProfilesMap[uid].normScore || 0) + (userProfilesMap[uid].moreScore || 0),
         ...userProfilesMap[uid]
       }));
 
-      const sorted = [...usersArr].sort((a, b) => b.totalScore - a.totalScore);
+      // 1. Global Ranking (Total Score)
+      const globalSorted = [...usersArr].sort((a, b) => b.totalScore - a.totalScore);
       globalRankMap = {};
-      let r = 1;
-      sorted.forEach((u, i) => {
-        if (i > 0 && u.totalScore < sorted[i - 1].totalScore) r = i + 1;
-        globalRankMap[u.id] = r;
+      let rG = 1;
+      globalSorted.forEach((u, i) => {
+        if (i > 0 && u.totalScore < globalSorted[i - 1].totalScore) rG = i + 1;
+        globalRankMap[u.id] = rG;
       });
 
-      ['global-podium-section', 'global-podium-section-more'].forEach(podId => {
-        const pod = document.getElementById(podId);
-        if (pod) {
-          pod.innerHTML = '';
-          sorted.slice(0, 3).forEach((u, i) => {
-            let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
-            pod.innerHTML += `
-              <div class="podium-card podium-rank-${i+1}">
-                <div class="podium-badge">${rLab}</div>
-                <div style="position:relative; width:42px; height:42px; margin:0 auto;">
-                  <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
-                  ${getSingleMedalHtml(i+1)}
-                </div>
-                <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
-                <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.totalScore} pts</div>
-              </div>`;
-          });
-        }
+      // 2. Normal Questions Ranking
+      const normSorted = [...usersArr].sort((a, b) => b.normScore - a.normScore);
+      normRankMap = {};
+      let rN = 1;
+      normSorted.forEach((u, i) => {
+        if (i > 0 && u.normScore < normSorted[i - 1].normScore) rN = i + 1;
+        normRankMap[u.id] = rN;
       });
 
-      ['global-rankings-container', 'global-rankings-container-more'].forEach(listId => {
-        const list = document.getElementById(listId);
-        if (list) {
-          list.innerHTML = '';
-          sorted.forEach(u => {
-            const isMe = u.id === currentUser.id;
-            const rank = globalRankMap[u.id];
-            list.innerHTML += `
-              <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-                <span style="font-weight:800; width:28px;">#${rank}</span>
-                <div style="position:relative; width:38px; height:38px;">
-                  <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
-                  ${rank <= 3 ? getSingleMedalHtml(rank) : ''}
-                </div>
-                <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-                <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.totalScore} pts</div>
-              </div>`;
-          });
-        }
+      // 3. More Questions Ranking
+      const moreSorted = [...usersArr].sort((a, b) => b.moreScore - a.moreScore);
+      moreRankMap = {};
+      let rM = 1;
+      moreSorted.forEach((u, i) => {
+        if (i > 0 && u.moreScore < moreSorted[i - 1].moreScore) rM = i + 1;
+        moreRankMap[u.id] = rM;
       });
+
+      // Render Normal Qs Leaderboard (Showing Norm Scores)
+      const normPod = document.getElementById('norm-podium-section');
+      const normList = document.getElementById('norm-rankings-container');
+      if (normPod && normList) {
+        normPod.innerHTML = ''; normList.innerHTML = '';
+        normSorted.slice(0, 3).forEach((u, i) => {
+          let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
+          normPod.innerHTML += `
+            <div class="podium-card podium-rank-${i+1}">
+              <div class="podium-badge">${rLab}</div>
+              <div style="position:relative; width:42px; height:42px; margin:0 auto;">
+                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+              </div>
+              <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
+              <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.normScore} pts</div>
+            </div>`;
+        });
+
+        normSorted.forEach(u => {
+          const isMe = u.id === currentUser.id;
+          normList.innerHTML += `
+            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+              <span style="font-weight:800; width:28px;">#${normRankMap[u.id]}</span>
+              <div style="position:relative; width:38px; height:38px;">
+                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
+              </div>
+              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
+            </div>`;
+        });
+      }
+
+      // Render More Qs Leaderboard (Showing More Scores)
+      const morePod = document.getElementById('more-podium-section');
+      const moreList = document.getElementById('more-rankings-container');
+      if (morePod && moreList) {
+        morePod.innerHTML = ''; moreList.innerHTML = '';
+        moreSorted.slice(0, 3).forEach((u, i) => {
+          let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
+          morePod.innerHTML += `
+            <div class="podium-card podium-rank-${i+1}">
+              <div class="podium-badge">${rLab}</div>
+              <div style="position:relative; width:42px; height:42px; margin:0 auto;">
+                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+              </div>
+              <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
+              <div style="font-size:0.75rem; font-weight:800; color:#3b82f6;">${u.moreScore} pts</div>
+            </div>`;
+        });
+
+        moreSorted.forEach(u => {
+          const isMe = u.id === currentUser.id;
+          moreList.innerHTML += `
+            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+              <span style="font-weight:800; width:28px;">#${moreRankMap[u.id]}</span>
+              <div style="position:relative; width:38px; height:38px;">
+                <img src="${u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User'}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; background:#fff;">
+              </div>
+              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+              <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
+            </div>`;
+        });
+      }
+
       updateProfileUI();
     }
 
@@ -912,17 +939,21 @@
       const u = userProfilesMap[uid];
       if (!u) return;
       const totalScore = (u.normScore || 0) + (u.moreScore || 0);
-      const rank = globalRankMap[uid] || '-';
+      const globalRank = globalRankMap[uid] || '-';
 
       document.getElementById('m-name').innerText = u.name || 'Guest Student';
       document.getElementById('m-roll').innerText = u.roll || 'N/A';
+      document.getElementById('m-norm-score').innerText = u.normScore || 0;
+      document.getElementById('m-norm-rank').innerText = normRankMap[uid] ? '#' + normRankMap[uid] : '-';
+      document.getElementById('m-more-score').innerText = u.moreScore || 0;
+      document.getElementById('m-more-rank').innerText = moreRankMap[uid] ? '#' + moreRankMap[uid] : '-';
       document.getElementById('m-total-score').innerText = totalScore;
-      document.getElementById('m-global-rank').innerText = rank !== '-' ? `#${rank}` : '-';
+      document.getElementById('m-global-rank').innerText = globalRank !== '-' ? `#${globalRank}` : '-';
       document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/adventurer/svg?seed=User';
       
       const badge = document.getElementById('m-medal-badge');
-      if (rank <= 3 && rank >= 1) {
-        badge.innerHTML = getSingleMedalHtml(rank).replace('class="medal-badge"', '');
+      if (globalRank <= 3 && globalRank >= 1) {
+        badge.innerHTML = getSingleMedalHtml(globalRank).replace('class="medal-badge"', '');
         badge.style.display = 'flex';
       } else {
         badge.style.display = 'none';
@@ -1014,7 +1045,7 @@
       const q = normQuizzesList.find(item => item.id === qId);
       if (!q) return;
       q.responses = q.responses || {};
-      if (q.responses[currentUser.id] !== undefined) return; // लॉक ताकि दोबारा क्लिक न हो सके
+      if (q.responses[currentUser.id] !== undefined) return;
 
       q.responses[currentUser.id] = optIdx;
       currentUser.answeredNormQs = currentUser.answeredNormQs || {};
@@ -1175,7 +1206,7 @@
       if (!p) return;
       p.responses = p.responses || {};
       p.responses[qId] = p.responses[qId] || {};
-      if (p.responses[qId][currentUser.id] !== undefined) return; // लॉक ताकि दोबारा क्लिक न हो सके
+      if (p.responses[qId][currentUser.id] !== undefined) return;
 
       p.responses[qId][currentUser.id] = optIdx;
       currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
