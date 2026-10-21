@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <title>We Are Group</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    input, select, textarea { 
+      user-select: text; 
+      -webkit-user-select: text;
+    }
+
+    :root {
+      --bg-gradient: radial-gradient(circle at 40% 30%, #dbe8df, #9cb3a8);
+      --text-dark: #1f3a2b;
+      --text-muted: #3d5e4a;
+      --card-border: rgba(255, 255, 255, 0.75);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-gradient);
+      color: var(--text-dark);
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-gradient);
+    }
+
+    .top-bar {
+      padding: 14px 18px;
+      background: rgba(220, 240, 225, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+      border-bottom: 1.5px solid var(--card-border);
+      box-shadow: 0 8px 20px rgba(20, 45, 30, 0.08);
+    }
+
+    .brand-area { display: flex; align-items: center; gap: 8px; }
+    .top-bar h2 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    .online-counter-btn {
+      background: rgba(255, 255, 255, 0.65);
+      border: 1.5px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #15803d;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .online-dot {
+      width: 9px;
+      height: 9px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    #custom-toast {
+      position: fixed;
+      top: -70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(225, 250, 230, 0.95);
+      border: 1.5px solid var(--card-border);
+      color: var(--text-dark);
+      padding: 12px 22px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: inset -4px -5px 8px rgba(30, 70, 50, 0.2), inset 4px 5px 8px rgba(255, 255, 255, 0.9), 0 12px 20px rgba(15, 35, 15, 0.15);
+      backdrop-filter: blur(16px);
+      z-index: 9999999;
+      transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+    #custom-toast.show { top: 20px; }
+    #custom-toast i { color: #2e6618; font-size: 1.1rem; }
+
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 160px;
+      scroll-behavior: smooth;
+      z-index: 10;
+      -webkit-overflow-scrolling: touch;
+    }
+    .content-area::-webkit-scrollbar { display: none; }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; animation: viewIn 0.2s ease-out; }
+
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: rgba(215, 242, 222, 0.4);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid var(--card-border);
+      border-radius: 28px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: inset -6px -8px 12px rgba(30, 70, 50, 0.15), inset 6px 8px 12px rgba(255, 255, 255, 0.85), 0 12px 20px -4px rgba(20, 45, 30, 0.12);
+    }
+
+    .form-group { margin-bottom: 14px; text-align: left; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
+    
+    .input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid var(--card-border);
+      border-radius: 18px;
+      padding: 12px 16px;
+      color: var(--text-dark);
+      outline: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: inset 2px 3px 6px rgba(20, 45, 30, 0.1), 0 4px 10px rgba(0,0,0,0.03);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      background: rgba(200, 240, 208, 0.65);
+      backdrop-filter: blur(12px);
+      color: #1f3a2b;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: inset -4px -5px 8px rgba(30, 70, 50, 0.2), inset 4px 5px 8px rgba(255, 255, 255, 0.9), 0 8px 15px -3px rgba(20, 45, 30, 0.15);
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-submit:active { transform: translateY(4px) scale(0.97); }
+
+    .sub-nav-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .sub-nav-btn {
+      flex: 1; padding: 10px; border-radius: 14px; border: 1.5px solid var(--card-border);
+      background: rgba(200, 238, 208, 0.4); font-size: 0.78rem; font-weight: 800;
+      color: var(--text-dark); cursor: pointer; text-align: center;
+      box-shadow: inset -2px -3px 5px rgba(30,70,50,0.1);
+    }
+    .sub-nav-btn.active {
+      background: rgba(185, 232, 198, 0.9); border-color: #15803d;
+      box-shadow: inset -3px -3px 6px rgba(20,60,40,0.2), 0 4px 10px rgba(0,0,0,0.08);
+    }
+    .sub-view { display: none; }
+    .sub-view.active { display: block; }
+
+    .avatar-grid { 
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 8px; 
+      max-height: 200px; overflow-y: auto; padding: 6px; 
+    }
+    .avatar-option { 
+      width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--card-border); 
+      cursor: pointer; object-fit: cover; background: rgba(255,255,255,0.7);
+      transition: transform 0.18s ease;
+    }
+    .avatar-option.selected { border-color: #15803d; transform: scale(1.15); background: rgba(185, 232, 198, 0.95); }
+
+    .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 16px; }
+    .podium-card {
+      flex: 1; background: rgba(255, 255, 255, 0.6); border: 1.5px solid var(--card-border);
+      border-radius: 20px; padding: 10px 4px; text-align: center; position: relative;
+    }
+    .podium-rank-1 { order: 2; transform: scale(1.05); background: rgba(254, 240, 138, 0.85); border-color: #eab308; }
+    .podium-rank-2 { order: 1; background: rgba(226, 232, 240, 0.85); border-color: #94a3b8; }
+    .podium-rank-3 { order: 3; background: rgba(254, 215, 170, 0.85); border-color: #d97706; }
+    .podium-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; cursor: pointer; }
+
+    .rank-list-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.5); border: 1.5px solid var(--card-border);
+      border-radius: 18px; margin-bottom: 8px; cursor: pointer;
+    }
+    .rank-list-item.is-me { background: rgba(200, 240, 208, 0.85); border-color: #15803d; }
+
+    .chat-container { display: flex; flex-direction: column; gap: 16px; padding-bottom: 20px; }
+    .chat-message { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; position: relative; }
+    .chat-message.my-message { align-self: flex-end; flex-direction: row-reverse; }
+    .chat-message.other-message { align-self: flex-start; }
+
+    .chat-avatar-wrapper { position: relative; flex-shrink: 0; }
+    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; }
+
+    /* Medals Overlay CSS */
+    .medals-container {
+      position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 1px; z-index: 5; pointer-events: none;
+    }
+    .medal-icon {
+      font-size: 0.85rem; filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.3));
+    }
+
+    .online-blue-tick {
+      position: absolute; top: 0; right: 0; width: 11px; height: 11px; background: #3b82f6; border-radius: 50%; border: 2px solid #fff; z-index: 6;
+    }
+
+    .chat-bubble-wrapper { display: flex; flex-direction: column; max-width: 100%; position: relative; }
+    .chat-bubble {
+      padding: 12px 16px; border-radius: 22px; font-size: 0.9rem; word-break: break-word;
+      border: 1.5px solid var(--card-border);
+      box-shadow: inset -4px -5px 8px rgba(30, 70, 50, 0.12), inset 4px 5px 8px rgba(255, 255, 255, 0.8);
+    }
+    .my-message .chat-bubble { background: rgba(185, 230, 198, 0.85); color: #1f3a2b; border-bottom-right-radius: 4px; }
+    .other-message .chat-bubble { background: rgba(255, 255, 255, 0.7); color: var(--text-dark); border-bottom-left-radius: 4px; }
+
+    .seen-by-text {
+      font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-top: 4px; cursor: pointer; align-self: flex-end;
+    }
+    .my-message .seen-by-text { align-self: flex-start; }
+
+    .reactions-bar {
+      display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;
+    }
+    .reaction-pill {
+      background: rgba(255,255,255,0.7); border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 2px 6px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; font-weight: 700;
+    }
+
+    .reaction-picker {
+      position: absolute; bottom: 105%; left: 0; background: rgba(240, 250, 242, 0.95);
+      border: 1.5px solid var(--card-border); border-radius: 20px; padding: 6px 10px;
+      display: none; gap: 8px; z-index: 100; box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+    .reaction-picker.show { display: flex; }
+    .reaction-picker span { font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
+    .reaction-picker span:active { transform: scale(1.3); }
+
+    .delete-msg-btn {
+      display: none; font-size: 0.72rem; font-weight: 800; color: #b91c1c;
+      background: rgba(254, 226, 226, 0.95); border: 1px solid rgba(239, 68, 68, 0.5);
+      padding: 5px 12px; border-radius: 12px; cursor: pointer; margin-top: 6px; align-self: flex-end;
+    }
+    .delete-msg-btn.show { display: inline-flex; align-items: center; gap: 5px; }
+
+    .chat-input-bar {
+      display: none; gap: 10px; padding: 12px 16px; background: rgba(220, 242, 225, 0.85);
+      backdrop-filter: blur(16px); border-top: 1.5px solid var(--card-border);
+      position: absolute; bottom: 85px; left: 0; right: 0; z-index: 900;
+    }
+    .send-btn {
+      width: 48px; height: 48px; border-radius: 50%; background: rgba(200, 240, 210, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.85); color: #1f3a2b; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+    }
+
+    .nav-bar {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(220, 242, 225, 0.55);
+      backdrop-filter: blur(20px); border-top: 1.5px solid var(--card-border); display: flex; justify-content: space-around; align-items: center; z-index: 99999; padding: 0 12px;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dark);
+      cursor: pointer; width: 58px; height: 54px; position: relative; border: 1.5px solid var(--card-border);
+      background: rgba(200, 238, 208, 0.55); border-radius: 48% 52% 45% 55% / 53% 47% 53% 47%;
+    }
+    .nav-item i { font-size: 1.2rem; pointer-events: none; }
+    .nav-item span { font-size: 0.6rem; margin-top: 2px; font-weight: 800; pointer-events: none; }
+    .nav-item.active { transform: translateY(-3px) scale(1.05); border-color: rgba(255, 255, 255, 0.95); background: rgba(185, 232, 198, 0.85); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(20, 45, 30, 0.35); display: none; justify-content: center; align-items: center; z-index: 999999; backdrop-filter: blur(8px);
+    }
+    .modal-card {
+      background: rgba(225, 248, 230, 0.95); border: 1.5px solid var(--card-border); padding: 22px; border-radius: 32px; width: 85%; max-width: 330px; text-align: center;
+    }
+
+    .user-online-badge {
+      width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff;
+      display: inline-block; margin-left: auto;
+    }
+    .is-online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .is-offline { background: #94a3b8; }
+  </style>
+</head>
+<body onclick="hideAllPopups(event)">
+
+  <div id="custom-toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-message">Success!</span>
+  </div>
+
+  <div class="app-container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="brand-area">
+        <i class="fa-solid fa-users-gear" style="font-size: 1.2rem; color: #15803d;"></i>
+        <h2>We Are Group</h2>
+      </div>
+      <div class="online-counter-btn" onclick="openOnlineStudentsModal()">
+        <div class="online-dot"></div>
+        <span id="online-count-text">Students Online</span>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="content-area" id="main-content-scroll">
+      
+      <!-- 1. HOME SCREEN -->
+      <div id="view-home" class="view-section active">
+        
+        <div class="sub-nav-bar">
+          <div class="sub-nav-btn active" onclick="switchHomeTab('norm-q')"><i class="fa-solid fa-file-circle-question"></i> Questions</div>
+          <div class="sub-nav-btn" onclick="switchHomeTab('more-q')"><i class="fa-solid fa-layer-group"></i> More Questions</div>
+        </div>
+
+        <!-- Normal Questions View -->
+        <div id="home-view-norm" class="sub-view active">
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Questions Leaderboard</h3>
+            <div id="norm-podium-section" class="podium-container"></div>
+            <div id="norm-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
+          </div>
+
+          <div id="norm-quizzes-list">
+            <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No questions available.</p></div>
+          </div>
+        </div>
+
+        <!-- More Questions View -->
+        <div id="home-view-more" class="sub-view">
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-award" style="color: #3b82f6;"></i> More Questions Leaderboard</h3>
+            <div id="more-podium-section" class="podium-container"></div>
+            <div id="more-rankings-container" style="max-height: 200px; overflow-y: auto;"></div>
+          </div>
+
+          <div id="more-papers-list">
+            <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No bulk papers available.</p></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 2. PUBLISH SCREEN -->
+      <div id="view-publish" class="view-section">
+        
+        <div class="sub-nav-bar">
+          <div class="sub-nav-btn active" onclick="switchPubTab('pub-norm')"><i class="fa-solid fa-plus"></i> Normal Q</div>
+          <div class="sub-nav-btn" onclick="switchPubTab('pub-more')"><i class="fa-solid fa-code"></i> More Q (HTML)</div>
+        </div>
+
+        <!-- Publish Normal Q -->
+        <div id="pub-view-norm" class="sub-view active">
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Publish Single Question</h3>
+            <div class="form-group"><label>Question Text</label><input type="text" id="pub-q-text" class="input-field" placeholder="Enter question statement..."></div>
+            <div class="form-group"><label>Option A</label><input type="text" id="pub-q-o0" class="input-field" placeholder="Option A"></div>
+            <div class="form-group"><label>Option B</label><input type="text" id="pub-q-o1" class="input-field" placeholder="Option B"></div>
+            <div class="form-group"><label>Option C</label><input type="text" id="pub-q-o2" class="input-field" placeholder="Option C"></div>
+            <div class="form-group"><label>Option D</label><input type="text" id="pub-q-o3" class="input-field" placeholder="Option D"></div>
+            <div class="form-group">
+              <label>Correct Answer Option</label>
+              <select id="pub-q-ans" class="input-field">
+                <option value="0">Option A</option>
+                <option value="1">Option B</option>
+                <option value="2">Option C</option>
+                <option value="3">Option D</option>
+              </select>
+            </div>
+            <button class="btn-submit" type="button" onclick="publishNormalQuestion()">Publish Question</button>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Questions</h3>
+            <div id="my-published-norm-list"></div>
+          </div>
+        </div>
+
+        <!-- Publish More Questions HTML -->
+        <div id="pub-view-more" class="sub-view">
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px;">Publish Bulk Question Paper</h3>
+            <div class="form-group"><label>Paper / Set Title</label><input type="text" id="pub-paper-title" class="input-field" placeholder="e.g. Science Chapter 1 Test"></div>
+            <div class="form-group">
+              <label>Paste HTML Code Here</label>
+              <textarea id="pub-paper-html" class="input-field" rows="6" placeholder="Paste Here HTML Code from AI Prompt..." style="height: 110px; resize: none;"></textarea>
+            </div>
+            <button class="btn-submit" type="button" onclick="publishMorePaperHTML()">Publish Paper Set</button>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Your Published Paper Sets</h3>
+            <div id="my-published-papers-list"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3. CHAT SCREEN -->
+      <div id="view-chat" class="view-section">
+        <div class="chat-container" id="chat-messages-container"></div>
+      </div>
+
+      <!-- 4. PROFILE SCREEN -->
+      <div id="view-profile" class="view-section">
+        <div class="card">
+          <div style="text-align: center; padding: 10px 0;">
+            <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto;">
+              <img id="p-dp-img" src="https://api.dicebear.com/7.x/micah/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover;">
+              <div id="p-medals-wrapper" class="medals-container" style="bottom:-8px;"></div>
+            </div>
+            <h3 id="p-name">Guest Student</h3>
+            <p id="p-board-class" style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700;">Set up profile</p>
+            
+            <div style="display: flex; gap: 10px; margin-top: 12px;">
+              <div style="flex:1; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 16px; border: 1px solid var(--card-border);">
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; display: block;">Questions Score</span>
+                <span id="p-norm-score" style="font-size: 1rem; font-weight: 800; color: #15803d;">0 pts</span>
+              </div>
+              <div style="flex:1; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 16px; border: 1px solid var(--card-border);">
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; display: block;">More Qs Score</span>
+                <span id="p-more-score" style="font-size: 1rem; font-weight: 800; color: #3b82f6;">0 pts</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 15px; border-top: 1.5px solid rgba(0,0,0,0.08); padding-top: 15px;">
+            <div class="form-group"><label>Full Name</label><input type="text" id="prof-input-name" class="input-field" placeholder="Enter Name"></div>
+            <div class="form-group"><label>Roll Number</label><input type="number" id="prof-input-roll" class="input-field" placeholder="Roll No."></div>
+            <div class="form-group"><label>Choose Avatar (200+ Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
+            <button class="btn-submit" type="button" onclick="saveUserProfile()">Save Profile</button>
+            
+            <div style="text-align: center; margin-top: 18px;">
+              <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-decoration: underline;" onclick="openAboutModal()">About This App</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Online Students Modal -->
+    <div id="online-modal" class="modal-overlay" onclick="closeOnlineStudentsModal()">
+      <div class="modal-card" style="max-width: 340px;" onclick="event.stopPropagation()">
+        <h3 style="margin-bottom: 12px; font-size: 1rem;">👥 Registered Students</h3>
+        <div id="online-students-list-container" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
+        <button class="btn-submit" style="margin-top: 15px; padding: 10px;" type="button" onclick="closeOnlineStudentsModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Student Details Modal -->
+    <div id="profile-modal" class="modal-overlay" onclick="closeProfileModal()">
+      <div class="modal-card" onclick="event.stopPropagation()">
+        <div style="position:relative; width:80px; height:80px; margin:0 auto 8px auto;">
+          <img id="m-dp" src="" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--card-border); object-fit: cover;">
+          <div id="m-medals-wrapper" class="medals-container" style="bottom:-6px;"></div>
+        </div>
+        <h3 id="m-name" style="margin-bottom: 4px;">Student Name</h3>
+        <div style="text-align: left; background: rgba(255,255,255,0.6); padding: 12px; border-radius: 16px; font-size: 0.85rem; margin-top: 10px; border: 1px solid var(--card-border);">
+          <p><strong>Roll No:</strong> <span id="m-roll">-</span></p>
+          <p><strong>Questions Score:</strong> <span id="m-norm-score">0</span> pts (Rank: <span id="m-norm-rank">-</span>)</p>
+          <p><strong>More Qs Score:</strong> <span id="m-more-score">0</span> pts (Rank: <span id="m-more-rank">-</span>)</p>
+        </div>
+        <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closeProfileModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Seen By Modal -->
+    <div id="seen-by-modal" class="modal-overlay" onclick="closeSeenByModal()">
+      <div class="modal-card" onclick="event.stopPropagation()">
+        <h3 style="margin-bottom: 12px; font-size: 1rem;">Seen By</h3>
+        <div id="seen-by-list-container" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
+        <button class="btn-submit" style="margin-top: 15px; padding: 10px;" type="button" onclick="closeSeenByModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Paper View Modal -->
+    <div id="paper-modal" class="modal-overlay" onclick="closePaperModal()">
+      <div class="modal-card" style="max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+        <h3 id="paper-modal-title" style="margin-bottom: 10px;">Paper Title</h3>
+        <div id="paper-modal-questions-list"></div>
+        <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closePaperModal()">Close Paper</button>
+      </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal-overlay" onclick="closeAboutModal()">
+      <div class="modal-card" onclick="event.stopPropagation()" style="text-align: center;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(200, 240, 210, 0.85); border: 1.5px solid rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: #1f3a2b; font-size: 1.4rem; font-weight: 800;"><i class="fa-solid fa-users-gear"></i></div>
+        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 6px;">We Are Group</h3>
+        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 16px; font-weight: 600;">
+          This application is proudly created and developed by <strong>Ankesh Kumar</strong>.<br><br>
+          Visit official YouTube Channel:
+        </p>
+        <a href="intent://www.youtube.com/@mrankesh-z3t#Intent;package=com.google.android.youtube;scheme=https;end;" class="btn-submit" style="display: block; text-decoration: none; line-height: normal; padding: 12px; margin-bottom: 10px;">
+          <i class="fa-brands fa-youtube"></i> Visit YouTube Channel
+        </a>
+        <button class="btn-submit" style="background: rgba(255,255,255,0.6); border: 1px solid var(--card-border); padding: 10px;" type="button" onclick="closeAboutModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Chat Bar -->
+    <div id="chat-bar-wrapper" class="chat-input-bar">
+      <div id="active-chat-input-group" style="display: flex; gap: 10px; width: 100%;">
+        <input type="text" id="chat-input-msg" class="input-field" placeholder="Type a message...">
+        <button class="send-btn" type="button" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+      <div class="nav-item active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>Home</span></div>
+      <div class="nav-item" onclick="switchTab('publish')"><i class="fa-solid fa-circle-plus"></i><span>Publish</span></div>
+      <div class="nav-item" onclick="switchTab('chat')"><i class="fa-solid fa-comment-dots"></i><span>Chat</span></div>
+      <div class="nav-item" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i><span>Profile</span></div>
+    </div>
+  </div>
+
+  <script>
+    const FIREBASE_URL = "https://question-project-1b8bf-default-rtdb.firebaseio.com/";
+
+    let currentUser = {
+      id: 'usr_' + Math.floor(100000 + Math.random() * 900000),
+      name: 'Guest Student',
+      roll: '00',
+      dp: 'https://api.dicebear.com/7.x/micah/svg?seed=StudentGroup',
+      normScore: 0,
+      moreScore: 0,
+      lastSeen: Date.now(),
+      answeredNormQs: {},
+      answeredMoreQs: {}
+    };
+
+    let userProfilesMap = {};
+    let normQuizzesList = [];
+    let morePapersList = [];
+    let currentChatList = [];
+    let lastRenderedChatJson = "";
+
+    let normRankMap = {};
+    let moreRankMap = {};
+
+    function showToast(msg) {
+      const toast = document.getElementById('custom-toast');
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    function scrollToBottom() {
+      const scrollArea = document.getElementById('main-content-scroll');
+      if (scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+
+    function initAvatarSelector() {
+      const grid = document.getElementById('avatar-selector-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      const styles = ['micah', 'adventurer', 'fun-emoji', 'avataaars', 'personas'];
+
+      for (let i = 1; i <= 150; i++) {
+        const style = styles[i % styles.length];
+        const seed = `WeAreGroup_${i}`;
+        const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'avatar-option' + (currentUser.dp === url ? ' selected' : '');
+        img.onclick = () => {
+          document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+          img.classList.add('selected');
+          currentUser.dp = url;
+          document.getElementById('p-dp-img').src = url;
+        };
+        grid.appendChild(img);
+      }
+    }
+
+    function switchHomeTab(tabName) {
+      const btns = document.querySelectorAll('#view-home .sub-nav-btn');
+      const views = document.querySelectorAll('#view-home .sub-view');
+      btns.forEach(b => b.classList.remove('active'));
+      views.forEach(v => v.classList.remove('active'));
+
+      if (tabName === 'norm-q') {
+        btns[0].classList.add('active');
+        document.getElementById('home-view-norm').classList.add('active');
+      } else {
+        btns[1].classList.add('active');
+        document.getElementById('home-view-more').classList.add('active');
+      }
+    }
+
+    function switchPubTab(tabName) {
+      const btns = document.querySelectorAll('#view-publish .sub-nav-btn');
+      const views = document.querySelectorAll('#view-publish .sub-view');
+      btns.forEach(b => b.classList.remove('active'));
+      views.forEach(v => v.classList.remove('active'));
+
+      if (tabName === 'pub-norm') {
+        btns[0].classList.add('active');
+        document.getElementById('pub-view-norm').classList.add('active');
+      } else {
+        btns[1].classList.add('active');
+        document.getElementById('pub-view-more').classList.add('active');
+      }
+    }
+
+    function openAboutModal() { document.getElementById('about-modal').style.display = 'flex'; }
+    function closeAboutModal() { document.getElementById('about-modal').style.display = 'none'; }
+
+    async function fetchFirebaseData() {
+      try {
+        currentUser.lastSeen = Date.now();
+        await fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}/lastSeen.json`, { method: 'PUT', body: JSON.stringify(currentUser.lastSeen) });
+
+        let response = await fetch(`${FIREBASE_URL}/.json`);
+        let data = await response.json();
+        if (data) {
+          if (data.UsersMap) {
+            userProfilesMap = data.UsersMap;
+            if (userProfilesMap[currentUser.id]) {
+              let activeDp = currentUser.dp;
+              let localAnsNorm = currentUser.answeredNormQs || {};
+              let localAnsMore = currentUser.answeredMoreQs || {};
+              currentUser = { ...currentUser, ...userProfilesMap[currentUser.id] };
+              if (activeDp) currentUser.dp = activeDp;
+              currentUser.answeredNormQs = localAnsNorm;
+              currentUser.answeredMoreQs = localAnsMore;
+            }
+            renderLeaderboards();
+            updateOnlineCounterUI();
+            updateProfileMedals();
+          }
+
+          if (data.NormQuizzes) {
+            let newNorm = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
+            checkNormUndoScore(newNorm);
+            normQuizzesList = newNorm;
+            renderNormQuizzes();
+            renderMyPublishedNorm();
+          } else {
+            checkNormUndoScore([]);
+            normQuizzesList = [];
+            renderNormQuizzes();
+            renderMyPublishedNorm();
+          }
+
+          if (data.MorePapers) {
+            let newPapers = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
+            checkMoreUndoScore(newPapers);
+            morePapersList = newPapers;
+            renderMorePapers();
+            renderMyPublishedPapers();
+          } else {
+            checkMoreUndoScore([]);
+            morePapersList = [];
+            renderMorePapers();
+            renderMyPublishedPapers();
+          }
+
+          if (data.GlobalChat) {
+            const rawChat = Array.isArray(data.GlobalChat) ? data.GlobalChat : Object.values(data.GlobalChat);
+            currentChatList = rawChat;
+            markMessagesAsSeen(currentChatList);
+            const chatString = JSON.stringify(rawChat);
+            if (chatString !== lastRenderedChatJson) {
+              lastRenderedChatJson = chatString;
+              renderChatMessages(currentChatList);
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    fetchFirebaseData();
+    setInterval(fetchFirebaseData, 3000);
+
+    function updateOnlineCounterUI() {
+      const now = Date.now();
+      let onlineCount = 0;
+      Object.keys(userProfilesMap).forEach(uid => {
+        const u = userProfilesMap[uid];
+        if (u && u.lastSeen && (now - u.lastSeen < 15000)) {
+          onlineCount++;
+        }
+      });
+      document.getElementById('online-count-text').innerText = `${onlineCount} Online`;
+    }
+
+    function isUserOnline(uid) {
+      if (!userProfilesMap[uid]) return false;
+      const last = userProfilesMap[uid].lastSeen || 0;
+      return (Date.now() - last < 15000);
+    }
+
+    /* Generator for Medals Html */
+    function getAvatarMedalsHtml(uid) {
+      const nRank = normRankMap[uid];
+      const mRank = moreRankMap[uid];
+
+      let medalsHtml = '';
+
+      // Normal Question Medal
+      if (nRank === 1) medalsHtml += `<span class="medal-icon" title="Normal Q Gold Medal">🥇</span>`;
+      else if (nRank === 2) medalsHtml += `<span class="medal-icon" title="Normal Q Silver Medal">🥈</span>`;
+      else if (nRank === 3) medalsHtml += `<span class="medal-icon" title="Normal Q Bronze Medal">🥉</span>`;
+
+      // More Question Medal
+      if (mRank === 1) medalsHtml += `<span class="medal-icon" title="More Q Gold Medal">🥇</span>`;
+      else if (mRank === 2) medalsHtml += `<span class="medal-icon" title="More Q Silver Medal">🥈</span>`;
+      else if (mRank === 3) medalsHtml += `<span class="medal-icon" title="More Q Bronze Medal">🥉</span>`;
+
+      if (medalsHtml !== '') {
+        return `<div class="medals-container">${medalsHtml}</div>`;
+      }
+      return '';
+    }
+
+    function updateProfileMedals() {
+      const pWrapper = document.getElementById('p-medals-wrapper');
+      if (pWrapper) pWrapper.innerHTML = getAvatarMedalsHtml(currentUser.id).replace('<div class="medals-container">', '').replace('</div>', '');
+    }
+
+    function openOnlineStudentsModal() {
+      const container = document.getElementById('online-students-list-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const uKeys = Object.keys(userProfilesMap);
+      if (uKeys.length === 0) {
+        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No students registered yet.</p>';
+      } else {
+        uKeys.forEach(uid => {
+          const u = userProfilesMap[uid];
+          const online = isUserOnline(uid);
+          const medals = getAvatarMedalsHtml(uid);
+          container.innerHTML += `
+            <div style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:16px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
+              <div style="position:relative; width:34px; height:34px; flex-shrink:0;">
+                <img src="${u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User'}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
+                ${medals}
+                ${online && uid !== currentUser.id ? '<div class="online-blue-tick" style="width:9px; height:9px;"></div>' : ''}
+              </div>
+              <span style="font-size:0.85rem; font-weight:800; flex:1;">${u.name || 'Guest Student'}</span>
+              <div class="user-online-badge ${online ? 'is-online' : 'is-offline'}"></div>
+            </div>
+          `;
+        });
+      }
+
+      document.getElementById('online-modal').style.display = 'flex';
+    }
+
+    function closeOnlineStudentsModal() { document.getElementById('online-modal').style.display = 'none'; }
+
+    async function markMessagesAsSeen(messages) {
+      let updated = false;
+      messages.forEach(msg => {
+        if (!msg) return;
+        msg.seenBy = msg.seenBy || {};
+        if (msg.senderId !== currentUser.id && !msg.seenBy[currentUser.id]) {
+          msg.seenBy[currentUser.id] = true;
+          updated = true;
+        }
+      });
+      if (updated) {
+        await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(messages) });
+      }
+    }
+
+    function showSeenByModal(msgId) {
+      const msg = currentChatList.find(m => m.msgId === msgId);
+      if (!msg || !msg.seenBy) return;
+      const container = document.getElementById('seen-by-list-container');
+      container.innerHTML = '';
+      const viewers = Object.keys(msg.seenBy).filter(uid => uid !== currentUser.id);
+      if (viewers.length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No one else has seen this yet.</p>';
+      } else {
+        viewers.forEach(uid => {
+          const uProf = userProfilesMap[uid] || { name: 'Guest Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+          container.innerHTML += `
+            <div style="display:flex; align-items:center; gap:10px; padding:6px; background:rgba(255,255,255,0.5); border-radius:14px; cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
+              <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+              <span style="font-size:0.85rem; font-weight:800;">${uProf.name || 'Guest Student'}</span>
+            </div>
+          `;
+        });
+      }
+      document.getElementById('seen-by-modal').style.display = 'flex';
+    }
+
+    function closeSeenByModal() { document.getElementById('seen-by-modal').style.display = 'none'; }
+
+    function checkNormUndoScore(newList) {
+      currentUser.answeredNormQs = currentUser.answeredNormQs || {};
+      let changed = false;
+      Object.keys(currentUser.answeredNormQs).forEach(qId => {
+        const impact = currentUser.answeredNormQs[qId];
+        if (!newList.some(q => q.id === qId)) {
+          currentUser.normScore = (currentUser.normScore || 0) - impact;
+          delete currentUser.answeredNormQs[qId];
+          changed = true;
+        }
+      });
+      if (changed) saveCurrentUserToDb();
+    }
+
+    function checkMoreUndoScore(newList) {
+      currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
+      let changed = false;
+      Object.keys(currentUser.answeredMoreQs).forEach(pId => {
+        const impact = currentUser.answeredMoreQs[pId];
+        if (!newList.some(p => p.id === pId)) {
+          currentUser.moreScore = (currentUser.moreScore || 0) - impact;
+          delete currentUser.answeredMoreQs[pId];
+          changed = true;
+        }
+      });
+      if (changed) saveCurrentUserToDb();
+    }
+
+    async function saveCurrentUserToDb() {
+      await fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
+    }
+
+    function renderLeaderboards() {
+      const normPodium = document.getElementById('norm-podium-section');
+      const normList = document.getElementById('norm-rankings-container');
+      const morePodium = document.getElementById('more-podium-section');
+      const moreList = document.getElementById('more-rankings-container');
+
+      if (!normPodium || !normList || !morePodium || !moreList) return;
+
+      const usersArr = Object.keys(userProfilesMap).map(uid => ({
+        id: uid,
+        normScore: userProfilesMap[uid].normScore || 0,
+        moreScore: userProfilesMap[uid].moreScore || 0,
+        ...userProfilesMap[uid]
+      }));
+
+      const normSorted = [...usersArr].sort((a, b) => b.normScore - a.normScore);
+      normRankMap = {};
+      let rN = 1;
+      normSorted.forEach((u, i) => {
+        if (i > 0 && u.normScore < normSorted[i - 1].normScore) rN = i + 1;
+        normRankMap[u.id] = rN;
+      });
+
+      const moreSorted = [...usersArr].sort((a, b) => b.moreScore - a.moreScore);
+      moreRankMap = {};
+      let rM = 1;
+      moreSorted.forEach((u, i) => {
+        if (i > 0 && u.moreScore < moreSorted[i - 1].moreScore) rM = i + 1;
+        moreRankMap[u.id] = rM;
+      });
+
+      normPodium.innerHTML = ''; normList.innerHTML = '';
+      normSorted.slice(0, 3).forEach((u, i) => {
+        let bClass = i === 0 ? 'badge-gold' : (i === 1 ? 'badge-silver' : 'badge-bronze');
+        let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
+        normPodium.innerHTML += `
+          <div class="podium-card podium-rank-${i+1}">
+            <div class="podium-badge ${bClass}">${rLab}</div>
+            <div style="position:relative; width:42px; height:42px; margin:0 auto;">
+              <img src="${u.dp}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+              ${getAvatarMedalsHtml(u.id)}
+            </div>
+            <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
+            <div style="font-size:0.75rem; font-weight:800; color:#15803d;">${u.normScore} pts</div>
+          </div>`;
+      });
+      normSorted.forEach(u => {
+        const isMe = u.id === currentUser.id;
+        const medals = getAvatarMedalsHtml(u.id);
+        normList.innerHTML += `
+          <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+            <span style="font-weight:800; width:28px;">#${normRankMap[u.id]}</span>
+            <div style="position:relative; width:38px; height:38px;">
+              <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+              ${medals}
+            </div>
+            <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+            <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
+          </div>`;
+      });
+
+      morePodium.innerHTML = ''; moreList.innerHTML = '';
+      moreSorted.slice(0, 3).forEach((u, i) => {
+        let bClass = i === 0 ? 'badge-gold' : (i === 1 ? 'badge-silver' : 'badge-bronze');
+        let rLab = i === 0 ? '👑 1st' : (i === 1 ? '🥈 2nd' : '🥉 3rd');
+        morePodium.innerHTML += `
+          <div class="podium-card podium-rank-${i+1}">
+            <div class="podium-badge ${bClass}">${rLab}</div>
+            <div style="position:relative; width:42px; height:42px; margin:0 auto;">
+              <img src="${u.dp}" class="podium-avatar" onclick="showStudentProfileModal('${u.id}')">
+              ${getAvatarMedalsHtml(u.id)}
+            </div>
+            <div style="font-size:0.75rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; margin-top:4px;">${u.name}</div>
+            <div style="font-size:0.75rem; font-weight:800; color:#3b82f6;">${u.moreScore} pts</div>
+          </div>`;
+      });
+      moreSorted.forEach(u => {
+        const isMe = u.id === currentUser.id;
+        const medals = getAvatarMedalsHtml(u.id);
+        moreList.innerHTML += `
+          <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+            <span style="font-weight:800; width:28px;">#${moreRankMap[u.id]}</span>
+            <div style="position:relative; width:38px; height:38px;">
+              <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+              ${medals}
+            </div>
+            <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+            <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
+          </div>`;
+      });
+    }
+
+    function showStudentProfileModal(uid) {
+      const u = userProfilesMap[uid];
+      if (!u) return;
+      document.getElementById('m-name').innerText = u.name || 'Guest Student';
+      document.getElementById('m-roll').innerText = u.roll || 'N/A';
+      document.getElementById('m-norm-score').innerText = u.normScore || 0;
+      document.getElementById('m-norm-rank').innerText = normRankMap[uid] ? '#' + normRankMap[uid] : 'N/A';
+      document.getElementById('m-more-score').innerText = u.moreScore || 0;
+      document.getElementById('m-more-rank').innerText = moreRankMap[uid] ? '#' + moreRankMap[uid] : 'N/A';
+      document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
+      
+      const mWrapper = document.getElementById('m-medals-wrapper');
+      if (mWrapper) mWrapper.innerHTML = getAvatarMedalsHtml(uid).replace('<div class="medals-container">', '').replace('</div>', '');
+
+      document.getElementById('profile-modal').style.display = 'flex';
+    }
+
+    function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
+
+    async function publishNormalQuestion() {
+      const qText = document.getElementById('pub-q-text').value.trim();
+      const o0 = document.getElementById('pub-q-o0').value.trim();
+      const o1 = document.getElementById('pub-q-o1').value.trim();
+      const o2 = document.getElementById('pub-q-o2').value.trim();
+      const o3 = document.getElementById('pub-q-o3').value.trim();
+      const ans = parseInt(document.getElementById('pub-q-ans').value);
+
+      if (!qText || !o0 || !o1) { showToast('Enter Question and Options!'); return; }
+
+      const newQ = {
+        id: 'nq_' + Date.now() + '_' + Math.random(),
+        creatorId: currentUser.id,
+        question: qText,
+        options: [o0, o1, o2, o3].filter(o => o !== ''),
+        correctIndex: ans,
+        responses: {}
+      };
+
+      normQuizzesList.push(newQ);
+      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
+      showToast('Question Published!');
+      document.getElementById('pub-q-text').value = '';
+      document.getElementById('pub-q-o0').value = ''; document.getElementById('pub-q-o1').value = '';
+      document.getElementById('pub-q-o2').value = ''; document.getElementById('pub-q-o3').value = '';
+      renderNormQuizzes(); renderMyPublishedNorm();
+    }
+
+    async function deleteNormQuestion(qId) {
+      normQuizzesList = normQuizzesList.filter(q => q.id !== qId);
+      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
+      showToast('Question Deleted!');
+      renderNormQuizzes(); renderMyPublishedNorm();
+    }
+
+    function renderNormQuizzes() {
+      const container = document.getElementById('norm-quizzes-list');
+      if (!container) return;
+      if (normQuizzesList.length === 0) {
+        container.innerHTML = '<div class="card" style="text-align:center;"><p style="font-weight:700; color:var(--text-muted);">No questions available</p></div>';
+        return;
+      }
+      container.innerHTML = '';
+      normQuizzesList.forEach(q => {
+        let optsHtml = '';
+        const myAns = (q.responses || {})[currentUser.id];
+        const creatorProf = userProfilesMap[q.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+        const medals = getAvatarMedalsHtml(q.creatorId);
+
+        q.options.forEach((o, idx) => {
+          let st = "background: rgba(255,255,255,0.7);";
+          if (myAns !== undefined) {
+            if (idx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
+            else if (idx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
+          }
+          optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${myAns !== undefined ? 'disabled':''}>${o}</button>`;
+        });
+
+        container.innerHTML += `
+          <div class="card">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${q.creatorId}')">
+              <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
+                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+                ${medals}
+                ${isUserOnline(q.creatorId) && q.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
+              </div>
+              <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
+            </div>
+            <div style="font-weight:800; margin-bottom:10px;">${q.question}</div>
+            <div>${optsHtml}</div>
+          </div>
+        `;
+      });
+    }
+
+    async function submitNormAnswer(qId, optIdx) {
+      const q = normQuizzesList.find(item => item.id === qId);
+      if (!q) return;
+      q.responses = q.responses || {};
+      if (q.responses[currentUser.id] !== undefined) return;
+
+      q.responses[currentUser.id] = optIdx;
+      currentUser.answeredNormQs = currentUser.answeredNormQs || {};
+
+      if (optIdx === q.correctIndex) {
+        currentUser.normScore = (currentUser.normScore || 0) + 1;
+        currentUser.answeredNormQs[qId] = 1;
+        showToast('Correct Answer! +1 Pt');
+      } else {
+        currentUser.normScore = (currentUser.normScore || 0) - 1;
+        currentUser.answeredNormQs[qId] = -1;
+        showToast('Wrong Answer! -1 Pt');
+      }
+
+      await saveCurrentUserToDb();
+      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
+      renderNormQuizzes();
+      renderLeaderboards();
+    }
+
+    function renderMyPublishedNorm() {
+      const container = document.getElementById('my-published-norm-list');
+      if (!container) return;
+      const myQs = normQuizzesList.filter(q => q.creatorId === currentUser.id);
+      if (myQs.length === 0) {
+        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No questions published yet.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      myQs.forEach(q => {
+        container.innerHTML += `
+          <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
+            <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${q.question}</div>
+            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteNormQuestion('${q.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+          </div>
+        `;
+      });
+    }
+
+    async function publishMorePaperHTML() {
+      const title = document.getElementById('pub-paper-title').value.trim();
+      const htmlText = document.getElementById('pub-paper-html').value.trim();
+
+      if (!title || !htmlText) { showToast('Enter Title and Paste HTML Code!'); return; }
+
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlText;
+
+      const qNodes = tempDiv.querySelectorAll('.paper-q-item');
+      let extractedQuestions = [];
+
+      qNodes.forEach((node, idx) => {
+        extractedQuestions.push({
+          qId: 'p_q_' + idx,
+          qText: node.getAttribute('data-q') || `Question ${idx + 1}`,
+          options: [
+            node.getAttribute('data-o0') || 'Option A',
+            node.getAttribute('data-o1') || 'Option B',
+            node.getAttribute('data-o2') || 'Option C',
+            node.getAttribute('data-o3') || 'Option D'
+          ],
+          correctIndex: parseInt(node.getAttribute('data-ans') || '0')
+        });
+      });
+
+      if (extractedQuestions.length === 0) {
+        showToast('Invalid HTML Code!');
+        return;
+      }
+
+      const newPaper = {
+        id: 'mp_' + Date.now() + '_' + Math.random(),
+        creatorId: currentUser.id,
+        title: title,
+        questions: extractedQuestions,
+        responses: {}
+      };
+
+      morePapersList.push(newPaper);
+      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
+      showToast('Paper Set Published!');
+      document.getElementById('pub-paper-title').value = '';
+      document.getElementById('pub-paper-html').value = '';
+      renderMorePapers(); renderMyPublishedPapers();
+    }
+
+    async function deleteMorePaper(pId) {
+      morePapersList = morePapersList.filter(p => p.id !== pId);
+      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
+      showToast('Paper Set Deleted!');
+      renderMorePapers(); renderMyPublishedPapers();
+    }
+
+    function renderMorePapers() {
+      const container = document.getElementById('more-papers-list');
+      if (!container) return;
+      if (morePapersList.length === 0) {
+        container.innerHTML = '<div class="card" style="text-align:center;"><p style="font-weight:700; color:var(--text-muted);">No bulk papers available</p></div>';
+        return;
+      }
+      container.innerHTML = '';
+      morePapersList.forEach(p => {
+        const creatorProf = userProfilesMap[p.creatorId] || { name: 'User', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+        const medals = getAvatarMedalsHtml(p.creatorId);
+        container.innerHTML += `
+          <div class="card">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${p.creatorId}')">
+              <div style="position:relative; width:28px; height:28px; flex-shrink:0;">
+                <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+                ${medals}
+                ${isUserOnline(p.creatorId) && p.creatorId !== currentUser.id ? '<div class="online-blue-tick" style="width:8px; height:8px;"></div>' : ''}
+              </div>
+              <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">By ${creatorProf.name}</span>
+            </div>
+            <div style="font-weight:800; font-size:1rem; margin-bottom:4px;">${p.title}</div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Total Questions: ${p.questions.length}</p>
+            <button class="btn-submit" style="padding:10px; font-size:0.85rem;" onclick="openPaperModal('${p.id}')">Start Attempting Paper</button>
+          </div>
+        `;
+      });
+    }
+
+    function openPaperModal(pId) {
+      const p = morePapersList.find(item => item.id === pId);
+      if (!p) return;
+
+      document.getElementById('paper-modal-title').innerText = p.title;
+      const container = document.getElementById('paper-modal-questions-list');
+      container.innerHTML = '';
+
+      p.questions.forEach((q, idx) => {
+        let optsHtml = '';
+        p.responses = p.responses || {};
+        p.responses[q.qId] = p.responses[q.qId] || {};
+        const myAns = p.responses[q.qId][currentUser.id];
+
+        q.options.forEach((o, oIdx) => {
+          let st = "background: rgba(255,255,255,0.7);";
+          if (myAns !== undefined) {
+            if (oIdx === q.correctIndex) st = "background: rgba(34,197,94,0.85); color:#fff; font-weight:800;";
+            else if (oIdx === myAns) st = "background: rgba(239,68,68,0.85); color:#fff; font-weight:800;";
+          }
+          optsHtml += `<button class="btn-submit" style="margin-bottom:6px; padding:8px; ${st}" onclick="submitPaperQuestionAnswer('${p.id}', '${q.qId}', ${oIdx})" ${myAns !== undefined ? 'disabled':''}>${o}</button>`;
+        });
+
+        container.innerHTML += `
+          <div style="text-align:left; background:rgba(255,255,255,0.5); padding:10px; border-radius:16px; margin-bottom:10px; border:1px solid var(--card-border);">
+            <div style="font-weight:800; font-size:0.85rem; margin-bottom:8px;">Q${idx+1}. ${q.qText}</div>
+            <div>${optsHtml}</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('paper-modal').style.display = 'flex';
+    }
+
+    function closePaperModal() { document.getElementById('paper-modal').style.display = 'none'; }
+
+    async function submitPaperQuestionAnswer(paperId, qId, optIdx) {
+      const p = morePapersList.find(item => item.id === paperId);
+      if (!p) return;
+      p.responses = p.responses || {};
+      p.responses[qId] = p.responses[qId] || {};
+      if (p.responses[qId][currentUser.id] !== undefined) return;
+
+      p.responses[qId][currentUser.id] = optIdx;
+      currentUser.answeredMoreQs = currentUser.answeredMoreQs || {};
+
+      const q = p.questions.find(item => item.qId === qId);
+      if (optIdx === q.correctIndex) {
+        currentUser.moreScore = (currentUser.moreScore || 0) + 1;
+        currentUser.answeredMoreQs[paperId] = (currentUser.answeredMoreQs[paperId] || 0) + 1;
+        showToast('Correct! +1 Pt');
+      } else {
+        currentUser.moreScore = (currentUser.moreScore || 0) - 1;
+        currentUser.answeredMoreQs[paperId] = (currentUser.answeredMoreQs[paperId] || 0) - 1;
+        showToast('Wrong! -1 Pt');
+      }
+
+      await saveCurrentUserToDb();
+      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
+      openPaperModal(paperId);
+      renderLeaderboards();
+    }
+
+    function renderMyPublishedPapers() {
+      const container = document.getElementById('my-published-papers-list');
+      if (!container) return;
+      const myPs = morePapersList.filter(p => p.creatorId === currentUser.id);
+      if (myPs.length === 0) {
+        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No papers published yet.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      myPs.forEach(p => {
+        container.innerHTML += `
+          <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
+            <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${p.title}</div>
+            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteMorePaper('${p.id}')"><i class="fa-solid fa-trash"></i> Delete Paper Set</button>
+          </div>
+        `;
+      });
+    }
+
+    let pressTimer = null;
+    function hideAllPopups(e) {
+      if (e && e.target.closest('.delete-msg-btn') || e.target.closest('.reaction-picker')) return;
+      document.querySelectorAll('.delete-msg-btn').forEach(btn => btn.classList.remove('show'));
+      document.querySelectorAll('.reaction-picker').forEach(p => p.classList.remove('show'));
+    }
+
+    function handleTouchStart(e, msgId) {
+      e.stopPropagation(); hideAllPopups();
+      pressTimer = setTimeout(() => {
+        const delBtn = document.getElementById(`del_btn_${msgId}`);
+        const picker = document.getElementById(`reaction_picker_${msgId}`);
+        if (delBtn) delBtn.classList.add('show');
+        if (picker) picker.classList.add('show');
+        if (navigator.vibrate) navigator.vibrate(50);
+      }, 800);
+    }
+
+    function handleTouchEnd() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
+
+    async function addReaction(msgId, emoji, e) {
+      if (e) e.stopPropagation();
+      const msg = currentChatList.find(m => m.msgId === msgId);
+      if (!msg) return;
+      msg.reactions = msg.reactions || {};
+      msg.reactions[currentUser.id] = emoji;
+
+      renderChatMessages(currentChatList);
+      await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
+    }
+
+    async function deleteMyMessage(msgId, e) {
+      if (e) e.stopPropagation();
+      currentChatList = currentChatList.filter(m => m.msgId !== msgId);
+      renderChatMessages(currentChatList);
+      await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
+      showToast('Message Deleted');
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chat-input-msg');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const msgObj = {
+        msgId: 'msg_' + Date.now() + '_' + Math.random(),
+        senderId: currentUser.id,
+        text: text,
+        seenBy: { [currentUser.id]: true },
+        reactions: {},
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      currentChatList.push(msgObj);
+      lastRenderedChatJson = JSON.stringify(currentChatList);
+      renderChatMessages(currentChatList);
+      input.value = '';
+      await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
+    }
+
+    function renderChatMessages(messages) {
+      const container = document.getElementById('chat-messages-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      messages.forEach(msg => {
+        if (!msg) return;
+        const isMy = (msg.senderId === currentUser.id);
+        const uProf = userProfilesMap[msg.senderId] || {};
+        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
+        const medals = getAvatarMedalsHtml(msg.senderId);
+        const online = isUserOnline(msg.senderId);
+
+        const seenByMap = msg.seenBy || {};
+        const otherViewers = Object.keys(seenByMap).filter(uid => uid !== currentUser.id);
+        let seenHtml = '';
+        if (otherViewers.length > 0) {
+          seenHtml = `<div class="seen-by-text" onclick="showSeenByModal('${msg.msgId}')">👁️ Seen by ${otherViewers.length}</div>`;
+        }
+
+        let reactionsHtml = '';
+        if (msg.reactions) {
+          let counts = {};
+          Object.values(msg.reactions).forEach(emo => { counts[emo] = (counts[emo] || 0) + 1; });
+          Object.keys(counts).forEach(emo => {
+            reactionsHtml += `<div class="reaction-pill"><span>${emo}</span> <span>${counts[emo]}</span></div>`;
+          });
+        }
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `chat-message ${isMy ? 'my-message' : 'other-message'}`;
+        msgDiv.innerHTML = `
+          <div class="chat-avatar-wrapper" style="position:relative;">
+            <img src="${dpDisplay}" class="chat-avatar" onclick="showStudentProfileModal('${msg.senderId}')">
+            ${medals}
+            ${online && !isMy ? '<div class="online-blue-tick"></div>' : ''}
+          </div>
+          <div class="chat-bubble-wrapper">
+            <div class="reaction-picker" id="reaction_picker_${msg.msgId}">
+              <span onclick="addReaction('${msg.msgId}', '👍', event)">👍</span>
+              <span onclick="addReaction('${msg.msgId}', '😂', event)">😂</span>
+              <span onclick="addReaction('${msg.msgId}', '😢', event)">😢</span>
+              <span onclick="addReaction('${msg.msgId}', '😡', event)">😡</span>
+              <span onclick="addReaction('${msg.msgId}', '❤️', event)">❤️</span>
+            </div>
+            <div class="chat-bubble" 
+                 onmousedown="handleTouchStart(event, '${msg.msgId}')" 
+                 onmouseup="handleTouchEnd()" 
+                 onmouseleave="handleTouchEnd()" 
+                 ontouchstart="handleTouchStart(event, '${msg.msgId}')" 
+                 ontouchend="handleTouchEnd()">
+              <div>${msg.text}</div>
+            </div>
+            <div class="reactions-bar">${reactionsHtml}</div>
+            ${seenHtml}
+            ${isMy ? `<div id="del_btn_${msg.msgId}" class="delete-msg-btn" onclick="deleteMyMessage('${msg.msgId}', event)"><i class="fa-solid fa-trash"></i> Delete</div>` : ''}
+          </div>
+        `;
+        container.appendChild(msgDiv);
+      });
+      scrollToBottom();
+    }
+
+    async function saveUserProfile() {
+      const name = document.getElementById('prof-input-name').value.trim();
+      if (!name) { showToast('Enter your name'); return; }
+
+      currentUser.name = name;
+      currentUser.roll = document.getElementById('prof-input-roll').value || '00';
+
+      document.getElementById('p-name').innerText = name;
+      document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
+      document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
+      document.getElementById('p-dp-img').src = currentUser.dp;
+
+      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
+        window.AppInventor.setWebViewString(JSON.stringify(currentUser));
+      }
+
+      await saveCurrentUserToDb();
+      showToast('Profile Saved!');
+      fetchFirebaseData();
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById('view-' + tabName).classList.add('active');
+
+      const tabMap = { 'home': 0, 'publish': 1, 'chat': 2, 'profile': 3 };
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => item.classList.remove('active'));
+      if (navItems[tabMap[tabName]]) navItems[tabMap[tabName]].classList.add('active');
+
+      document.getElementById('chat-bar-wrapper').style.display = (tabName === 'chat') ? 'flex' : 'none';
+      if (tabName === 'chat') setTimeout(scrollToBottom, 100);
+    }
+
+    window.onload = () => {
+      try {
+        const webViewData = window.WebViewerString || (window.AppInventor && typeof window.AppInventor.getWebViewString === 'function' ? window.AppInventor.getWebViewString() : null);
+        if (webViewData) {
+          const parsedUser = JSON.parse(webViewData);
+          if (parsedUser && parsedUser.id) currentUser = { ...currentUser, ...parsedUser };
+        }
+      } catch (e) {}
+
+      document.getElementById('p-name').innerText = currentUser.name || 'Guest Student';
+      document.getElementById('p-norm-score').innerText = `${currentUser.normScore || 0} pts`;
+      document.getElementById('p-more-score').innerText = `${currentUser.moreScore || 0} pts`;
+      document.getElementById('p-dp-img').src = currentUser.dp;
+      
+      document.getElementById('prof-input-name').value = (currentUser.name === 'Guest Student') ? '' : currentUser.name;
+      document.getElementById('prof-input-roll').value = currentUser.roll;
+      
+      initAvatarSelector();
+    };
+  </script>
+</body>
+</html>
