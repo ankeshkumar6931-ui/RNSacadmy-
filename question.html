@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -451,7 +451,7 @@
           <div style="margin-top: 15px; border-top: 1.5px solid rgba(0,0,0,0.08); padding-top: 15px;">
             <div class="form-group"><label>Full Name</label><input type="text" id="prof-input-name" class="input-field" placeholder="Enter Name"></div>
             <div class="form-group"><label>Roll Number</label><input type="number" id="prof-input-roll" class="input-field" placeholder="Roll No."></div>
-            <div class="form-group"><label>Choose Avatar (300+ Attitude & Cool Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
+            <div class="form-group"><label>Choose Avatar (500+ Cool & Human Avatars)</label><div class="avatar-grid" id="avatar-selector-grid"></div></div>
             <button class="btn-submit" type="button" onclick="saveUserProfile()">Save Profile</button>
             
             <div style="text-align: center; margin-top: 18px;">
@@ -490,7 +490,7 @@
       </div>
     </div>
 
-    <!-- Responses / Anti-Cheating Modal -->
+    <!-- Responses Modal -->
     <div id="responses-modal" class="modal-overlay" onclick="closeResponsesModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
         <h3 style="margin-bottom: 12px; font-size: 1rem;">Student Responses</h3>
@@ -567,12 +567,14 @@
       setTimeout(() => { toast.classList.remove('show'); }, 3000);
     }
 
-    function isGuestUser() {
-      return (!currentUser.name || currentUser.name.trim() === 'Guest Student' || currentUser.name.trim() === '');
+    function isGuest(uObj) {
+      if (!uObj) return true;
+      const n = uObj.name ? uObj.name.trim() : '';
+      return (!n || n === 'Guest Student' || n === 'Guest' || n === 'Student');
     }
 
     function checkGuestRestriction() {
-      if (isGuestUser()) {
+      if (isGuest(currentUser)) {
         showToast("Please save your profile first to continue!");
         switchTab('profile');
         return true;
@@ -589,12 +591,12 @@
       const grid = document.getElementById('avatar-selector-grid');
       if (!grid) return;
       grid.innerHTML = '';
-      // Safe, fast and human styles ONLY (No robots / bottts style)
+      // Highly reliable, human and cool styles only (No robots / bottts)
       const styles = ['micah', 'adventurer', 'fun-emoji', 'avataaars', 'personas', 'big-smile', 'open-peeps'];
 
-      for (let i = 1; i <= 300; i++) {
+      for (let i = 1; i <= 500; i++) {
         const style = styles[i % styles.length];
-        const seed = `Avatar_User_Cool_${i}`;
+        const seed = `Attitude_Avatar_${i}`;
         const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
 
         const img = document.createElement('img');
@@ -706,7 +708,8 @@
       let onlineCount = 0;
       Object.keys(userProfilesMap).forEach(uid => {
         const u = userProfilesMap[uid];
-        if (u && u.lastSeen && (now - u.lastSeen < 15000)) onlineCount++;
+        // Count online only if registered (not guest)
+        if (u && !isGuest(u) && u.lastSeen && (now - u.lastSeen < 15000)) onlineCount++;
       });
       document.getElementById('online-count-text').innerText = `${onlineCount} Online`;
     }
@@ -718,12 +721,15 @@
     }
 
     function calculateOverallLeaderboards() {
-      const usersArr = Object.keys(userProfilesMap).map(uid => {
-        const u = userProfilesMap[uid];
-        const nS = u.normScore || 0;
-        const mS = u.moreScore || 0;
-        return { id: uid, normScore: nS, moreScore: mS, totalScore: nS + mS, ...u };
-      });
+      // Filter out guest users from leaderboards
+      const usersArr = Object.keys(userProfilesMap)
+        .map(uid => {
+          const u = userProfilesMap[uid];
+          const nS = u.normScore || 0;
+          const mS = u.moreScore || 0;
+          return { id: uid, normScore: nS, moreScore: mS, totalScore: nS + mS, ...u };
+        })
+        .filter(u => !isGuest(u));
 
       const finalSorted = [...usersArr].sort((a, b) => b.totalScore - a.totalScore);
       overallRankMap = {};
@@ -732,57 +738,69 @@
       const finalContainer = document.getElementById('final-rankings-container');
       if (finalContainer) {
         finalContainer.innerHTML = '';
-        finalSorted.forEach(u => {
-          const isMe = u.id === currentUser.id;
-          finalContainer.innerHTML += `
-            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-              <span style="font-weight:800; width:28px;">#${overallRankMap[u.id]}</span>
-              <div style="position:relative; width:38px; height:38px;">
-                <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
-                ${getBadgeHtml(u.id)}
-              </div>
-              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.totalScore} pts</div>
-            </div>`;
-        });
+        if (finalSorted.length === 0) {
+          finalContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center;">No registered users on leaderboard.</p>';
+        } else {
+          finalSorted.forEach(u => {
+            const isMe = u.id === currentUser.id;
+            finalContainer.innerHTML += `
+              <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+                <span style="font-weight:800; width:28px;">#${overallRankMap[u.id]}</span>
+                <div style="position:relative; width:38px; height:38px;">
+                  <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+                  ${getBadgeHtml(u.id)}
+                </div>
+                <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+                <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.totalScore} pts</div>
+              </div>`;
+          });
+        }
       }
 
       const normSorted = [...usersArr].sort((a, b) => b.normScore - a.normScore);
       const normList = document.getElementById('norm-rankings-container');
       if (normList) {
         normList.innerHTML = '';
-        normSorted.forEach((u, idx) => {
-          const isMe = u.id === currentUser.id;
-          normList.innerHTML += `
-            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-              <span style="font-weight:800; width:28px;">#${idx+1}</span>
-              <div style="position:relative; width:36px; height:36px;">
-                <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
-                ${getBadgeHtml(u.id)}
-              </div>
-              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
-            </div>`;
-        });
+        if (normSorted.length === 0) {
+          normList.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center;">No registered users on leaderboard.</p>';
+        } else {
+          normSorted.forEach((u, idx) => {
+            const isMe = u.id === currentUser.id;
+            normList.innerHTML += `
+              <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+                <span style="font-weight:800; width:28px;">#${idx+1}</span>
+                <div style="position:relative; width:36px; height:36px;">
+                  <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+                  ${getBadgeHtml(u.id)}
+                </div>
+                <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+                <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
+              </div>`;
+          });
+        }
       }
 
       const moreSorted = [...usersArr].sort((a, b) => b.moreScore - a.moreScore);
       const moreList = document.getElementById('more-rankings-container');
       if (moreList) {
         moreList.innerHTML = '';
-        moreSorted.forEach((u, idx) => {
-          const isMe = u.id === currentUser.id;
-          moreList.innerHTML += `
-            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-              <span style="font-weight:800; width:28px;">#${idx+1}</span>
-              <div style="position:relative; width:36px; height:36px;">
-                <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
-                ${getBadgeHtml(u.id)}
-              </div>
-              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-              <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
-            </div>`;
-        });
+        if (moreSorted.length === 0) {
+          moreList.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center;">No registered users on leaderboard.</p>';
+        } else {
+          moreSorted.forEach((u, idx) => {
+            const isMe = u.id === currentUser.id;
+            moreList.innerHTML += `
+              <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+                <span style="font-weight:800; width:28px;">#${idx+1}</span>
+                <div style="position:relative; width:36px; height:36px;">
+                  <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+                  ${getBadgeHtml(u.id)}
+                </div>
+                <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+                <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
+              </div>`;
+          });
+        }
       }
 
       document.getElementById('p-overall-score').innerText = `Total Score: ${(currentUser.normScore||0) + (currentUser.moreScore||0)} pts`;
@@ -794,9 +812,10 @@
       if (!container) return;
       container.innerHTML = '';
 
-      const uKeys = Object.keys(userProfilesMap);
+      // Filter out guest users from online students list
+      const uKeys = Object.keys(userProfilesMap).filter(uid => !isGuest(userProfilesMap[uid]));
       if (uKeys.length === 0) {
-        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No students registered yet.</p>';
+        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No registered students available.</p>';
       } else {
         uKeys.forEach(uid => {
           const u = userProfilesMap[uid];
@@ -808,7 +827,7 @@
                 ${getBadgeHtml(uid)}
                 ${online && uid !== currentUser.id ? '<div class="online-blue-tick" style="width:9px; height:9px;"></div>' : ''}
               </div>
-              <span style="font-size:0.85rem; font-weight:800; flex:1;">${u.name || 'Guest Student'}</span>
+              <span style="font-size:0.85rem; font-weight:800; flex:1;">${u.name}</span>
               <div class="user-online-badge ${online ? 'is-online' : 'is-offline'}"></div>
             </div>
           `;
@@ -821,8 +840,8 @@
 
     function showStudentProfileModal(uid) {
       const u = userProfilesMap[uid];
-      if (!u) return;
-      document.getElementById('m-name').innerText = u.name || 'Guest Student';
+      if (!u || isGuest(u)) return;
+      document.getElementById('m-name').innerText = u.name || 'Student';
       document.getElementById('m-roll').innerText = u.roll || 'N/A';
       document.getElementById('m-norm-score').innerText = u.normScore || 0;
       document.getElementById('m-more-score').innerText = u.moreScore || 0;
