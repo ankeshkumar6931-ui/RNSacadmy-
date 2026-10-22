@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -591,7 +591,6 @@
       const grid = document.getElementById('avatar-selector-grid');
       if (!grid) return;
       grid.innerHTML = '';
-      // Highly reliable, human and cool styles only (No robots / bottts)
       const styles = ['micah', 'adventurer', 'fun-emoji', 'avataaars', 'personas', 'big-smile', 'open-peeps'];
 
       for (let i = 1; i <= 500; i++) {
@@ -656,6 +655,62 @@
     function openAboutModal() { document.getElementById('about-modal').style.display = 'flex'; }
     function closeAboutModal() { document.getElementById('about-modal').style.display = 'none'; }
 
+    // Dynamic Score Recalculation Engine based on existing questions
+    function recalculateScoresFromRemainingData() {
+      // Reset temporary scores
+      let calcNormScores = {};
+      let calcMoreScores = {};
+
+      Object.keys(userProfilesMap).forEach(uid => {
+        calcNormScores[uid] = 0;
+        calcMoreScores[uid] = 0;
+      });
+
+      // Calculate Normal Quizzes Score based on active questions
+      normQuizzesList.forEach(q => {
+        if (q.responses) {
+          Object.keys(q.responses).forEach(uid => {
+            if (calcNormScores[uid] === undefined) calcNormScores[uid] = 0;
+            if (q.responses[uid] === q.correctIndex) {
+              calcNormScores[uid] += 1;
+            } else {
+              calcNormScores[uid] -= 1;
+            }
+          });
+        }
+      });
+
+      // Calculate More Papers Score based on active questions
+      morePapersList.forEach(p => {
+        if (p.questions && p.responses) {
+          p.questions.forEach(q => {
+            const qRes = p.responses[q.qId];
+            if (qRes) {
+              Object.keys(qRes).forEach(uid => {
+                if (calcMoreScores[uid] === undefined) calcMoreScores[uid] = 0;
+                if (qRes[uid] === q.correctIndex) {
+                  calcMoreScores[uid] += 1;
+                } else {
+                  calcMoreScores[uid] -= 1;
+                }
+              });
+            }
+          });
+        }
+      });
+
+      // Update User Profiles
+      Object.keys(userProfilesMap).forEach(uid => {
+        userProfilesMap[uid].normScore = Math.max(0, calcNormScores[uid] || 0);
+        userProfilesMap[uid].moreScore = Math.max(0, calcMoreScores[uid] || 0);
+      });
+
+      if (userProfilesMap[currentUser.id]) {
+        currentUser.normScore = userProfilesMap[currentUser.id].normScore;
+        currentUser.moreScore = userProfilesMap[currentUser.id].moreScore;
+      }
+    }
+
     async function fetchFirebaseData() {
       try {
         currentUser.lastSeen = Date.now();
@@ -664,36 +719,29 @@
         let response = await fetch(`${FIREBASE_URL}/.json`);
         let data = await response.json();
         if (data) {
-          if (data.UsersMap) {
-            userProfilesMap = data.UsersMap;
-            if (userProfilesMap[currentUser.id]) {
-              let activeDp = currentUser.dp;
-              currentUser = { ...currentUser, ...userProfilesMap[currentUser.id] };
-              if (activeDp) currentUser.dp = activeDp;
-            }
-            calculateOverallLeaderboards();
-            updateOnlineCounterUI();
-          }
+          if (data.UsersMap) userProfilesMap = data.UsersMap;
 
           if (data.NormQuizzes) {
             normQuizzesList = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
-            renderNormQuizzes();
-            renderMyPublishedNorm();
           } else {
             normQuizzesList = [];
-            renderNormQuizzes();
-            renderMyPublishedNorm();
           }
 
           if (data.MorePapers) {
             morePapersList = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
-            renderMorePapers();
-            renderMyPublishedPapers();
           } else {
             morePapersList = [];
-            renderMorePapers();
-            renderMyPublishedPapers();
           }
+
+          // Recalculate and update Leaderboard dynamically
+          recalculateScoresFromRemainingData();
+          calculateOverallLeaderboards();
+          updateOnlineCounterUI();
+
+          renderNormQuizzes();
+          renderMyPublishedNorm();
+          renderMorePapers();
+          renderMyPublishedPapers();
 
           if (data.GlobalChat) {
             currentChatList = Array.isArray(data.GlobalChat) ? data.GlobalChat : Object.values(data.GlobalChat);
@@ -708,7 +756,6 @@
       let onlineCount = 0;
       Object.keys(userProfilesMap).forEach(uid => {
         const u = userProfilesMap[uid];
-        // Count online only if registered (not guest)
         if (u && !isGuest(u) && u.lastSeen && (now - u.lastSeen < 15000)) onlineCount++;
       });
       document.getElementById('online-count-text').innerText = `${onlineCount} Online`;
@@ -721,7 +768,6 @@
     }
 
     function calculateOverallLeaderboards() {
-      // Filter out guest users from leaderboards
       const usersArr = Object.keys(userProfilesMap)
         .map(uid => {
           const u = userProfilesMap[uid];
@@ -812,7 +858,6 @@
       if (!container) return;
       container.innerHTML = '';
 
-      // Filter out guest users from online students list
       const uKeys = Object.keys(userProfilesMap).filter(uid => !isGuest(userProfilesMap[uid]));
       if (uKeys.length === 0) {
         container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No registered students available.</p>';
@@ -869,7 +914,7 @@
       if (!qText || !o0 || !o1) { showToast('Enter Question and Options!'); return; }
 
       const newQ = {
-        id: 'nq_' + Date.now() + '_' + Math.random(),
+        id: 'nq_' + Date.now() + '_' + Math.floor(Math.random()*1000),
         creatorId: currentUser.id,
         question: qText,
         options: [o0, o1, o2, o3].filter(o => o !== ''),
@@ -886,6 +931,7 @@
       renderNormQuizzes(); renderMyPublishedNorm();
     }
 
+    /* Strict Under-the-hood ID Wipeout on Question Deletion */
     async function deleteNormQuestion(qId) {
       if (checkGuestRestriction()) return;
 
@@ -897,23 +943,17 @@
         return;
       }
 
-      if (q.responses) {
-        for (let uid of Object.keys(q.responses)) {
-          const ans = q.responses[uid];
-          if (userProfilesMap[uid]) {
-            if (ans === q.correctIndex) {
-              userProfilesMap[uid].normScore = Math.max(0, (userProfilesMap[uid].normScore || 0) - 1);
-            } else {
-              userProfilesMap[uid].normScore = (userProfilesMap[uid].normScore || 0) + 1;
-            }
-            await fetch(`${FIREBASE_URL}/UsersMap/${uid}.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap[uid]) });
-          }
-        }
-      }
-
+      // Filter out deleted question ID
       normQuizzesList = normQuizzesList.filter(item => item.id !== qId);
+      
+      // Save updated questions array to Firebase
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      showToast('Question Deleted & Scores Updated!');
+      
+      // Recalculate scores and sync User Database instantly
+      recalculateScoresFromRemainingData();
+      await fetch(`${FIREBASE_URL}/UsersMap.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap) });
+
+      showToast('Question & Responses Wiped Out!');
       fetchFirebaseData();
     }
 
@@ -947,8 +987,8 @@
             <div style="font-weight:800; margin-bottom:10px;">${q.question}</div>
             <div>${optsHtml}</div>
             <div style="text-align:right; margin-top:8px;">
-              <span style="font-size:0.75rem; font-weight:800; color:#15803d; cursor:pointer;" onclick="openResponsesModal('${q.id}')">
-                <i class="fa-solid fa-users"></i> Responses by (${Object.keys(responses).length})
+              <span style="font-size:0.75rem; font-weight:800; color:#15803d; cursor:pointer;" onclick="openResponsesModal('${q.id}', 'norm')">
+                <i class="fa-solid fa-users"></i> Responses (${Object.keys(responses).length})
               </span>
             </div>
           </div>
@@ -999,13 +1039,24 @@
       });
     }
 
-    function openResponsesModal(qId) {
-      const q = normQuizzesList.find(item => item.id === qId);
-      if (!q) return;
+    /* View Responses for Normal Questions & More Papers Questions */
+    function openResponsesModal(targetId, type, paperId = null) {
+      let responses = {};
+      let correctIdx = 0;
 
-      const responses = q.responses || {};
-      const myAns = responses[currentUser.id];
-      const hasAnswered = (myAns !== undefined);
+      if (type === 'norm') {
+        const q = normQuizzesList.find(item => item.id === targetId);
+        if (!q) return;
+        responses = q.responses || {};
+        correctIdx = q.correctIndex;
+      } else if (type === 'more') {
+        const p = morePapersList.find(item => item.id === paperId);
+        if (!p) return;
+        p.responses = p.responses || {};
+        responses = p.responses[targetId] || {};
+        const q = p.questions.find(item => item.qId === targetId);
+        if (q) correctIdx = q.correctIndex;
+      }
 
       const container = document.getElementById('responses-list-container');
       container.innerHTML = '';
@@ -1017,18 +1068,11 @@
         uKeys.forEach(uid => {
           const uProf = userProfilesMap[uid] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
           const givenOpt = responses[uid];
-          const isCorrect = (givenOpt === q.correctIndex);
+          const isCorrect = (givenOpt === correctIdx);
 
-          let statusBadge = '';
-          if (!hasAnswered) {
-            statusBadge = isCorrect 
-              ? `<span style="color:#15803d; font-weight:800; font-size:0.8rem; background:#dcfce7; padding:3px 8px; border-radius:10px;">Correct ✔</span>` 
-              : `<span style="color:#dc2626; font-weight:800; font-size:0.8rem; background:#fee2e2; padding:3px 8px; border-radius:10px;">Wrong ✖</span>`;
-          } else {
-            statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'};">
-              Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
-            </span>`;
-          }
+          let statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'}; background:${isCorrect ? '#dcfce7' : '#fee2e2'}; padding:3px 8px; border-radius:10px;">
+            Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
+          </span>`;
 
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border);">
@@ -1060,7 +1104,7 @@
 
       qNodes.forEach((node, idx) => {
         extractedQuestions.push({
-          qId: 'p_q_' + idx,
+          qId: 'p_q_' + Date.now() + '_' + idx,
           qText: node.getAttribute('data-q') || `Question ${idx + 1}`,
           options: [
             node.getAttribute('data-o0') || 'Option A',
@@ -1075,7 +1119,7 @@
       if (extractedQuestions.length === 0) { showToast('Invalid HTML Code!'); return; }
 
       const newPaper = {
-        id: 'mp_' + Date.now() + '_' + Math.random(),
+        id: 'mp_' + Date.now() + '_' + Math.floor(Math.random()*1000),
         creatorId: currentUser.id,
         title: title,
         questions: extractedQuestions,
@@ -1090,6 +1134,7 @@
       renderMorePapers(); renderMyPublishedPapers();
     }
 
+    /* Delete Paper Set with Clean ID Wipeout & Dynamic Score Sync */
     async function deleteMorePaper(pId) {
       if (checkGuestRestriction()) return;
 
@@ -1101,29 +1146,13 @@
         return;
       }
 
-      if (p.responses) {
-        for (let qId of Object.keys(p.responses)) {
-          const qRes = p.responses[qId];
-          const qObj = p.questions.find(item => item.qId === qId);
-          if (qObj) {
-            for (let uid of Object.keys(qRes)) {
-              const ans = qRes[uid];
-              if (userProfilesMap[uid]) {
-                if (ans === qObj.correctIndex) {
-                  userProfilesMap[uid].moreScore = Math.max(0, (userProfilesMap[uid].moreScore || 0) - 1);
-                } else {
-                  userProfilesMap[uid].moreScore = (userProfilesMap[uid].moreScore || 0) + 1;
-                }
-                await fetch(`${FIREBASE_URL}/UsersMap/${uid}.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap[uid]) });
-              }
-            }
-          }
-        }
-      }
-
       morePapersList = morePapersList.filter(item => item.id !== pId);
       await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      showToast('Paper Deleted & Scores Updated!');
+
+      recalculateScoresFromRemainingData();
+      await fetch(`${FIREBASE_URL}/UsersMap.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap) });
+
+      showToast('Paper Set Wiped Out!');
       fetchFirebaseData();
     }
 
@@ -1148,6 +1177,7 @@
       });
     }
 
+    /* Open Paper Modal with Response Counter per Question */
     function openPaperModal(pId) {
       if (checkGuestRestriction()) return;
 
@@ -1162,7 +1192,8 @@
         let optsHtml = '';
         p.responses = p.responses || {};
         p.responses[q.qId] = p.responses[q.qId] || {};
-        const myAns = p.responses[q.qId][currentUser.id];
+        const qResponses = p.responses[q.qId];
+        const myAns = qResponses[currentUser.id];
         const hasAnswered = (myAns !== undefined);
 
         q.options.forEach((o, oIdx) => {
@@ -1178,6 +1209,11 @@
           <div style="text-align:left; background:rgba(255,255,255,0.5); padding:10px; border-radius:16px; margin-bottom:10px; border:1px solid var(--card-border);">
             <div style="font-weight:800; font-size:0.85rem; margin-bottom:8px;">Q${idx+1}. ${q.qText}</div>
             <div>${optsHtml}</div>
+            <div style="text-align:right; margin-top:6px;">
+              <span style="font-size:0.75rem; font-weight:800; color:#15803d; cursor:pointer;" onclick="openResponsesModal('${q.qId}', 'more', '${p.id}')">
+                <i class="fa-solid fa-users"></i> Responses (${Object.keys(qResponses).length})
+              </span>
+            </div>
           </div>
         `;
       });
