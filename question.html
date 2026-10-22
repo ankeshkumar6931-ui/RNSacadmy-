@@ -655,9 +655,8 @@
     function openAboutModal() { document.getElementById('about-modal').style.display = 'flex'; }
     function closeAboutModal() { document.getElementById('about-modal').style.display = 'none'; }
 
-    // Dynamic Score Recalculation Engine based on existing questions
+    // Dynamic Score Recalculation Engine based on active existing questions
     function recalculateScoresFromRemainingData() {
-      // Reset temporary scores
       let calcNormScores = {};
       let calcMoreScores = {};
 
@@ -666,7 +665,6 @@
         calcMoreScores[uid] = 0;
       });
 
-      // Calculate Normal Quizzes Score based on active questions
       normQuizzesList.forEach(q => {
         if (q.responses) {
           Object.keys(q.responses).forEach(uid => {
@@ -680,7 +678,6 @@
         }
       });
 
-      // Calculate More Papers Score based on active questions
       morePapersList.forEach(p => {
         if (p.questions && p.responses) {
           p.questions.forEach(q => {
@@ -699,7 +696,6 @@
         }
       });
 
-      // Update User Profiles
       Object.keys(userProfilesMap).forEach(uid => {
         userProfilesMap[uid].normScore = Math.max(0, calcNormScores[uid] || 0);
         userProfilesMap[uid].moreScore = Math.max(0, calcMoreScores[uid] || 0);
@@ -733,7 +729,6 @@
             morePapersList = [];
           }
 
-          // Recalculate and update Leaderboard dynamically
           recalculateScoresFromRemainingData();
           calculateOverallLeaderboards();
           updateOnlineCounterUI();
@@ -931,7 +926,6 @@
       renderNormQuizzes(); renderMyPublishedNorm();
     }
 
-    /* Strict Under-the-hood ID Wipeout on Question Deletion */
     async function deleteNormQuestion(qId) {
       if (checkGuestRestriction()) return;
 
@@ -943,13 +937,9 @@
         return;
       }
 
-      // Filter out deleted question ID
       normQuizzesList = normQuizzesList.filter(item => item.id !== qId);
-      
-      // Save updated questions array to Firebase
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
       
-      // Recalculate scores and sync User Database instantly
       recalculateScoresFromRemainingData();
       await fetch(`${FIREBASE_URL}/UsersMap.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap) });
 
@@ -996,6 +986,7 @@
       });
     }
 
+    /* Instant Real-Time Score Update Engine */
     async function submitNormAnswer(qId, optIdx) {
       if (checkGuestRestriction()) return;
 
@@ -1014,10 +1005,15 @@
         showToast('Wrong Answer! -1 Pt');
       }
 
+      userProfilesMap[currentUser.id] = currentUser;
+
+      // Instant UI Sync
       renderNormQuizzes();
+      calculateOverallLeaderboards();
+      
+      // Instant Parallel DB Sync
       saveUserProfileToDb();
-      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      fetchFirebaseData();
+      fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
     }
 
     function renderMyPublishedNorm() {
@@ -1039,16 +1035,18 @@
       });
     }
 
-    /* View Responses for Normal Questions & More Papers Questions */
+    /* Smart View Responses Modal: Correct/Wrong BEFORE Answer, Option Details AFTER Answer */
     function openResponsesModal(targetId, type, paperId = null) {
       let responses = {};
       let correctIdx = 0;
+      let hasMyAnswered = false;
 
       if (type === 'norm') {
         const q = normQuizzesList.find(item => item.id === targetId);
         if (!q) return;
         responses = q.responses || {};
         correctIdx = q.correctIndex;
+        hasMyAnswered = (responses[currentUser.id] !== undefined);
       } else if (type === 'more') {
         const p = morePapersList.find(item => item.id === paperId);
         if (!p) return;
@@ -1056,6 +1054,7 @@
         responses = p.responses[targetId] || {};
         const q = p.questions.find(item => item.qId === targetId);
         if (q) correctIdx = q.correctIndex;
+        hasMyAnswered = (responses[currentUser.id] !== undefined);
       }
 
       const container = document.getElementById('responses-list-container');
@@ -1070,9 +1069,18 @@
           const givenOpt = responses[uid];
           const isCorrect = (givenOpt === correctIdx);
 
-          let statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'}; background:${isCorrect ? '#dcfce7' : '#fee2e2'}; padding:3px 8px; border-radius:10px;">
-            Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
-          </span>`;
+          let statusBadge = '';
+          if (!hasMyAnswered) {
+            // Answer Dene se Pehle: SIRF Correct / Wrong Dikhega
+            statusBadge = isCorrect 
+              ? `<span style="color:#15803d; font-weight:800; font-size:0.8rem; background:#dcfce7; padding:3px 8px; border-radius:10px;">Correct ✔</span>` 
+              : `<span style="color:#dc2626; font-weight:800; font-size:0.8rem; background:#fee2e2; padding:3px 8px; border-radius:10px;">Wrong ✖</span>`;
+          } else {
+            // Answer Dene ke Baad: Option Detail ke saath Dikhega
+            statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'}; background:${isCorrect ? '#dcfce7' : '#fee2e2'}; padding:3px 8px; border-radius:10px;">
+              Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
+            </span>`;
+          }
 
           container.innerHTML += `
             <div style="display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border);">
@@ -1134,7 +1142,6 @@
       renderMorePapers(); renderMyPublishedPapers();
     }
 
-    /* Delete Paper Set with Clean ID Wipeout & Dynamic Score Sync */
     async function deleteMorePaper(pId) {
       if (checkGuestRestriction()) return;
 
@@ -1177,7 +1184,6 @@
       });
     }
 
-    /* Open Paper Modal with Response Counter per Question */
     function openPaperModal(pId) {
       if (checkGuestRestriction()) return;
 
@@ -1223,6 +1229,7 @@
 
     function closePaperModal() { document.getElementById('paper-modal').style.display = 'none'; }
 
+    /* Instant Real-time Score Update for Bulk Papers */
     async function submitPaperQuestionAnswer(paperId, qId, optIdx) {
       if (checkGuestRestriction()) return;
 
@@ -1243,10 +1250,15 @@
         showToast('Wrong! -1 Pt');
       }
 
+      userProfilesMap[currentUser.id] = currentUser;
+
+      // Instant UI Sync
       openPaperModal(paperId);
+      calculateOverallLeaderboards();
+
+      // Instant Parallel DB Sync
       saveUserProfileToDb();
-      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-      fetchFirebaseData();
+      fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
     }
 
     function renderMyPublishedPapers() {
