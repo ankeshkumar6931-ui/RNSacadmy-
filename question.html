@@ -105,7 +105,7 @@
       box-shadow: 0 0 8px #22c55e;
     }
 
-    /* CUSTOM DYNAMIC TOAST POPUP (GREEN/RED) */
+    /* TOAST POPUP (GREEN/RED) */
     #custom-toast {
       position: fixed;
       top: -70px;
@@ -121,7 +121,7 @@
       box-shadow: 0 12px 20px rgba(0,0,0,0.15);
       backdrop-filter: blur(16px);
       z-index: 9999999;
-      transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
     }
     #custom-toast.show { top: 20px; }
@@ -310,18 +310,12 @@
     .nav-item span { font-size: 0.6rem; margin-top: 2px; font-weight: 800; pointer-events: none; }
     .nav-item.active { transform: translateY(-3px) scale(1.05); border-color: rgba(255, 255, 255, 0.95); background: rgba(185, 232, 198, 0.85); }
 
-    /* MODAL OVERLAYS LAYER STACKING FIX */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(20, 45, 30, 0.35); display: none; justify-content: center; align-items: center; z-index: 999999; backdrop-filter: blur(8px);
     }
     
-    /* Paper View Modal Level */
     #paper-modal { z-index: 999990; }
-    
-    /* Student Responses Modal Level */
     #responses-modal { z-index: 999995; }
-    
-    /* Student Profile Details Modal TOP LEVEL (Always opens on top of question/responses) */
     #profile-modal { z-index: 999999; }
 
     .modal-card {
@@ -337,9 +331,8 @@
 </head>
 <body onclick="hideAllPopups(event)">
 
-  <!-- AUTH MODAL (LOGIN / SIGNUP) -->
+  <!-- AUTH MODAL -->
   <div id="auth-modal" class="modal-overlay" style="display:none;">
-    <!-- SIGNUP BOX -->
     <div id="auth-signup-box" class="modal-card" style="display:block;" onclick="event.stopPropagation()">
       <h3 style="margin-bottom: 12px; font-size: 1.1rem;"><i class="fa-solid fa-user-plus"></i> Create New Account</h3>
       <div class="form-group"><label>Full Name</label><input type="text" id="auth-reg-name" class="input-field" placeholder="Enter Full Name"></div>
@@ -349,7 +342,6 @@
       <div style="margin-top: 14px; font-size: 0.8rem; font-weight: 700; color: #15803d; cursor: pointer; text-decoration: underline;" onclick="toggleAuthBox('login')">Already have an account? Login</div>
     </div>
 
-    <!-- LOGIN BOX -->
     <div id="auth-login-box" class="modal-card" style="display:none;" onclick="event.stopPropagation()">
       <h3 style="margin-bottom: 12px; font-size: 1.1rem;"><i class="fa-solid fa-right-to-bracket"></i> Login to Account</h3>
       <div class="form-group"><label>Roll Number / ID</label><input type="number" id="auth-log-roll" class="input-field" placeholder="Enter Roll No."></div>
@@ -359,7 +351,7 @@
     </div>
   </div>
 
-  <!-- CUSTOM DYNAMIC TOAST -->
+  <!-- TOAST -->
   <div id="custom-toast" class="toast-success">
     <i id="toast-icon" class="fa-solid fa-circle-check"></i>
     <span id="toast-message">Success!</span>
@@ -374,11 +366,11 @@
       </div>
       <div class="online-counter-btn" onclick="openOnlineStudentsModal()">
         <div class="online-dot"></div>
-        <span id="online-count-text">Students Online</span>
+        <span id="online-count-text">1 Online</span>
       </div>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- Main Content -->
     <div class="content-area" id="main-content-scroll">
       
       <!-- 1. HOME SCREEN -->
@@ -511,13 +503,13 @@
     <!-- Online Students Modal -->
     <div id="online-modal" class="modal-overlay" onclick="closeOnlineStudentsModal()">
       <div class="modal-card" style="max-width: 340px;" onclick="event.stopPropagation()">
-        <h3 style="margin-bottom: 12px; font-size: 1rem;">👥 Registered Students</h3>
+        <h3 style="margin-bottom: 12px; font-size: 1rem;">👥 Registered Online Students</h3>
         <div id="online-students-list-container" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
         <button class="btn-submit" style="margin-top: 15px; padding: 10px;" type="button" onclick="closeOnlineStudentsModal()">Close</button>
       </div>
     </div>
 
-    <!-- Student Details Modal (Always TOP LEVEL) -->
+    <!-- Student Details Modal -->
     <div id="profile-modal" class="modal-overlay" onclick="closeProfileModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
         <div style="position:relative; width:80px; height:80px; margin:0 auto 8px auto;">
@@ -538,8 +530,8 @@
     <!-- Responses Modal -->
     <div id="responses-modal" class="modal-overlay" onclick="closeResponsesModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
-        <h3 style="margin-bottom: 12px; font-size: 1rem;">Student Responses</h3>
-        <div id="responses-list-container" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
+        <h3 id="responses-modal-title" style="margin-bottom: 12px; font-size: 1rem;">Student Responses</h3>
+        <div id="responses-list-container" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
         <button class="btn-submit" style="margin-top: 15px; padding: 10px;" type="button" onclick="closeResponsesModal()">Close</button>
       </div>
     </div>
@@ -605,13 +597,14 @@
     let morePapersList = [];
     let currentChatList = [];
     let overallRankMap = {};
+    let toastTimer = null;
 
-    /* SMART ENGLISH DYNAMIC TOAST (GREEN/RED) */
     function showToast(msg, type = 'success') {
       const toast = document.getElementById('custom-toast');
       const toastMsg = document.getElementById('toast-message');
       const toastIcon = document.getElementById('toast-icon');
 
+      if (!toast) return;
       toastMsg.innerText = msg;
 
       if (type === 'error') {
@@ -623,7 +616,8 @@
       }
 
       toast.classList.add('show');
-      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 2500);
     }
 
     function toggleAuthBox(mode) {
@@ -708,7 +702,7 @@
 
       initAvatarSelector();
       fetchFirebaseData();
-      setInterval(fetchFirebaseData, 3000);
+      setInterval(fetchFirebaseData, 5000);
     }
 
     function scrollToBottom() {
@@ -722,7 +716,7 @@
       grid.innerHTML = '';
       const styles = ['micah', 'adventurer', 'fun-emoji', 'avataaars', 'personas', 'big-smile', 'open-peeps'];
 
-      for (let i = 1; i <= 500; i++) {
+      for (let i = 1; i <= 200; i++) {
         const style = styles[i % styles.length];
         const seed = `Attitude_Avatar_${i}`;
         const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
@@ -789,8 +783,10 @@
       let calcMoreScores = {};
 
       Object.keys(userProfilesMap).forEach(uid => {
-        calcNormScores[uid] = 0;
-        calcMoreScores[uid] = 0;
+        if (uid && userProfilesMap[uid] && userProfilesMap[uid].name) {
+          calcNormScores[uid] = 0;
+          calcMoreScores[uid] = 0;
+        }
       });
 
       normQuizzesList.forEach(q => {
@@ -825,8 +821,10 @@
       });
 
       Object.keys(userProfilesMap).forEach(uid => {
-        userProfilesMap[uid].normScore = Math.max(0, calcNormScores[uid] || 0);
-        userProfilesMap[uid].moreScore = Math.max(0, calcMoreScores[uid] || 0);
+        if (userProfilesMap[uid]) {
+          userProfilesMap[uid].normScore = Math.max(0, calcNormScores[uid] || 0);
+          userProfilesMap[uid].moreScore = Math.max(0, calcMoreScores[uid] || 0);
+        }
       });
 
       if (userProfilesMap[currentUser.id]) {
@@ -839,12 +837,24 @@
       if (!currentUser.id) return;
       try {
         currentUser.lastSeen = Date.now();
-        await fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}/lastSeen.json`, { method: 'PUT', body: JSON.stringify(currentUser.lastSeen) });
+        fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}/lastSeen.json`, { method: 'PUT', body: JSON.stringify(currentUser.lastSeen) });
 
         let response = await fetch(`${FIREBASE_URL}/.json`);
         let data = await response.json();
         if (data) {
-          if (data.UsersMap) userProfilesMap = data.UsersMap;
+          const mainScroll = document.getElementById('main-content-scroll');
+          const savedScrollTop = mainScroll ? mainScroll.scrollTop : 0;
+
+          if (data.UsersMap) {
+            // Filter out corrupted/undefined guest entries
+            let cleanMap = {};
+            Object.keys(data.UsersMap).forEach(k => {
+              if (data.UsersMap[k] && data.UsersMap[k].name && data.UsersMap[k].id) {
+                cleanMap[k] = data.UsersMap[k];
+              }
+            });
+            userProfilesMap = cleanMap;
+          }
 
           if (data.NormQuizzes) {
             normQuizzesList = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
@@ -871,6 +881,8 @@
             currentChatList = Array.isArray(data.GlobalChat) ? data.GlobalChat : Object.values(data.GlobalChat);
             renderChatMessages(currentChatList);
           }
+
+          if (mainScroll) mainScroll.scrollTop = savedScrollTop;
         }
       } catch (e) {}
     }
@@ -878,21 +890,31 @@
     function updateOnlineCounterUI() {
       const now = Date.now();
       let onlineCount = 0;
+      
+      // Ensure current user counts as online at minimum
+      userProfilesMap[currentUser.id] = currentUser;
+
       Object.keys(userProfilesMap).forEach(uid => {
         const u = userProfilesMap[uid];
-        if (u && u.lastSeen && (now - u.lastSeen < 15000)) onlineCount++;
+        if (u && u.name && u.lastSeen && (now - u.lastSeen < 30000)) {
+          onlineCount++;
+        }
       });
+
+      if (onlineCount < 1) onlineCount = 1;
       document.getElementById('online-count-text').innerText = `${onlineCount} Online`;
     }
 
     function isUserOnline(uid) {
+      if (uid === currentUser.id) return true;
       if (!userProfilesMap[uid]) return false;
       const last = userProfilesMap[uid].lastSeen || 0;
-      return (Date.now() - last < 15000);
+      return (Date.now() - last < 30000);
     }
 
     function calculateOverallLeaderboards() {
       const usersArr = Object.keys(userProfilesMap)
+        .filter(uid => userProfilesMap[uid] && userProfilesMap[uid].name)
         .map(uid => {
           const u = userProfilesMap[uid];
           const nS = u.normScore || 0;
@@ -973,7 +995,8 @@
       if (!container) return;
       container.innerHTML = '';
 
-      const uKeys = Object.keys(userProfilesMap);
+      const uKeys = Object.keys(userProfilesMap).filter(uid => userProfilesMap[uid] && userProfilesMap[uid].name);
+      
       uKeys.forEach(uid => {
         const u = userProfilesMap[uid];
         const online = isUserOnline(uid);
@@ -984,7 +1007,7 @@
               ${getBadgeHtml(uid)}
               ${online && uid !== currentUser.id ? '<div class="online-blue-tick" style="width:9px; height:9px;"></div>' : ''}
             </div>
-            <span style="font-size:0.85rem; font-weight:800; flex:1;">${u.name}</span>
+            <span style="font-size:0.85rem; font-weight:800; flex:1;">${u.name} ${uid === currentUser.id ? '(You)' : ''}</span>
             <div class="user-online-badge ${online ? 'is-online' : 'is-offline'}"></div>
           </div>
         `;
@@ -994,7 +1017,6 @@
 
     function closeOnlineStudentsModal() { document.getElementById('online-modal').style.display = 'none'; }
 
-    /* Open Student Profile Modal at TOP z-index */
     function showStudentProfileModal(uid) {
       const u = userProfilesMap[uid];
       if (!u) return;
@@ -1068,25 +1090,34 @@
         return;
       }
       container.innerHTML = '';
-      normQuizzesList.forEach(q => {
+      
+      const reversedList = [...normQuizzesList].reverse();
+      
+      reversedList.forEach(q => {
         let optsHtml = '';
         const responses = q.responses || {};
         const myAns = responses[currentUser.id];
         const hasAnswered = (myAns !== undefined);
 
         q.options.forEach((o, idx) => {
-          let st = "background: rgba(255,255,255,0.7);";
+          let st = "background: rgba(255,255,255,0.7); color: var(--text-dark);";
           if (hasAnswered) {
-            if (idx === q.correctIndex) st = "background: rgba(34,197,94,0.9); color:#fff; font-weight:800;";
-            else if (idx === myAns) st = "background: rgba(239,68,68,0.9); color:#fff; font-weight:800;";
+            if (idx === q.correctIndex) {
+              st = "background: rgba(34,197,94,0.95) !important; color:#fff !important; font-weight:800;";
+            } else if (idx === myAns) {
+              st = "background: rgba(239,68,68,0.95) !important; color:#fff !important; font-weight:800;";
+            }
           }
           optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
 
-        const creatorProf = userProfilesMap[q.creatorId] || { name: 'Student' };
+        const creatorProf = userProfilesMap[q.creatorId] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
         container.innerHTML += `
           <div class="card">
-            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:800; margin-bottom:4px;">By ${creatorProf.name}</div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${q.creatorId}')">
+              <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--card-border);">
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:800;">By ${creatorProf.name}</span>
+            </div>
             <div style="font-weight:800; margin-bottom:10px;">${q.question}</div>
             <div>${optsHtml}</div>
             <div style="text-align:right; margin-top:8px;">
@@ -1099,29 +1130,33 @@
       });
     }
 
-    async function submitNormAnswer(qId, optIdx) {
+    function submitNormAnswer(qId, optIdx) {
       const q = normQuizzesList.find(item => item.id === qId);
       if (!q) return;
       q.responses = q.responses || {};
+      
       if (q.responses[currentUser.id] !== undefined) return;
 
+      // INSTANT ZERO-LAG LOCAL UPDATE
       q.responses[currentUser.id] = optIdx;
-
-      if (optIdx === q.correctIndex) {
-        currentUser.normScore = (currentUser.normScore || 0) + 1;
-        showToast('Correct Answer! +1 Pt', 'success');
-      } else {
-        currentUser.normScore = (currentUser.normScore || 0) - 1;
-        showToast('Wrong Answer! -1 Pt', 'error');
-      }
-
-      userProfilesMap[currentUser.id] = currentUser;
-
+      recalculateScoresFromRemainingData();
       renderNormQuizzes();
       calculateOverallLeaderboards();
-      
-      saveUserProfileToDb();
-      fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
+
+      showToast(optIdx === q.correctIndex ? 'Correct Answer! +1 Pt' : 'Wrong Answer! -1 Pt', optIdx === q.correctIndex ? 'success' : 'error');
+
+      // ASYNC FIREBASE SYNC (In Background without freezing)
+      const quizIndex = normQuizzesList.findIndex(item => item.id === qId);
+      if (quizIndex !== -1) {
+        fetch(`${FIREBASE_URL}/NormQuizzes/${quizIndex}/responses/${currentUser.id}.json`, { 
+          method: 'PUT', 
+          body: JSON.stringify(optIdx) 
+        });
+      }
+      fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { 
+        method: 'PUT', 
+        body: JSON.stringify(currentUser) 
+      });
     }
 
     function renderMyPublishedNorm() {
@@ -1133,7 +1168,7 @@
         return;
       }
       container.innerHTML = '';
-      myQs.forEach(q => {
+      myQs.reverse().forEach(q => {
         container.innerHTML += `
           <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
             <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${q.question}</div>
@@ -1144,57 +1179,93 @@
     }
 
     function openResponsesModal(targetId, type, paperId = null) {
-      let responses = {};
-      let correctIdx = 0;
-      let hasMyAnswered = false;
-
-      if (type === 'norm') {
-        const q = normQuizzesList.find(item => item.id === targetId);
-        if (!q) return;
-        responses = q.responses || {};
-        correctIdx = q.correctIndex;
-        hasMyAnswered = (responses[currentUser.id] !== undefined);
-      } else if (type === 'more') {
-        const p = morePapersList.find(item => item.id === paperId);
-        if (!p) return;
-        p.responses = p.responses || {};
-        responses = p.responses[targetId] || {};
-        const q = p.questions.find(item => item.qId === targetId);
-        if (q) correctIdx = q.correctIndex;
-        hasMyAnswered = (responses[currentUser.id] !== undefined);
-      }
-
       const container = document.getElementById('responses-list-container');
       container.innerHTML = '';
 
-      const uKeys = Object.keys(responses);
-      if (uKeys.length === 0) {
-        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No responses yet.</p>';
-      } else {
-        uKeys.forEach(uid => {
-          const uProf = userProfilesMap[uid] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
-          const givenOpt = responses[uid];
-          const isCorrect = (givenOpt === correctIdx);
+      if (type === 'paper_overall') {
+        document.getElementById('responses-modal-title').innerText = "Overall Paper Responses";
+        const p = morePapersList.find(item => item.id === targetId);
+        if (!p) return;
 
-          let statusBadge = '';
-          if (!hasMyAnswered) {
-            statusBadge = isCorrect 
-              ? `<span style="color:#15803d; font-weight:800; font-size:0.8rem; background:#dcfce7; padding:3px 8px; border-radius:10px;">Correct ✔</span>` 
-              : `<span style="color:#dc2626; font-weight:800; font-size:0.8rem; background:#fee2e2; padding:3px 8px; border-radius:10px;">Wrong ✖</span>`;
-          } else {
-            statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'}; background:${isCorrect ? '#dcfce7' : '#fee2e2'}; padding:3px 8px; border-radius:10px;">
-              Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
-            </span>`;
-          }
-
-          container.innerHTML += `
-            <div style="display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
-              <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
-              <span style="font-size:0.82rem; font-weight:800; flex:1;">${uProf.name}</span>
-              ${statusBadge}
-            </div>
-          `;
+        let userPaperScores = {};
+        p.questions.forEach(q => {
+          const qRes = (p.responses && p.responses[q.qId]) ? p.responses[q.qId] : {};
+          Object.keys(qRes).forEach(uid => {
+            if (userPaperScores[uid] === undefined) userPaperScores[uid] = 0;
+            if (qRes[uid] === q.correctIndex) userPaperScores[uid] += 1;
+            else userPaperScores[uid] -= 1;
+          });
         });
+
+        const uKeys = Object.keys(userPaperScores);
+        if (uKeys.length === 0) {
+          container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No attempts for this paper yet.</p>';
+        } else {
+          uKeys.forEach(uid => {
+            const uProf = userProfilesMap[uid] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+            const pScore = userPaperScores[uid];
+            container.innerHTML += `
+              <div style="display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
+                <img src="${uProf.dp}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+                <span style="font-size:0.85rem; font-weight:800; flex:1;">${uProf.name}</span>
+                <span style="font-weight:800; font-size:0.8rem; color:${pScore >= 0 ? '#15803d' : '#dc2626'}; background:${pScore >= 0 ? '#dcfce7' : '#fee2e2'}; padding:3px 10px; border-radius:12px;">
+                  ${pScore} / ${p.questions.length} pts
+                </span>
+              </div>
+            `;
+          });
+        }
+      } else {
+        document.getElementById('responses-modal-title').innerText = "Question Responses";
+        let responses = {};
+        let correctIdx = 0;
+        let hasMyAnswered = false;
+
+        if (type === 'norm') {
+          const q = normQuizzesList.find(item => item.id === targetId);
+          if (!q) return;
+          responses = q.responses || {};
+          correctIdx = q.correctIndex;
+          hasMyAnswered = (responses[currentUser.id] !== undefined);
+        } else if (type === 'more') {
+          const p = morePapersList.find(item => item.id === paperId);
+          if (!p) return;
+          p.responses = p.responses || {};
+          responses = p.responses[targetId] || {};
+          const q = p.questions.find(item => item.qId === targetId);
+          if (q) correctIdx = q.correctIndex;
+          hasMyAnswered = (responses[currentUser.id] !== undefined);
+        }
+
+        const uKeys = Object.keys(responses);
+        if (uKeys.length === 0) {
+          container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No responses yet.</p>';
+        } else {
+          uKeys.forEach(uid => {
+            const uProf = userProfilesMap[uid] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+            const givenOpt = responses[uid];
+            const isCorrect = (givenOpt === correctIdx);
+
+            let statusBadge = '';
+            if (!hasMyAnswered) {
+              statusBadge = isCorrect 
+                ? `<span style="color:#15803d; font-weight:800; font-size:0.8rem; background:#dcfce7; padding:3px 8px; border-radius:10px;">Correct ✔</span>` 
+                : `<span style="color:#dc2626; font-weight:800; font-size:0.8rem; background:#fee2e2; padding:3px 8px; border-radius:10px;">Wrong ✖</span>`;
+            } else {
+              statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'}; background:${isCorrect ? '#dcfce7' : '#fee2e2'}; padding:3px 8px; border-radius:10px;">
+                Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
+              </span>`;
+            }
+
+            container.innerHTML += `
+              <div style="display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
+                <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+                <span style="font-size:0.82rem; font-weight:800; flex:1;">${uProf.name}</span>
+                ${statusBadge}
+              </div>
+            `;
+          });
+        }
       }
       document.getElementById('responses-modal').style.display = 'flex';
     }
@@ -1272,14 +1343,32 @@
         return;
       }
       container.innerHTML = '';
-      morePapersList.forEach(p => {
-        const creatorProf = userProfilesMap[p.creatorId] || { name: 'Student' };
+
+      const reversedPapers = [...morePapersList].reverse();
+
+      reversedPapers.forEach(p => {
+        const creatorProf = userProfilesMap[p.creatorId] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
+        
+        let attemptedUsers = new Set();
+        if (p.questions && p.responses) {
+          p.questions.forEach(q => {
+            const qRes = p.responses[q.qId] || {};
+            Object.keys(qRes).forEach(u => attemptedUsers.add(u));
+          });
+        }
+
         container.innerHTML += `
           <div class="card">
-            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:800; margin-bottom:4px;">By ${creatorProf.name}</div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;" onclick="showStudentProfileModal('${p.creatorId}')">
+              <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--card-border);">
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:800;">By ${creatorProf.name}</span>
+            </div>
             <div style="font-weight:800; font-size:1rem; margin-bottom:4px;">${p.title}</div>
             <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Total Questions: ${p.questions.length}</p>
-            <button class="btn-submit" style="padding:10px; font-size:0.85rem;" onclick="openPaperModal('${p.id}')">Start Attempting Paper</button>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-submit" style="padding:10px; font-size:0.85rem; flex:2;" onclick="openPaperModal('${p.id}')">Start Attempting</button>
+              <button class="btn-submit" style="padding:10px; font-size:0.75rem; flex:1; background:rgba(255,255,255,0.7);" onclick="openResponsesModal('${p.id}', 'paper_overall')"><i class="fa-solid fa-users"></i> Responses (${attemptedUsers.size})</button>
+            </div>
           </div>
         `;
       });
@@ -1302,10 +1391,13 @@
         const hasAnswered = (myAns !== undefined);
 
         q.options.forEach((o, oIdx) => {
-          let st = "background: rgba(255,255,255,0.7);";
+          let st = "background: rgba(255,255,255,0.7); color: var(--text-dark);";
           if (hasAnswered) {
-            if (oIdx === q.correctIndex) st = "background: rgba(34,197,94,0.9); color:#fff; font-weight:800;";
-            else if (oIdx === myAns) st = "background: rgba(239,68,68,0.9); color:#fff; font-weight:800;";
+            if (oIdx === q.correctIndex) {
+              st = "background: rgba(34,197,94,0.95) !important; color:#fff !important; font-weight:800;";
+            } else if (oIdx === myAns) {
+              st = "background: rgba(239,68,68,0.95) !important; color:#fff !important; font-weight:800;";
+            }
           }
           optsHtml += `<button class="btn-submit" style="margin-bottom:6px; padding:8px; ${st}" onclick="submitPaperQuestionAnswer('${p.id}', '${q.qId}', ${oIdx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
@@ -1328,31 +1420,36 @@
 
     function closePaperModal() { document.getElementById('paper-modal').style.display = 'none'; }
 
-    async function submitPaperQuestionAnswer(paperId, qId, optIdx) {
+    function submitPaperQuestionAnswer(paperId, qId, optIdx) {
       const p = morePapersList.find(item => item.id === paperId);
       if (!p) return;
       p.responses = p.responses || {};
       p.responses[qId] = p.responses[qId] || {};
+      
       if (p.responses[qId][currentUser.id] !== undefined) return;
 
+      // INSTANT UI UPDATE
       p.responses[qId][currentUser.id] = optIdx;
-
       const q = p.questions.find(item => item.qId === qId);
-      if (optIdx === q.correctIndex) {
-        currentUser.moreScore = (currentUser.moreScore || 0) + 1;
-        showToast('Correct Answer! +1 Pt', 'success');
-      } else {
-        currentUser.moreScore = (currentUser.moreScore || 0) - 1;
-        showToast('Wrong Answer! -1 Pt', 'error');
-      }
-
-      userProfilesMap[currentUser.id] = currentUser;
-
+      
+      recalculateScoresFromRemainingData();
       openPaperModal(paperId);
       calculateOverallLeaderboards();
 
-      saveUserProfileToDb();
-      fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
+      showToast(optIdx === q.correctIndex ? 'Correct Answer! +1 Pt' : 'Wrong Answer! -1 Pt', optIdx === q.correctIndex ? 'success' : 'error');
+
+      // ASYNC FIREBASE SYNC
+      const paperIndex = morePapersList.findIndex(item => item.id === paperId);
+      if (paperIndex !== -1) {
+        fetch(`${FIREBASE_URL}/MorePapers/${paperIndex}/responses/${qId}/${currentUser.id}.json`, { 
+          method: 'PUT', 
+          body: JSON.stringify(optIdx) 
+        });
+      }
+      fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { 
+        method: 'PUT', 
+        body: JSON.stringify(currentUser) 
+      });
     }
 
     function renderMyPublishedPapers() {
@@ -1364,7 +1461,7 @@
         return;
       }
       container.innerHTML = '';
-      myPs.forEach(p => {
+      myPs.reverse().forEach(p => {
         container.innerHTML += `
           <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
             <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${p.title}</div>
@@ -1461,7 +1558,6 @@
             ${online && !isMy ? '<div class="online-blue-tick"></div>' : ''}
           </div>
           <div class="chat-bubble-wrapper">
-            <!-- 6 EMOJIS SELECTION BAR -->
             <div class="reaction-picker" id="reaction_picker_${msg.msgId}">
               <span onclick="addReaction('${msg.msgId}', '👍', event)">👍</span>
               <span onclick="addReaction('${msg.msgId}', '😂', event)">😂</span>
