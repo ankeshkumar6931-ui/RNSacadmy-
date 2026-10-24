@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,99 +7,24 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Agora RTC Web SDK -->
-  <script src="https://download.agora.io/sdk/web/AgoraRTC_N-4.20.0.js"></script>
+  <!-- 📌 Agora Web SDK (Stable CDN Version) -->
+  <script src="https://download.agora.io/sdk/web/AgoraRTC_N-4.18.0.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    body {
-      background: #121212;
-      color: #ffffff;
-      padding: 15px;
-      display: flex;
-      justify-content: center;
-    }
-    .admin-container {
-      width: 100%;
-      max-width: 500px;
-    }
-    .card {
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 20px;
-    }
-    h2, h3 {
-      color: #22c55e;
-      margin-bottom: 12px;
-    }
-    .form-group {
-      margin-bottom: 12px;
-    }
-    label {
-      display: block;
-      font-size: 0.85rem;
-      color: #aaa;
-      margin-bottom: 5px;
-      font-weight: 600;
-    }
-    .input-field {
-      width: 100%;
-      background: #2a2a2a;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 10px 14px;
-      color: #fff;
-      outline: none;
-      font-size: 0.9rem;
-    }
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: #22c55e;
-      color: #000;
-      font-weight: 800;
-      font-size: 0.95rem;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-    .btn-danger {
-      background: #ef4444;
-      color: #fff;
-    }
-    .btn-secondary {
-      background: #3b82f6;
-      color: #fff;
-    }
-    #video-preview {
-      width: 100%;
-      height: 240px;
-      background: #000;
-      border-radius: 12px;
-      margin-top: 10px;
-      position: relative;
-      overflow: hidden;
-    }
-    #camera-controls {
-      display: none;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    #upload-progress {
-      display: none;
-      color: #eab308;
-      font-size: 0.85rem;
-      margin-top: 5px;
-      font-weight: 700;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: #121212; color: #ffffff; padding: 15px; display: flex; justify-content: center; }
+    .admin-container { width: 100%; max-width: 500px; }
+    .card { background: #1e1e1e; border: 1px solid #333; border-radius: 16px; padding: 18px; margin-bottom: 20px; }
+    h2, h3 { color: #22c55e; margin-bottom: 12px; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 5px; font-weight: 600; }
+    .input-field { width: 100%; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; padding: 10px 14px; color: #fff; outline: none; font-size: 0.9rem; }
+    .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #22c55e; color: #000; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 5px; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-secondary { background: #3b82f6; color: #fff; }
+    #video-preview { width: 100%; height: 240px; background: #000; border-radius: 12px; margin-top: 10px; position: relative; overflow: hidden; }
+    #camera-controls { display: none; gap: 10px; margin-top: 10px; }
+    #upload-progress { display: none; color: #eab308; font-size: 0.85rem; margin-top: 5px; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -110,7 +35,7 @@
   <!-- 1. LIVE STREAMING CONTROLS (AGORA) -->
   <div class="card">
     <h3>🔴 Agora Live Streaming Control</h3>
-    <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">एक क्लिक में लाइव शुरू करें और सीधे ऐप में दिखेगा।</p>
+    <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">एक क्लिक में लाइव शुरू करें।</p>
     
     <div id="video-preview"></div>
 
@@ -118,7 +43,7 @@
     <button id="btn-stop-live" class="btn btn-danger" style="display:none;" onclick="stopLiveStream()"><i class="fa-solid fa-power-off"></i> End Live Stream</button>
 
     <div id="camera-controls">
-      <button class="btn btn-secondary" onclick="switchCamera()"><i class="fa-solid fa-camera-rotate"></i> Switch Camera (Front/Back)</button>
+      <button class="btn btn-secondary" onclick="switchCamera()"><i class="fa-solid fa-camera-rotate"></i> Switch Camera</button>
     </div>
   </div>
 
@@ -163,7 +88,7 @@
     <div class="form-group"><label>Paper Set Title</label><input type="text" id="admin-paper-title" class="input-field" placeholder="e.g. Math Quiz Set 1"></div>
     <div class="form-group">
       <label>Paste HTML Code</label>
-      <textarea id="admin-paper-html" class="input-field" rows="5" placeholder="Paste HTML code generated from AI..."></textarea>
+      <textarea id="admin-paper-html" class="input-field" rows="5" placeholder="Paste HTML code..."></textarea>
     </div>
     <button class="btn" onclick="postMorePaperSet()"><i class="fa-solid fa-file-code"></i> Publish Paper Set</button>
   </div>
@@ -183,7 +108,7 @@
   // 1. 🔴 LIVE STREAMING LOGIC
   async function startLiveStream() {
     if (typeof AgoraRTC === 'undefined') {
-      alert("Agora SDK अभी पूरी तरह लोड नहीं हुआ है। कृपया पेज रीफ्रेश करें।");
+      alert("Agora SDK लोड नहीं हो पाया है। कृपया इंटरनेट चेक करें या क्रोम ब्राउज़र में खोलें।");
       return;
     }
 
@@ -215,30 +140,21 @@
 
       alert("🔴 Live Stream Started Successfully!");
     } catch (err) {
-      alert("Error starting live stream: " + err.message);
+      alert("Live Error: " + err.message);
     }
   }
 
   async function stopLiveStream() {
     try {
-      if (localTracks.videoTrack) {
-        localTracks.videoTrack.stop();
-        localTracks.videoTrack.close();
-      }
-      if (localTracks.audioTrack) {
-        localTracks.audioTrack.stop();
-        localTracks.audioTrack.close();
-      }
-      if (agoraClient) {
-        await agoraClient.leave();
-      }
+      if (localTracks.videoTrack) { localTracks.videoTrack.stop(); localTracks.videoTrack.close(); }
+      if (localTracks.audioTrack) { localTracks.audioTrack.stop(); localTracks.audioTrack.close(); }
+      if (agoraClient) await agoraClient.leave();
 
       await fetch(`${BACKEND_URL}/end-live`, { method: 'POST' });
 
       document.getElementById('btn-start-live').style.display = 'block';
       document.getElementById('btn-stop-live').style.display = 'none';
       document.getElementById('camera-controls').style.display = 'none';
-
       alert("Live Stream Ended!");
     } catch (err) {
       alert("Error stopping stream: " + err.message);
@@ -250,13 +166,12 @@
     try {
       currentCameraFacing = (currentCameraFacing === 'user') ? 'environment' : 'user';
       await localTracks.videoTrack.setDevice(currentCameraFacing);
-      alert("Switched Camera!");
     } catch (e) {
-      alert("Camera switch error or device not supported.");
+      alert("Camera switch error.");
     }
   }
 
-  // 2. 📹 CLOUDINARY VIDEO UPLOAD
+  // 2. 📹 CLOUDINARY VIDEO UPLOAD (Fixed with error details)
   async function uploadVideoToCloudinary() {
     const title = document.getElementById('video-title').value.trim();
     const fileInput = document.getElementById('video-file-input');
@@ -302,10 +217,10 @@
         document.getElementById('video-title').value = '';
         fileInput.value = '';
       } else {
-        alert("Cloudinary Upload Failed: " + (data.error ? data.error.message : "Preset / Network error"));
+        alert("Upload Failed: " + (data.error ? data.error.message : "Unknown error"));
       }
     } catch (err) {
-      alert("Video upload error: " + err.message);
+      alert("Network or Upload Error: " + err.message);
     } finally {
       progressDiv.style.display = 'none';
     }
@@ -320,92 +235,49 @@
     const o3 = document.getElementById('admin-q-o3').value.trim();
     const ans = parseInt(document.getElementById('admin-q-ans').value);
 
-    if (!qText || !o0 || !o1) {
-      alert("Please fill Question and Options!");
-      return;
-    }
+    if (!qText || !o0 || !o1) { alert("Please fill Question and Options!"); return; }
 
     let res = await fetch(`${FIREBASE_URL}/NormQuizzes.json`);
     let list = await res.json() || [];
     if (!Array.isArray(list)) list = Object.values(list);
 
-    const newQ = {
-      id: 'nq_' + Date.now(),
-      creatorId: 'admin',
-      question: qText,
-      options: [o0, o1, o2, o3].filter(o => o !== ''),
-      correctIndex: ans,
-      responses: {}
-    };
-
-    list.push(newQ);
-    await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { 
-      method: 'PUT', 
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(list) 
-    });
+    list.push({ id: 'nq_' + Date.now(), creatorId: 'admin', question: qText, options: [o0, o1, o2, o3].filter(o => o !== ''), correctIndex: ans, responses: {} });
+    await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(list) });
 
     alert("Question Published!");
     document.getElementById('admin-q-text').value = '';
-    document.getElementById('admin-q-o0').value = '';
-    document.getElementById('admin-q-o1').value = '';
-    document.getElementById('admin-q-o2').value = '';
-    document.getElementById('admin-q-o3').value = '';
+    document.getElementById('admin-q-o0').value = ''; document.getElementById('admin-q-o1').value = '';
+    document.getElementById('admin-q-o2').value = ''; document.getElementById('admin-q-o3').value = '';
   }
 
   // 4. 📄 POST MORE PAPERS (HTML SET)
   async function postMorePaperSet() {
     const title = document.getElementById('admin-paper-title').value.trim();
     const htmlText = document.getElementById('admin-paper-html').value.trim();
+    if (!title || !htmlText) { alert("Please enter Title and HTML Code!"); return; }
 
-    if (!title || !htmlText) {
-      alert("Please enter Title and HTML Code!");
-      return;
-    }
-
-    const tempDiv = document.createElement('div');
+    let tempDiv = document.createElement('div');
     tempDiv.innerHTML = htmlText;
-
-    const qNodes = tempDiv.querySelectorAll('.paper-q-item');
+    let qNodes = tempDiv.querySelectorAll('.paper-q-item');
     let extractedQuestions = [];
 
     qNodes.forEach((node, idx) => {
       extractedQuestions.push({
         qId: 'p_q_' + Date.now() + '_' + idx,
         qText: node.getAttribute('data-q') || `Question ${idx + 1}`,
-        options: [
-          node.getAttribute('data-o0') || 'Option A',
-          node.getAttribute('data-o1') || 'Option B',
-          node.getAttribute('data-o2') || 'Option C',
-          node.getAttribute('data-o3') || 'Option D'
-        ],
+        options: [node.getAttribute('data-o0') || 'A', node.getAttribute('data-o1') || 'B', node.getAttribute('data-o2') || 'C', node.getAttribute('data-o3') || 'D'],
         correctIndex: parseInt(node.getAttribute('data-ans') || '0')
       });
     });
 
-    if (extractedQuestions.length === 0) {
-      alert("Invalid HTML Code format!");
-      return;
-    }
+    if (extractedQuestions.length === 0) { alert("Invalid HTML Code format!"); return; }
 
     let res = await fetch(`${FIREBASE_URL}/MorePapers.json`);
     let list = await res.json() || [];
     if (!Array.isArray(list)) list = Object.values(list);
 
-    const newPaper = {
-      id: 'mp_' + Date.now(),
-      creatorId: 'admin',
-      title: title,
-      questions: extractedQuestions,
-      responses: {}
-    };
-
-    list.push(newPaper);
-    await fetch(`${FIREBASE_URL}/MorePapers.json`, { 
-      method: 'PUT', 
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(list) 
-    });
+    list.push({ id: 'mp_' + Date.now(), creatorId: 'admin', title, questions: extractedQuestions, responses: {} });
+    await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(list) });
 
     alert("Paper Set Published!");
     document.getElementById('admin-paper-title').value = '';
