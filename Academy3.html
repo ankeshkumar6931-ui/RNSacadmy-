@@ -1,408 +1,825 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>We Are Group - Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <title>रंजन सर - Admin Panel</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Agora RTC SDK Live Streaming के लिए -->
-  <script src="https://download.agora.io/sdk/web/AgoraRTC_N-4.18.0.js"></script>
+  <script src="https://download.agora.io/sdk/web/AgoraRTC_N-4.20.0.js"></script>
 
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    body {
-      background: #121212;
-      color: #ffffff;
-      padding: 15px;
+
+    input, select, textarea { 
+      user-select: text; 
+      -webkit-user-select: text;
+    }
+
+    :root {
+      --bg-gradient: radial-gradient(circle at 40% 30%, #dbe8df, #9cb3a8);
+      --text-dark: #1f3a2b;
+      --text-muted: #3d5e4a;
+      --card-border: rgba(255, 255, 255, 0.75);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-gradient);
+      color: var(--text-dark);
       display: flex;
       justify-content: center;
+      align-items: center;
     }
-    .admin-container {
+
+    .app-container {
       width: 100%;
-      max-width: 500px;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-gradient);
     }
-    .card {
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 20px;
+
+    .top-bar {
+      padding: 14px 18px;
+      background: rgba(220, 240, 225, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+      border-bottom: 1.5px solid var(--card-border);
+      box-shadow: 0 8px 20px rgba(20, 45, 30, 0.08);
     }
-    h2, h3 {
-      color: #22c55e;
-      margin-bottom: 12px;
+
+    .brand-area { display: flex; align-items: center; gap: 8px; }
+    .top-bar h2 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
     }
-    .form-group {
-      margin-bottom: 12px;
+
+    .online-counter-btn {
+      background: rgba(255, 255, 255, 0.65);
+      border: 1.5px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #15803d;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
-    label {
-      display: block;
+
+    .online-dot {
+      width: 9px;
+      height: 9px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    #custom-toast {
+      position: fixed;
+      top: -70px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 22px;
+      border-radius: 40px;
       font-size: 0.85rem;
-      color: #aaa;
-      margin-bottom: 5px;
-      font-weight: 600;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+      backdrop-filter: blur(16px);
+      z-index: 9999999;
+      transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
     }
+    #custom-toast.show { top: 20px; }
+    #custom-toast.toast-success { background: rgba(220, 252, 231, 0.95); border: 1.5px solid #22c55e; color: #14532d; }
+    #custom-toast.toast-error { background: rgba(254, 226, 226, 0.95); border: 1.5px solid #ef4444; color: #7f1d1d; }
+
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 160px;
+      scroll-behavior: smooth;
+      z-index: 10;
+      -webkit-overflow-scrolling: touch;
+    }
+    .content-area::-webkit-scrollbar { display: none; }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; animation: viewIn 0.2s ease-out; }
+
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: rgba(215, 242, 222, 0.4);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid var(--card-border);
+      border-radius: 28px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: inset -6px -8px 12px rgba(30, 70, 50, 0.15), inset 6px 8px 12px rgba(255, 255, 255, 0.85), 0 12px 20px -4px rgba(20, 45, 30, 0.12);
+    }
+
+    .form-group { margin-bottom: 14px; text-align: left; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
+    
     .input-field {
       width: 100%;
-      background: #2a2a2a;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 10px 14px;
-      color: #fff;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid var(--card-border);
+      border-radius: 18px;
+      padding: 12px 16px;
+      color: var(--text-dark);
       outline: none;
       font-size: 0.9rem;
+      font-weight: 600;
     }
-    .btn {
+
+    .btn-submit {
       width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: #22c55e;
-      color: #000;
+      padding: 14px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      background: rgba(200, 240, 208, 0.65);
+      color: #1f3a2b;
       font-weight: 800;
       font-size: 0.95rem;
       cursor: pointer;
-      margin-top: 5px;
+      box-shadow: inset -4px -5px 8px rgba(30, 70, 50, 0.2), inset 4px 5px 8px rgba(255, 255, 255, 0.9), 0 8px 15px -3px rgba(20, 45, 30, 0.15);
     }
-    .btn-danger {
-      background: #ef4444;
-      color: #fff;
+    .btn-danger { background: rgba(254, 226, 226, 0.95); color: #b91c1c; border-color: #ef4444; }
+    .btn-live { background: #ef4444 !important; color: #fff !important; }
+
+    .sub-nav-bar { display: flex; gap: 6px; margin-bottom: 16px; }
+    .sub-nav-btn {
+      flex: 1; padding: 10px 6px; border-radius: 14px; border: 1.5px solid var(--card-border);
+      background: rgba(200, 238, 208, 0.4); font-size: 0.72rem; font-weight: 800;
+      color: var(--text-dark); cursor: pointer; text-align: center;
     }
-    .btn-secondary {
-      background: #3b82f6;
-      color: #fff;
+    .sub-nav-btn.active {
+      background: rgba(185, 232, 198, 0.9); border-color: #15803d;
     }
+    .sub-view { display: none; }
+    .sub-view.active { display: block; }
+
+    .student-response-pill {
+      font-size: 0.75rem;
+      background: rgba(255,255,255,0.7);
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin: 3px 3px 3px 0;
+      display: inline-block;
+      border: 1px solid var(--card-border);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     #video-preview {
       width: 100%;
-      height: 240px;
+      height: 220px;
       background: #000;
-      border-radius: 12px;
-      margin-top: 10px;
+      border-radius: 16px;
+      margin-bottom: 12px;
       position: relative;
       overflow: hidden;
+      border: 1.5px solid var(--card-border);
     }
-    #camera-controls {
-      display: none;
-      gap: 10px;
-      margin-top: 10px;
+
+    .chat-container { display: flex; flex-direction: column; gap: 16px; padding-bottom: 20px; }
+    .chat-message { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; position: relative; }
+    .chat-message.my-message { align-self: flex-end; flex-direction: row-reverse; }
+    .chat-message.other-message { align-self: flex-start; }
+
+    .chat-avatar-wrapper { position: relative; flex-shrink: 0; }
+    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-border); display: block; cursor: pointer; }
+
+    .chat-bubble {
+      padding: 12px 16px; border-radius: 22px; font-size: 0.9rem; word-break: break-word;
+      border: 1.5px solid var(--card-border);
+      box-shadow: inset -4px -5px 8px rgba(30, 70, 50, 0.12), inset 4px 5px 8px rgba(255, 255, 255, 0.8);
     }
-    #upload-progress {
-      display: none;
-      color: #eab308;
-      font-size: 0.85rem;
-      margin-top: 5px;
+    /* रंजन सर (Admin) के मैसेज का विशेष कूल कलर */
+    .my-message .chat-bubble { background: rgba(254, 240, 138, 0.9); color: #713f12; border-bottom-right-radius: 4px; border-color: #fde047; }
+    .other-message .chat-bubble { background: rgba(255, 255, 255, 0.7); color: var(--text-dark); border-bottom-left-radius: 4px; }
+
+    .chat-input-bar {
+      display: none; gap: 10px; padding: 12px 16px; background: rgba(220, 242, 225, 0.85);
+      backdrop-filter: blur(16px); border-top: 1.5px solid var(--card-border);
+      position: absolute; bottom: 85px; left: 0; right: 0; z-index: 900;
     }
+    .send-btn {
+      width: 48px; height: 48px; border-radius: 50%; background: rgba(200, 240, 210, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.85); color: #1f3a2b; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(20, 45, 30, 0.35); display: none; justify-content: center; align-items: center; z-index: 999999; backdrop-filter: blur(8px);
+    }
+    .modal-card {
+      background: rgba(225, 248, 230, 0.95); border: 1.5px solid var(--card-border); padding: 22px; border-radius: 32px; width: 88%; max-width: 360px; text-align: center;
+    }
+    .user-online-badge { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff; display: inline-block; margin-left: auto; }
+    .is-online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .is-offline { background: #94a3b8; }
+
+    .nav-bar {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(220, 242, 225, 0.55);
+      backdrop-filter: blur(20px); border-top: 1.5px solid var(--card-border); display: flex; justify-content: space-around; align-items: center; z-index: 99999; padding: 0 12px;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dark);
+      cursor: pointer; width: 58px; height: 54px; position: relative; border: 1.5px solid var(--card-border);
+      background: rgba(200, 238, 208, 0.55); border-radius: 48% 52% 45% 55% / 53% 47% 53% 47%;
+    }
+    .nav-item i { font-size: 1.2rem; pointer-events: none; }
+    .nav-item span { font-size: 0.6rem; margin-top: 2px; font-weight: 800; pointer-events: none; }
+    .nav-item.active { transform: translateY(-3px) scale(1.05); border-color: rgba(255, 255, 255, 0.95); background: rgba(185, 232, 198, 0.85); }
   </style>
 </head>
 <body>
 
-<div class="admin-container">
-  <h2 style="text-align:center; margin-bottom: 15px;">⚙️ Admin Control Panel</h2>
+  <!-- TOAST -->
+  <div id="custom-toast" class="toast-success">
+    <i id="toast-icon" class="fa-solid fa-circle-check"></i>
+    <span id="toast-message">Success!</span>
+  </div>
 
-  <!-- 1. LIVE STREAMING CONTROLS (AGORA) -->
-  <div class="card">
-    <h3>🔴 Agora Live Streaming Control</h3>
-    <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">एक क्लिक में लाइव शुरू करें और सीधे ऐप में दिखेगा।</p>
-    
-    <div id="video-preview"></div>
+  <div class="app-container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="brand-area">
+        <i class="fa-solid fa-chalkboard-user" style="font-size: 1.2rem; color: #15803d;"></i>
+        <h2>रंजन सर (Admin Panel)</h2>
+      </div>
+      <div class="online-counter-btn" onclick="openOnlineStudentsModal()">
+        <div class="online-dot"></div>
+        <span id="online-count-text">1 Online</span>
+      </div>
+    </div>
 
-    <button id="btn-start-live" class="btn" onclick="startLiveStream()"><i class="fa-solid fa-broadcast-tower"></i> Start Live Stream</button>
-    <button id="btn-stop-live" class="btn btn-danger" style="display:none;" onclick="stopLiveStream()"><i class="fa-solid fa-power-off"></i> End Live Stream</button>
+    <!-- Main Content Area -->
+    <div class="content-area" id="main-content-scroll">
+      
+      <!-- 1. HOME SCREEN (Questions & Student Responses Analytics) -->
+      <div id="view-home" class="view-section active">
+        <div class="sub-nav-bar">
+          <div class="sub-nav-btn active" onclick="switchHomeTab('norm')"><i class="fa-solid fa-question-circle"></i> Questions</div>
+          <div class="sub-nav-btn" onclick="switchHomeTab('papers')"><i class="fa-solid fa-layer-group"></i> Bulk Papers</div>
+        </div>
 
-    <div id="camera-controls">
-      <button class="btn btn-secondary" onclick="switchCamera()"><i class="fa-solid fa-camera-rotate"></i> Switch Camera (Front/Back)</button>
+        <div id="home-view-norm" class="sub-view active">
+          <div id="admin-norm-list">
+            <div class="card" style="text-align: center;"><p style="font-weight: 600; color: var(--text-muted);">कोई प्रश्न उपलब्ध नहीं है।</p></div>
+          </div>
+        </div>
+
+        <div id="home-view-papers" class="sub-view">
+          <div id="admin-papers-list">
+            <div class="card" style="text-align: center;"><p style="font-weight: 600; color: var(--text-muted);">कोई पेपर सेट उपलब्ध नहीं है।</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. PUBLISH SCREEN (+) -->
+      <div id="view-publish" class="view-section">
+        <div class="sub-nav-bar">
+          <div class="sub-nav-btn active" onclick="switchPubTab('p-norm')"><i class="fa-solid fa-plus"></i> Normal Q</div>
+          <div class="sub-nav-btn" onclick="switchPubTab('p-more')"><i class="fa-solid fa-code"></i> HTML Paper</div>
+        </div>
+
+        <div id="pub-view-norm" class="sub-view active">
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">नया प्रश्न पब्लिश करें</h3>
+            <div class="form-group"><label>प्रश्न (Question)</label><input type="text" id="pub-q-text" class="input-field" placeholder="सवाल लिखें..."></div>
+            <div class="form-group"><label>विकल्प A</label><input type="text" id="pub-q-o0" class="input-field" placeholder="Option A"></div>
+            <div class="form-group"><label>विकल्प B</label><input type="text" id="pub-q-o1" class="input-field" placeholder="Option B"></div>
+            <div class="form-group"><label>विकल्प C</label><input type="text" id="pub-q-o2" class="input-field" placeholder="Option C"></div>
+            <div class="form-group"><label>विकल्प D</label><input type="text" id="pub-q-o3" class="input-field" placeholder="Option D"></div>
+            <div class="form-group">
+              <label>सही उत्तर (Correct Option)</label>
+              <select id="pub-q-ans" class="input-field">
+                <option value="0">Option A</option>
+                <option value="1">Option B</option>
+                <option value="2">Option C</option>
+                <option value="3">Option D</option>
+              </select>
+            </div>
+            <button class="btn-submit" type="button" onclick="publishNormalQuestion()">Publish Question</button>
+          </div>
+        </div>
+
+        <div id="pub-view-more" class="sub-view">
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px;">HTML पेपर सेट पब्लिश करें</h3>
+            <div class="form-group"><label>पेपर शीर्षक (Title)</label><input type="text" id="pub-paper-title" class="input-field" placeholder="जैसे: Math Test Set 1"></div>
+            <div class="form-group">
+              <label>HTML कोड पेस्ट करें</label>
+              <textarea id="pub-paper-html" class="input-field" rows="6" placeholder="AI जनरेटेड HTML कोड यहाँ डालें..." style="resize:none; height:110px;"></textarea>
+            </div>
+            <button class="btn-submit" type="button" onclick="publishMorePaperHTML()">Publish Paper Set</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. MEDIA & LIVE SCREEN -->
+      <div id="view-media" class="view-section">
+        <!-- Live Control Card -->
+        <div class="card" style="border-color: #ef4444;">
+          <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px; color: #ef4444;"><i class="fa-solid fa-tower-broadcast"></i> लाइव स्ट्रीमिंग कंट्रोल (Agora)</h3>
+          <div id="video-preview"></div>
+          <button id="btn-start-live" class="btn-submit btn-live" onclick="startLiveStream()"><i class="fa-solid fa-play"></i> Start Live Stream</button>
+          <button id="btn-stop-live" class="btn-submit btn-danger" style="display:none;" onclick="stopLiveStream()"><i class="fa-solid fa-power-off"></i> End Live Stream</button>
+          <button class="btn-submit" style="margin-top: 8px; background: rgba(255,255,255,0.7);" onclick="switchCamera()"><i class="fa-solid fa-camera-rotate"></i> कैमरा बदलें (Front/Back)</button>
+        </div>
+
+        <!-- Video Upload Card -->
+        <div class="card">
+          <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;"><i class="fa-solid fa-video"></i> गैलरी से वीडियो अपलोड करें (Cloudinary)</h3>
+          <div class="form-group"><label>वीडियो शीर्षक</label><input type="text" id="video-title" class="input-field" placeholder="वीडियो का नाम..."></div>
+          <div class="form-group"><label>वीडियो फ़ाइल चुनें</label><input type="file" id="video-file-input" class="input-field" accept="video/*"></div>
+          <div id="upload-progress" style="font-size:0.8rem; font-weight:700; color:#eab308; margin-bottom:8px; display:none;">अपलोड हो रहा है... कृपया प्रतीक्षा करें...</div>
+          <button class="btn-submit" onclick="uploadVideoToCloudinary()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload & Publish Video</button>
+        </div>
+      </div>
+
+      <!-- 4. CHAT SCREEN -->
+      <div id="view-chat" class="view-section">
+        <div class="chat-container" id="chat-messages-container"></div>
+      </div>
+
+    </div>
+
+    <!-- Online Students Modal -->
+    <div id="online-modal" class="modal-overlay" onclick="closeOnlineStudentsModal()">
+      <div class="modal-card" style="max-width: 340px;" onclick="event.stopPropagation()">
+        <h3 style="margin-bottom: 12px; font-size: 1rem;">👥 Registered Online Students</h3>
+        <div id="online-students-list-container" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
+        <button class="btn-submit" style="margin-top: 15px; padding: 10px;" type="button" onclick="closeOnlineStudentsModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Student Details Modal -->
+    <div id="profile-modal" class="modal-overlay" onclick="closeProfileModal()">
+      <div class="modal-card" onclick="event.stopPropagation()">
+        <div style="position:relative; width:80px; height:80px; margin:0 auto 8px auto;">
+          <img id="m-dp" src="" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--card-border); object-fit: cover;">
+          <div id="m-badge-container"></div>
+        </div>
+        <h3 id="m-name" style="margin-bottom: 4px;">Student Name</h3>
+        <div style="text-align: left; background: rgba(255,255,255,0.6); padding: 12px; border-radius: 16px; font-size: 0.85rem; margin-top: 10px; border: 1px solid var(--card-border);">
+          <p><strong>Roll No:</strong> <span id="m-roll">-</span></p>
+          <p><strong>Total Score:</strong> <span id="m-total-score">0</span> pts</p>
+        </div>
+        <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closeProfileModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Chat Bar -->
+    <div id="chat-bar-wrapper" class="chat-input-bar">
+      <div style="display: flex; gap: 10px; width: 100%;">
+        <input type="text" id="chat-input-msg" class="input-field" placeholder="Type as Ranjan Sir...">
+        <button class="send-btn" type="button" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+      <div class="nav-item active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>Home</span></div>
+      <div class="nav-item" onclick="switchTab('publish')"><i class="fa-solid fa-circle-plus"></i><span>Publish</span></div>
+      <div class="nav-item" onclick="switchTab('media')"><i class="fa-solid fa-video"></i><span>Live/Video</span></div>
+      <div class="nav-item" onclick="switchTab('chat')"><i class="fa-solid fa-comment-dots"></i><span>Chat</span></div>
     </div>
   </div>
 
-  <!-- 2. CLOUDINARY VIDEO UPLOAD -->
-  <div class="card">
-    <h3>📹 Upload Video (Cloudinary)</h3>
-    <div class="form-group">
-      <label>Video Title</label>
-      <input type="text" id="video-title" class="input-field" placeholder="Enter video title...">
-    </div>
-    <div class="form-group">
-      <label>Select Video File from Phone</label>
-      <input type="file" id="video-file-input" class="input-field" accept="video/*">
-    </div>
-    <div id="upload-progress">Uploading to Cloudinary... Please wait...</div>
-    <button class="btn" onclick="uploadVideoToCloudinary()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload & Publish Video</button>
-  </div>
+  <script>
+    // 🔥 आपका नया Firebase Realtime Database URL
+    const FIREBASE_URL = "https://question-project-1b8bf-default-rtdb.firebaseio.com/";
+    const BACKEND_URL = "https://mrankesh-live-backend.onrender.com";
+    const AGORA_APP_ID = "edea8d3f66104552ac7ec969d670186d";
+    const CLOUD_NAME = "vljvpsmy";
+    const UPLOAD_PRESET = "we_are_group_preset";
 
-  <!-- 3. POST NORMAL QUESTION -->
-  <div class="card">
-    <h3>❓ Post Single Question</h3>
-    <div class="form-group"><label>Question</label><input type="text" id="admin-q-text" class="input-field" placeholder="Enter question..."></div>
-    <div class="form-group"><label>Option A</label><input type="text" id="admin-q-o0" class="input-field" placeholder="Option A"></div>
-    <div class="form-group"><label>Option B</label><input type="text" id="admin-q-o1" class="input-field" placeholder="Option B"></div>
-    <div class="form-group"><label>Option C</label><input type="text" id="admin-q-o2" class="input-field" placeholder="Option C"></div>
-    <div class="form-group"><label>Option D</label><input type="text" id="admin-q-o3" class="input-field" placeholder="Option D"></div>
-    <div class="form-group">
-      <label>Correct Option Index (0 = A, 1 = B, 2 = C, 3 = D)</label>
-      <select id="admin-q-ans" class="input-field">
-        <option value="0">Option A</option>
-        <option value="1">Option B</option>
-        <option value="2">Option C</option>
-        <option value="3">Option D</option>
-      </select>
-    </div>
-    <button class="btn" onclick="postNormalQuestion()"><i class="fa-solid fa-paper-plane"></i> Publish Question</button>
-  </div>
+    // 📌 रंजन सर (Admin) की फिक्स ऑटो-लॉगिन प्रोफाइल
+    let currentUser = {
+      id: 'admin_ranjan',
+      name: 'रंजन सर (Admin)',
+      roll: '0000',
+      pass: 'admin123',
+      dp: 'https://api.dicebear.com/7.x/micah/svg?seed=RanjanSir',
+      normScore: 9999,
+      moreScore: 9999,
+      lastSeen: Date.now()
+    };
 
-  <!-- 4. POST MORE QUESTIONS (HTML BULK PAPER) -->
-  <div class="card">
-    <h3>📄 Post More Qs (HTML Set)</h3>
-    <div class="form-group"><label>Paper Set Title</label><input type="text" id="admin-paper-title" class="input-field" placeholder="e.g. Math Quiz Set 1"></div>
-    <div class="form-group">
-      <label>Paste HTML Code</label>
-      <textarea id="admin-paper-html" class="input-field" rows="5" placeholder="Paste HTML code generated from AI..."></textarea>
-    </div>
-    <button class="btn" onclick="postMorePaperSet()"><i class="fa-solid fa-file-code"></i> Publish Paper Set</button>
-  </div>
-</div>
+    let userProfilesMap = {};
+    let normQuizzesList = [];
+    let morePapersList = [];
+    let currentChatList = [];
+    let overallRankMap = {};
 
-<script>
-  // 🔗 प्रोजेक्ट क्रेडेंशियल्स और लिंक्स
-  const BACKEND_URL = "https://mrankesh-live-backend.onrender.com";
-  const FIREBASE_URL = "https://live-app-bdba9-default-rtdb.firebaseio.com";
-  const AGORA_APP_ID = "edea8d3f66104552ac7ec969d670186d";
-  const CLOUD_NAME = "vljvpsmy";
-  const UPLOAD_PRESET = "we_are_group_preset";
+    let agoraClient = null;
+    let localTracks = { videoTrack: null, audioTrack: null };
+    let currentCameraFacing = 'user';
+    let toastTimer = null;
 
-  let agoraClient = null;
-  let localTracks = { videoTrack: null, audioTrack: null };
-  let currentCameraFacing = 'user'; // 'user' (front) या 'environment' (back)
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('custom-toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+      if (!toast) return;
+      toastMsg.innerText = msg;
+      toast.className = (type === 'error') ? 'toast-error' : 'toast-success';
+      toastIcon.className = (type === 'error') ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-circle-check';
+      toast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 2500);
+    }
 
-  // 1. 🔴 LIVE STREAMING LOGIC (AGORA)
-  async function startLiveStream() {
-    try {
-      agoraClient = AgoraRTC.createClient({ mode: "live", codec: "vp8" });
-      await agoraClient.setClientRole("host");
+    function switchHomeTab(t) {
+      document.querySelectorAll('#view-home .sub-nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#view-home .sub-view').forEach(v => v.classList.remove('active'));
+      if (t === 'norm') { document.querySelectorAll('#view-home .sub-nav-btn')[0].classList.add('active'); document.getElementById('home-view-norm').classList.add('active'); }
+      else { document.querySelectorAll('#view-home .sub-nav-btn')[1].classList.add('active'); document.getElementById('home-view-papers').classList.add('active'); }
+    }
 
-      const channelName = "main_channel";
-      await agoraClient.join(AGORA_APP_ID, channelName, null, "admin_host");
+    function switchPubTab(t) {
+      document.querySelectorAll('#view-publish .sub-nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#view-publish .sub-view').forEach(v => v.classList.remove('active'));
+      if (t === 'p-norm') { document.querySelectorAll('#view-publish .sub-nav-btn')[0].classList.add('active'); document.getElementById('pub-view-norm').classList.add('active'); }
+      else { document.querySelectorAll('#view-publish .sub-nav-btn')[1].classList.add('active'); document.getElementById('pub-view-more').classList.add('active'); }
+    }
 
-      // कैमरा और माइक चालू करें
-      localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack({
-        encoderConfig: "360p_1",
-        facingMode: currentCameraFacing
+    function switchTab(tabName) {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('view-' + tabName).classList.add('active');
+      let map = { 'home':0, 'publish':1, 'media':2, 'chat':3 };
+      let items = document.querySelectorAll('.nav-item');
+      items.forEach(i => i.classList.remove('active'));
+      if (items[map[tabName]]) items[map[tabName]].classList.add('active');
+
+      document.getElementById('chat-bar-wrapper').style.display = (tabName === 'chat') ? 'flex' : 'none';
+      if (tabName === 'chat') setTimeout(scrollToBottom, 100);
+    }
+
+    function scrollToBottom() {
+      const scrollArea = document.getElementById('main-content-scroll');
+      if (scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+
+    async function fetchAdminData() {
+      try {
+        currentUser.lastSeen = Date.now();
+        fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}/lastSeen.json`, { method: 'PUT', body: JSON.stringify(currentUser.lastSeen) });
+
+        let res = await fetch(`${FIREBASE_URL}/.json`);
+        let data = await res.json();
+        if (data) {
+          if (data.UsersMap) {
+            userProfilesMap = data.UsersMap;
+            calculateLeaderboard(data.UsersMap);
+          }
+          normQuizzesList = data.NormQuizzes ? (Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes)) : [];
+          morePapersList = data.MorePapers ? (Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers)) : [];
+          if (data.GlobalChat) {
+            currentChatList = Array.isArray(data.GlobalChat) ? data.GlobalChat : Object.values(data.GlobalChat);
+            renderChatMessages(currentChatList);
+          }
+          updateOnlineCounterUI();
+          renderAdminNormQuizzes();
+          renderAdminMorePapers();
+        }
+      } catch(e){}
+    }
+
+    function updateOnlineCounterUI() {
+      const now = Date.now();
+      let onlineCount = 0;
+      userProfilesMap[currentUser.id] = currentUser;
+      Object.keys(userProfilesMap).forEach(uid => {
+        const u = userProfilesMap[uid];
+        if (u && u.lastSeen && (now - u.lastSeen < 30000)) onlineCount++;
       });
-
-      // कैमरा प्रिव्यू स्क्रीन पर दिखाएं
-      localTracks.videoTrack.play("video-preview");
-
-      // लाइव पब्लिश करें
-      await agoraClient.publish([localTracks.audioTrack, localTracks.videoTrack]);
-
-      // रेंडर बैकएंड ब्रिज सर्वर को सूचित करें कि लाइव चालू हो गया है
-      await fetch(`${BACKEND_URL}/start-live`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channelName: channelName, hostName: "Admin" })
-      });
-
-      document.getElementById('btn-start-live').style.display = 'none';
-      document.getElementById('btn-stop-live').style.display = 'block';
-      document.getElementById('camera-controls').style.display = 'flex';
-
-      alert("🔴 Live Stream Started Successfully!");
-    } catch (err) {
-      alert("Error starting live stream: " + err.message);
-    }
-  }
-
-  async function stopLiveStream() {
-    try {
-      if (localTracks.videoTrack) {
-        localTracks.videoTrack.stop();
-        localTracks.videoTrack.close();
-      }
-      if (localTracks.audioTrack) {
-        localTracks.audioTrack.stop();
-        localTracks.audioTrack.close();
-      }
-      if (agoraClient) {
-        await agoraClient.leave();
-      }
-
-      // रेंडर बैकएंड को सूचित करें कि लाइव बंद हो गया है
-      await fetch(`${BACKEND_URL}/end-live`, { method: 'POST' });
-
-      document.getElementById('btn-start-live').style.display = 'block';
-      document.getElementById('btn-stop-live').style.display = 'none';
-      document.getElementById('camera-controls').style.display = 'none';
-
-      alert("Live Stream Ended!");
-    } catch (err) {
-      alert("Error stopping stream: " + err.message);
-    }
-  }
-
-  async function switchCamera() {
-    if (!localTracks.videoTrack) return;
-    try {
-      currentCameraFacing = (currentCameraFacing === 'user') ? 'environment' : 'user';
-      await localTracks.videoTrack.setDevice(currentCameraFacing);
-      alert("Switched Camera!");
-    } catch (e) {
-      alert("Camera switch error or device not supported.");
-    }
-  }
-
-  // 2. 📹 CLOUDINARY VIDEO UPLOAD LOGIC
-  async function uploadVideoToCloudinary() {
-    const title = document.getElementById('video-title').value.trim();
-    const fileInput = document.getElementById('video-file-input');
-
-    if (!title || fileInput.files.length === 0) {
-      alert("Please enter Video Title and select a file!");
-      return;
+      if (onlineCount < 1) onlineCount = 1;
+      document.getElementById('online-count-text').innerText = `${onlineCount} Online`;
     }
 
-    const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", UPLOAD_PRESET);
+    function isUserOnline(uid) {
+      if (uid === currentUser.id) return true;
+      if (!userProfilesMap[uid]) return false;
+      return (Date.now() - (userProfilesMap[uid].lastSeen || 0) < 30000);
+    }
 
-    document.getElementById('upload-progress').style.display = 'block';
+    function calculateLeaderboard(usersMap) {
+      if (!usersMap) return;
+      let usersArr = Object.keys(usersMap).map(uid => ({ id: uid, ...usersMap[uid] }));
+      let sorted = usersArr.sort((a, b) => ((b.normScore||0)+(b.moreScore||0)) - ((a.normScore||0)+(a.moreScore||0)));
+      overallRankMap = {};
+      sorted.forEach((u, idx) => { overallRankMap[u.id] = idx + 1; });
+    }
 
-    try {
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await response.json();
+    function getBadgeHtml(uid) {
+      const r = overallRankMap[uid];
+      if (r === 1) return `<div class="medal-badge rank-gold" title="Rank 1">1</div>`;
+      if (r === 2) return `<div class="medal-badge rank-silver" title="Rank 2">2</div>`;
+      if (r === 3) return `<div class="medal-badge rank-bronze" title="Rank 3">3</div>`;
+      return '';
+    }
 
-      if (data.secure_url) {
-        // Firebase में नया वीडियो रिकॉर्ड डालें
-        const videoData = {
-          type: "video",
-          title: title,
-          url: data.secure_url,
-          thumbnail: data.secure_url.replace(/\.[^/.]+$/, ".jpg"), // thumbnail ऑटो जेनरेट
-          createdAt: Date.now()
-        };
+    function showStudentProfileModal(uid) {
+      let u = userProfilesMap[uid] || (uid === currentUser.id ? currentUser : null);
+      if (!u) return;
+      document.getElementById('m-name').innerText = u.name || 'Student';
+      document.getElementById('m-roll').innerText = u.roll || 'N/A';
+      let totalScore = (u.normScore || 0) + (u.moreScore || 0);
+      document.getElementById('m-total-score').innerText = totalScore;
+      document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
+      document.getElementById('m-badge-container').innerHTML = getBadgeHtml(uid);
+      document.getElementById('profile-modal').style.display = 'flex';
+    }
 
-        await fetch(`${FIREBASE_URL}/contents.json`, {
-          method: 'POST',
-          body: JSON.stringify(videoData)
+    function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
+    function openOnlineStudentsModal() {}
+
+    function renderAdminNormQuizzes() {
+      let container = document.getElementById('admin-norm-list');
+      if (!container) return;
+      if (normQuizzesList.length === 0) { container.innerHTML = '<div class="card" style="text-align:center;"><p style="font-weight: 600; color: var(--text-muted);">कोई प्रश्न उपलब्ध नहीं है।</p></div>'; return; }
+      container.innerHTML = '';
+      [...normQuizzesList].reverse().forEach(q => {
+        let opts = '';
+        q.options.forEach((o, idx) => {
+          let isCorrect = (idx === q.correctIndex);
+          opts += `<div style="padding:6px 12px; margin-bottom:4px; border-radius:10px; background:${isCorrect?'rgba(34,197,94,0.3)':'rgba(255,255,255,0.6)'}; font-weight:${isCorrect?'800':'600'}; font-size:0.85rem;">${o} ${isCorrect?'(सही उत्तर)':''}</div>`;
         });
 
-        alert("📹 Video Uploaded & Published Successfully!");
-        document.getElementById('video-title').value = '';
-        fileInput.value = '';
-      } else {
-        alert("Cloudinary Upload Failed!");
-      }
-    } catch (err) {
-      alert("Video upload error: " + err.message);
-    } finally {
-      document.getElementById('upload-progress').style.display = 'none';
-    }
-  }
+        let responsesHtml = '<div style="margin-top:10px; font-size:0.8rem; font-weight:700; color:var(--text-muted);">छात्रों के जवाब:</div>';
+        let hasResp = false;
+        if (q.responses) {
+          Object.keys(q.responses).forEach(uid => {
+            let uData = userProfilesMap[uid] || { name: 'Student' };
+            let chosenOpt = q.responses[uid];
+            let optText = q.options[chosenOpt] || 'Option';
+            let correct = (chosenOpt === q.correctIndex);
+            hasResp = true;
+            responsesHtml += `<div class="student-response-pill" onclick="showStudentProfileModal('${uid}')">${uData.name}: <span style="color:${correct?'#15803d':'#b91c1c'}">${optText}</span></div> `;
+          });
+        }
+        if (!hasResp) responsesHtml += '<div style="font-size:0.75rem; color:#666; margin-top:2px;">अभी किसी छात्र ने जवाब नहीं दिया है।</div>';
 
-  // 3. ❓ POST NORMAL QUESTION
-  async function postNormalQuestion() {
-    const qText = document.getElementById('admin-q-text').value.trim();
-    const o0 = document.getElementById('admin-q-o0').value.trim();
-    const o1 = document.getElementById('admin-q-o1').value.trim();
-    const o2 = document.getElementById('admin-q-o2').value.trim();
-    const o3 = document.getElementById('admin-q-o3').value.trim();
-    const ans = parseInt(document.getElementById('admin-q-ans').value);
-
-    if (!qText || !o0 || !o1) {
-      alert("Please fill Question and Options!");
-      return;
-    }
-
-    // पहले से मौजूद सूची लाएं
-    let res = await fetch(`${FIREBASE_URL}/NormQuizzes.json`);
-    let list = await res.json() || [];
-    if (!Array.isArray(list)) list = Object.values(list);
-
-    const newQ = {
-      id: 'nq_' + Date.now(),
-      creatorId: 'admin',
-      question: qText,
-      options: [o0, o1, o2, o3].filter(o => o !== ''),
-      correctIndex: ans,
-      responses: {}
-    };
-
-    list.push(newQ);
-    await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(list) });
-
-    alert("Question Published!");
-    document.getElementById('admin-q-text').value = '';
-    document.getElementById('admin-q-o0').value = '';
-    document.getElementById('admin-q-o1').value = '';
-    document.getElementById('admin-q-o2').value = '';
-    document.getElementById('admin-q-o3').value = '';
-  }
-
-  // 4. 📄 POST MORE PAPERS (HTML SET)
-  async function postMorePaperSet() {
-    const title = document.getElementById('admin-paper-title').value.trim();
-    const htmlText = document.getElementById('admin-paper-html').value.trim();
-
-    if (!title || !htmlText) {
-      alert("Please enter Title and HTML Code!");
-      return;
-    }
-
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlText;
-
-    const qNodes = tempDiv.querySelectorAll('.paper-q-item');
-    let extractedQuestions = [];
-
-    qNodes.forEach((node, idx) => {
-      extractedQuestions.push({
-        qId: 'p_q_' + Date.now() + '_' + idx,
-        qText: node.getAttribute('data-q') || `Question ${idx + 1}`,
-        options: [
-          node.getAttribute('data-o0') || 'Option A',
-          node.getAttribute('data-o1') || 'Option B',
-          node.getAttribute('data-o2') || 'Option C',
-          node.getAttribute('data-o3') || 'Option D'
-        ],
-        correctIndex: parseInt(node.getAttribute('data-ans') || '0')
+        container.innerHTML += `
+          <div class="card">
+            <div style="font-weight:800; margin-bottom:8px;">${q.question}</div>
+            <div style="margin-bottom:8px;">${opts}</div>
+            <div style="border-top:1px solid rgba(0,0,0,0.1); padding-top:8px;">${responsesHtml}</div>
+          </div>`;
       });
-    });
-
-    if (extractedQuestions.length === 0) {
-      alert("Invalid HTML Code format!");
-      return;
     }
 
-    let res = await fetch(`${FIREBASE_URL}/MorePapers.json`);
-    let list = await res.json() || [];
-    if (!Array.isArray(list)) list = Object.values(list);
+    function renderAdminMorePapers() {
+      let container = document.getElementById('admin-papers-list');
+      if (!container) return;
+      if (morePapersList.length === 0) { container.innerHTML = '<div class="card" style="text-align:center;"><p style="font-weight: 600; color: var(--text-muted);">कोई पेपर सेट उपलब्ध नहीं है।</p></div>'; return; }
+      container.innerHTML = '';
+      [...morePapersList].reverse().forEach(p => {
+        container.innerHTML += `<div class="card"><div style="font-weight:800; font-size:1rem; margin-bottom:4px;">${p.title}</div><p style="font-size:0.75rem; color:var(--text-muted);">कुल प्रश्न: ${p.questions.length}</p></div>`;
+      });
+    }
 
-    const newPaper = {
-      id: 'mp_' + Date.now(),
-      creatorId: 'admin',
-      title: title,
-      questions: extractedQuestions,
-      responses: {}
+    async function publishNormalQuestion() {
+      let qText = document.getElementById('pub-q-text').value.trim();
+      let o0 = document.getElementById('pub-q-o0').value.trim();
+      let o1 = document.getElementById('pub-q-o1').value.trim();
+      let o2 = document.getElementById('pub-q-o2').value.trim();
+      let o3 = document.getElementById('pub-q-o3').value.trim();
+      let ans = parseInt(document.getElementById('pub-q-ans').value);
+      if (!qText || !o0 || !o1) { showToast('प्रश्न और विकल्प भरें!', 'error'); return; }
+
+      let newQ = { id: 'nq_' + Date.now(), creatorId: currentUser.id, question: qText, options: [o0,o1,o2,o3].filter(o=>o!==''), correctIndex: ans, responses: {} };
+      normQuizzesList.push(newQ);
+      await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
+      showToast('प्रश्न सफलतापूर्वक पब्लिश हो गया!', 'success');
+      document.getElementById('pub-q-text').value = '';
+      document.getElementById('pub-q-o0').value = ''; document.getElementById('pub-q-o1').value = '';
+      document.getElementById('pub-q-o2').value = ''; document.getElementById('pub-q-o3').value = '';
+      renderAdminNormQuizzes();
+    }
+
+    async function publishMorePaperHTML() {
+      let title = document.getElementById('pub-paper-title').value.trim();
+      let htmlText = document.getElementById('pub-paper-html').value.trim();
+      if (!title || !htmlText) { showToast('शीर्षक और HTML कोड दर्ज करें!', 'error'); return; }
+
+      let tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlText;
+      let qNodes = tempDiv.querySelectorAll('.paper-q-item');
+      let extracted = [];
+      qNodes.forEach((node, idx) => {
+        extracted.push({
+          qId: 'p_q_' + Date.now() + '_' + idx,
+          qText: node.getAttribute('data-q') || `Q ${idx+1}`,
+          options: [node.getAttribute('data-o0')||'A', node.getAttribute('data-o1')||'B', node.getAttribute('data-o2')||'C', node.getAttribute('data-o3')||'D'],
+          correctIndex: parseInt(node.getAttribute('data-ans')||'0')
+        });
+      });
+      if (extracted.length === 0) { showToast('अमान्य HTML कोड format!', 'error'); return; }
+
+      let newPaper = { id: 'mp_' + Date.now(), creatorId: currentUser.id, title, questions: extracted, responses: {} };
+      morePapersList.push(newPaper);
+      await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
+      showToast('पेपर सेट पब्लिश हो गया!', 'success');
+      document.getElementById('pub-paper-title').value = '';
+      document.getElementById('pub-paper-html').value = '';
+      renderAdminMorePapers();
+    }
+
+    async function startLiveStream() {
+      if (typeof AgoraRTC === 'undefined') { showToast('Agora SDK लोड नहीं हुआ है!', 'error'); return; }
+      try {
+        agoraClient = AgoraRTC.createClient({ mode: "live", codec: "vp8" });
+        await agoraClient.setClientRole("host");
+        await agoraClient.join(AGORA_APP_ID, "main_channel", null, "ranjan_sir");
+        localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack({ encoderConfig: "360p_1", facingMode: currentCameraFacing });
+        localTracks.videoTrack.play("video-preview");
+        await agoraClient.publish([localTracks.audioTrack, localTracks.videoTrack]);
+
+        await fetch(`${BACKEND_URL}/start-live`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelName: "main_channel", hostName: "रंजन सर" })
+        });
+
+        // Firebase पर भी लाइव स्टेटस अपडेट करें
+        await fetch(`${FIREBASE_URL}/live_status.json`, {
+          method: 'PUT',
+          body: JSON.stringify({ isLive: true, channelName: "main_channel", hostName: "रंजन सर" })
+        });
+
+        document.getElementById('btn-start-live').style.display = 'none';
+        document.getElementById('btn-stop-live').style.display = 'block';
+        showToast('🔴 लाइव स्ट्रीम शुरू हो गई!', 'success');
+      } catch (err) {
+        showToast('लाइव शुरू करने में त्रुटि: ' + err.message, 'error');
+      }
+    }
+
+    async function stopLiveStream() {
+      try {
+        if (localTracks.videoTrack) { localTracks.videoTrack.stop(); localTracks.videoTrack.close(); }
+        if (localTracks.audioTrack) { localTracks.audioTrack.stop(); localTracks.audioTrack.close(); }
+        if (agoraClient) { await agoraClient.leave(); }
+        await fetch(`${BACKEND_URL}/end-live`, { method: 'POST' });
+        
+        await fetch(`${FIREBASE_URL}/live_status.json`, {
+          method: 'PUT',
+          body: JSON.stringify({ isLive: false, channelName: "", hostName: "" })
+        });
+
+        document.getElementById('btn-start-live').style.display = 'block';
+        document.getElementById('btn-stop-live').style.display = 'none';
+        showToast('लाइव स्ट्रीम समाप्त!', 'success');
+      } catch (err) {
+        showToast('एरर: ' + err.message, 'error');
+      }
+    }
+
+    async function switchCamera() {
+      if (!localTracks.videoTrack) return;
+      try {
+        currentCameraFacing = (currentCameraFacing === 'user') ? 'environment' : 'user';
+        await localTracks.videoTrack.setDevice(currentCameraFacing);
+        showToast('कैमरा बदला गया!', 'success');
+      } catch (e) {
+        showToast('कैमरा स्विच सपोर्टेड नहीं है।', 'error');
+      }
+    }
+
+    async function uploadVideoToCloudinary() {
+      let title = document.getElementById('video-title').value.trim();
+      let fileInput = document.getElementById('video-file-input');
+      if (!title || fileInput.files.length === 0) { showToast('शीर्षक और वीडियो फ़ाइल चुनें!', 'error'); return; }
+
+      let formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+      formData.append("upload_preset", UPLOAD_PRESET);
+      let progress = document.getElementById('upload-progress');
+      progress.style.display = 'block';
+
+      try {
+        let res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData });
+        let data = await res.json();
+        if (data.secure_url) {
+          let vData = { type: "video", title: title, url: data.secure_url, thumbnail: data.secure_url.replace(/\.[^/.]+$/, ".jpg"), createdAt: Date.now() };
+          await fetch(`${FIREBASE_URL}/contents.json`, { method: 'POST', body: JSON.stringify(vData) });
+          showToast('📹 वीडियो सफलतापूर्वक अपलोड हो गया!', 'success');
+          document.getElementById('video-title').value = '';
+          fileInput.value = '';
+        } else { showToast('Cloudinary अपलोड फेल हुआ!', 'error'); }
+      } catch (err) {
+        showToast('वीडियो अपलोड एरर: ' + err.message, 'error');
+      } finally { progress.style.display = 'none'; }
+    }
+
+    async function sendChatMessage() {
+      let input = document.getElementById('chat-input-msg');
+      let text = input.value.trim();
+      if (!text) return;
+      let msgObj = {
+        msgId: 'msg_' + Date.now() + '_' + Math.random(),
+        senderId: currentUser.id,
+        text: text,
+        reactions: {},
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      currentChatList.push(msgObj);
+      renderChatMessages(currentChatList);
+      input.value = '';
+      await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
+    }
+
+    function renderChatMessages(messages) {
+      const container = document.getElementById('chat-messages-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      messages.forEach(msg => {
+        if (!msg) return;
+        const isMy = (msg.senderId === currentUser.id);
+        const uProf = userProfilesMap[msg.senderId] || (isMy ? currentUser : { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' });
+        const dpDisplay = uProf.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
+        const online = isUserOnline(msg.senderId);
+
+        let reactionsHtml = '';
+        if (msg.reactions) {
+          let counts = {};
+          Object.values(msg.reactions).forEach(emo => { counts[emo] = (counts[emo] || 0) + 1; });
+          Object.keys(counts).forEach(emo => {
+            reactionsHtml += `<div class="reaction-pill"><span>${emo}</span> <span>${counts[emo]}</span></div>`;
+          });
+        }
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `chat-message ${isMy ? 'my-message' : 'other-message'}`;
+        msgDiv.innerHTML = `
+          <div class="chat-avatar-wrapper" style="position:relative;">
+            <img src="${dpDisplay}" class="chat-avatar" onclick="showStudentProfileModal('${msg.senderId}')">
+            ${getBadgeHtml(msg.senderId)}
+            ${online && !isMy ? '<div class="online-blue-tick"></div>' : ''}
+          </div>
+          <div class="chat-bubble-wrapper">
+            <div class="chat-bubble">
+              <div>${msg.text}</div>
+            </div>
+            <div class="reactions-bar">${reactionsHtml}</div>
+          </div>
+        `;
+        container.appendChild(msgDiv);
+      });
+      scrollToBottom();
+    }
+
+    window.onload = () => {
+      fetchAdminData();
+      setInterval(fetchAdminData, 5000);
     };
-
-    list.push(newPaper);
-    await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(list) });
-
-    alert("Paper Set Published!");
-    document.getElementById('admin-paper-title').value = '';
-    document.getElementById('admin-paper-html').value = '';
-  }
-</script>
-
+  </script>
 </body>
 </html>
