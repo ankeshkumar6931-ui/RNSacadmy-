@@ -483,7 +483,7 @@
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Publish Video</h3>
             <div class="form-group"><label>Video Title</label><input type="text" id="pub-v-title" class="input-field" placeholder="Enter video title..."></div>
-            <div class="form-group"><label>YouTube or Video URL</label><input type="text" id="pub-v-url" class="input-field" placeholder="https://www.youtube.com/watch?v=..."></div>
+            <div class="form-group"><label>YouTube or Cloudinary URL</label><input type="text" id="pub-v-url" class="input-field" placeholder="https://www.youtube.com/watch?v=..."></div>
             <div class="form-group"><label>Thumbnail URL</label><input type="text" id="pub-v-thumb" class="input-field" placeholder="https://img.youtube.com/vi/.../hqdefault.jpg"></div>
             <button class="btn-submit" type="button" onclick="publishVideoPost()">Publish Video</button>
           </div>
@@ -637,7 +637,7 @@
     let overallRankMap = {};
     let toastTimer = null;
 
-    let activeImagePickerMode = 'profile'; // 'profile' or 'chat'
+    let activeImagePickerMode = 'profile';
 
     function sendToAppInventor(payloadObj) {
       const payloadStr = JSON.stringify(payloadObj);
@@ -660,13 +660,12 @@
       showToast('Opening Image Picker...');
     }
 
-    // Called from MIT App Inventor when image is picked
     function receiveImageFromAppInventor(imageUrl) {
       if (!imageUrl) return;
       if (activeImagePickerMode === 'profile') {
         currentUser.dp = imageUrl;
         document.getElementById('p-dp-img').src = imageUrl;
-        showToast('DP selected! Tap "Update Profile" to save permanently.');
+        showToast('DP selected! Tap "Update Profile" to save.');
       } else if (activeImagePickerMode === 'chat') {
         sendChatImageMessage(imageUrl);
       }
@@ -1081,11 +1080,18 @@
 
       if (!title || !url || !thumb) { showToast('Please fill all video details!', 'error'); return; }
 
+      let embedUrl = url;
+      if (url.includes('youtube.com/watch?v=')) {
+        embedUrl = url.replace('watch?v=', 'embed/');
+      } else if (url.includes('youtu.be/')) {
+        embedUrl = url.replace('youtu.be/', 'www.youtube.com/embed/');
+      }
+
       const newVideo = {
         id: 'vid_' + Date.now() + '_' + Math.floor(Math.random()*1000),
         creatorId: currentUser.id,
         title: title,
-        videoUrl: url,
+        videoUrl: embedUrl,
         thumbUrl: thumb
       };
 
