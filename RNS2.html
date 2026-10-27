@@ -346,9 +346,11 @@
     #responses-modal { z-index: 999995; }
     #profile-modal { z-index: 999999; }
     #image-lightbox-modal { z-index: 9999999; }
+    #delete-chat-modal { z-index: 9999995; }
 
     .modal-card {
       background: rgba(225, 248, 230, 0.95); border: 1.5px solid var(--card-border); padding: 22px; border-radius: 32px; width: 88%; max-width: 360px; text-align: center;
+      box-shadow: 0 15px 30px rgba(20, 45, 30, 0.2);
     }
 
     .user-online-badge {
@@ -360,7 +362,7 @@
     .video-player-container {
       width: 100%; position: relative; border-radius: 18px; overflow: hidden; background: #000; margin-bottom: 12px;
     }
-    .video-player-container video { width: 100%; height: 210px; display: block; object-fit: contain; }
+    .video-player-container video, .video-player-container iframe { width: 100%; height: 210px; display: block; object-fit: contain; border: none; }
 
     .live-badge {
       background: #ef4444; color: #fff; font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px; animation: pulse 1.5s infinite;
@@ -490,8 +492,8 @@
           </div>
           
           <div id="active-live-container" style="display: none;">
-            <div class="video-player-container">
-              <video id="live-stream-player" controls autoplay playsinline></video>
+            <div class="video-player-container" id="live-player-wrapper">
+              <!-- Live Stream Player (Video or YouTube) -->
             </div>
             <h4 id="active-live-title" style="font-size: 0.95rem; font-weight: 800; margin-bottom: 6px;">Live Broadcast</h4>
           </div>
@@ -549,7 +551,7 @@
           <div style="text-align: center; padding: 10px 0;">
             <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto;">
               <img id="p-dp-img" src="https://api.dicebear.com/7.x/micah/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover;">
-              <div style="position:absolute; bottom:0; right:0; background:#15803d; color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid #fff; font-size:0.8rem;" onclick="document.getElementById('custom-dp-file-input').click()">
+              <div style="position:absolute; bottom:0; right:0; background:#15803d; color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid #fff; font-size:0.8rem;" onclick="triggerImagePickerBridge()">
                 <i class="fa-solid fa-pencil"></i>
               </div>
               <input type="file" id="custom-dp-file-input" style="display:none;" accept="image/*" onchange="handleCustomDpUpload(this)">
@@ -599,6 +601,18 @@
           <p><strong>Total Score:</strong> <span id="m-total-score">0</span> pts (Overall Rank: <span id="m-overall-rank">-</span>)</p>
         </div>
         <button class="btn-submit" style="margin-top: 12px; padding: 10px;" type="button" onclick="closeProfileModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Glassmorphism Delete Chat Modal -->
+    <div id="delete-chat-modal" class="modal-overlay" onclick="closeDeleteChatModal()">
+      <div class="modal-card" style="max-width: 300px;" onclick="event.stopPropagation()">
+        <h3 style="margin-bottom: 10px; font-size: 1.05rem; color: #b91c1c;"><i class="fa-solid fa-trash"></i> Delete Chat</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 16px;">Are you sure you want to delete this chat history?</p>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-submit" style="background: #fee2e2; color: #b91c1c; border-color: #ef4444; padding: 10px;" type="button" onclick="executeDeletePersonalChat()">Delete</button>
+          <button class="btn-submit" style="background: rgba(255,255,255,0.7); padding: 10px;" type="button" onclick="closeDeleteChatModal()">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -717,8 +731,37 @@
     let activeChatPartnerName = 'Group Chat';
     let groupLastReadTimestamp = 0;
     let personalLastReadMap = {};
+    let pendingDeletePartnerId = null;
 
     let currentReplyMsgObj = null;
+
+    function sendToAppInventor(payloadObj) {
+      const payloadStr = JSON.stringify(payloadObj);
+      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
+        window.AppInventor.setWebViewString(payloadStr);
+      } else {
+        window.WebViewerString = payloadStr;
+      }
+    }
+
+    function triggerImagePickerBridge() {
+      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
+        sendToAppInventor({ action: 'PICK_IMAGE' });
+        showToast('Opening Image Picker...');
+      } else {
+        document.getElementById('custom-dp-file-input').click();
+      }
+    }
+
+    // Called from MIT App Inventor when image is picked and uploaded
+    function receiveImageFromAppInventor(imageUrl) {
+      if (imageUrl) {
+        currentUser.dp = imageUrl;
+        document.getElementById('p-dp-img').src = imageUrl;
+        saveUserProfileToDb();
+        showToast('Profile Picture Updated!');
+      }
+    }
 
     function showToast(msg, type = 'success') {
       const toast = document.getElementById('custom-toast');
@@ -991,10 +1034,26 @@
             userProfilesMap = cleanMap;
           }
 
+          let newNormLen = data.NormQuizzes ? (Array.isArray(data.NormQuizzes) ? data.NormQuizzes.length : Object.keys(data.NormQuizzes).length) : 0;
+          if (newNormLen > normQuizzesList.length && normQuizzesList.length > 0) {
+            sendToAppInventor({ action: 'NOTIFICATION', type: 'NEW_QUESTION', title: 'New Question Added!' });
+          }
+
           normQuizzesList = data.NormQuizzes ? (Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes)) : [];
           morePapersList = data.MorePapers ? (Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers)) : [];
+          
+          let newVideoLen = data.VideoPosts ? (Array.isArray(data.VideoPosts) ? data.VideoPosts.length : Object.keys(data.VideoPosts).length) : 0;
+          if (newVideoLen > videoPostsList.length && videoPostsList.length > 0) {
+            sendToAppInventor({ action: 'NOTIFICATION', type: 'NEW_VIDEO', title: 'New Video Published!' });
+          }
           videoPostsList = data.VideoPosts ? (Array.isArray(data.VideoPosts) ? data.VideoPosts : Object.values(data.VideoPosts)) : [];
+
+          let oldLiveId = liveStreamData ? liveStreamData.streamUrl : null;
           liveStreamData = data.LiveBroadcast || null;
+          if (liveStreamData && liveStreamData.isLive && liveStreamData.streamUrl && liveStreamData.streamUrl !== oldLiveId) {
+            sendToAppInventor({ action: 'NOTIFICATION', type: 'LIVE_STARTED', title: 'Live Stream Started!' });
+          }
+
           globalChatList = data.GlobalChat ? (Array.isArray(data.GlobalChat) ? data.GlobalChat : Object.values(data.GlobalChat)) : [];
           personalChatsMap = data.PersonalChats || {};
           blockedUsersMap = (data.BlockedUsers && data.BlockedUsers[currentUser.id]) ? data.BlockedUsers[currentUser.id] : {};
@@ -1167,6 +1226,7 @@
         const lastMsg = globalChatList[globalChatList.length - 1];
         if (lastMsg.timestampNum && lastMsg.timestampNum > groupLastReadTimestamp && lastMsg.senderId !== currentUser.id) {
           groupDot.style.display = 'block';
+          sendToAppInventor({ action: 'NOTIFICATION', type: 'NEW_MESSAGE', title: 'New Message in Group Chat' });
         } else {
           groupDot.style.display = 'none';
         }
@@ -1203,6 +1263,10 @@
         const lastRead = personalLastReadMap[partnerId] || 0;
         const hasUnread = latest.timestampNum > lastRead && latest.senderId !== partnerId;
 
+        if (hasUnread) {
+          sendToAppInventor({ action: 'NOTIFICATION', type: 'NEW_MESSAGE', title: `New message from ${partnerProf.name}` });
+        }
+
         container.innerHTML += `
           <div class="chat-list-item" onclick="openChatRoom('personal', '${partnerProf.name}', '${partnerId}')" oncontextmenu="confirmDeletePersonalChat(event, '${partnerId}')">
             <div style="position:relative; width:44px; height:44px; flex-shrink:0;">
@@ -1218,6 +1282,28 @@
           </div>
         `;
       });
+    }
+
+    function confirmDeletePersonalChat(e, partnerId) {
+      e.preventDefault();
+      e.stopPropagation();
+      pendingDeletePartnerId = partnerId;
+      document.getElementById('delete-chat-modal').style.display = 'flex';
+    }
+
+    function closeDeleteChatModal() {
+      document.getElementById('delete-chat-modal').style.display = 'none';
+      pendingDeletePartnerId = null;
+    }
+
+    async function executeDeletePersonalChat() {
+      if (!pendingDeletePartnerId) return;
+      const roomKey = getPersonalChatRoomId(currentUser.id, pendingDeletePartnerId);
+      personalChatsMap[roomKey] = [];
+      renderChatHub();
+      await fetch(`${FIREBASE_URL}/PersonalChats/${roomKey}.json`, { method: 'PUT', body: JSON.stringify([]) });
+      showToast('Chat deleted!', 'error');
+      closeDeleteChatModal();
     }
 
     function filterStudentsForChat(query) {
@@ -1634,15 +1720,25 @@
       }
     }
 
-    async function confirmDeletePersonalChat(e, partnerId) {
-      e.preventDefault();
-      if (confirm('Delete this entire chat?')) {
-        const roomKey = getPersonalChatRoomId(currentUser.id, partnerId);
-        personalChatsMap[roomKey] = [];
-        renderChatHub();
-        await fetch(`${FIREBASE_URL}/PersonalChats/${roomKey}.json`, { method: 'PUT', body: JSON.stringify([]) });
-        showToast('Chat deleted!', 'error');
+    // --- HELPER FOR YOUTUBE OR CLOUDINARY MEDIA ---
+    function renderMediaPlayer(url, posterUrl = '') {
+      if (!url) return '';
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let embedUrl = url;
+        if (url.includes('watch?v=')) {
+          embedUrl = url.replace('watch?v=', 'embed/');
+        } else if (url.includes('youtu.be/')) {
+          embedUrl = url.replace('youtu.be/', 'www.youtube.com/embed/');
+        }
+        return `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+      } else {
+        return `<video controls poster="${posterUrl}" playsinline preload="metadata"><source src="${url}" type="video/mp4"></video>`;
       }
+    }
+
+    function handleVideoItemClick(vId, vUrl, vTitle) {
+      sendToAppInventor({ action: 'OPEN_VIDEO', id: vId, url: vUrl, title: vTitle });
+      openVideoQuestionsModal(vId);
     }
 
     // --- VIDEOS & LIVE STREAMS RENDERING ---
@@ -1666,10 +1762,8 @@
               <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--card-border);">
               <span style="font-size:0.75rem; color:var(--text-muted); font-weight:800;">Published by ${creatorProf.name}</span>
             </div>
-            <div class="video-player-container">
-              <video controls poster="${v.thumbUrl || ''}" playsinline preload="metadata">
-                <source src="${v.videoUrl}" type="video/mp4">
-              </video>
+            <div class="video-player-container" onclick="handleVideoItemClick('${v.id}', '${v.videoUrl}', '${v.title}')">
+              ${renderMediaPlayer(v.videoUrl, v.thumbUrl || '')}
             </div>
             <div style="font-weight:800; font-size:0.95rem; margin-bottom:8px;">${v.title}</div>
             
@@ -1758,17 +1852,18 @@
       const liveTag = document.getElementById('live-status-tag');
       const activeBox = document.getElementById('active-live-container');
       const noLiveBox = document.getElementById('no-live-container');
-      const player = document.getElementById('live-stream-player');
+      const liveWrapper = document.getElementById('live-player-wrapper');
       const pastList = document.getElementById('past-live-streams-list');
 
       if (liveStreamData && liveStreamData.isLive && liveStreamData.streamUrl) {
         if (liveTag) liveTag.style.display = 'inline-flex';
         if (activeBox) activeBox.style.display = 'block';
         if (noLiveBox) noLiveBox.style.display = 'none';
-        if (player && player.src !== liveStreamData.streamUrl) {
-          player.src = liveStreamData.streamUrl;
+        if (liveWrapper) {
+          liveWrapper.innerHTML = renderMediaPlayer(liveStreamData.streamUrl);
         }
         document.getElementById('active-live-title').innerText = liveStreamData.title || 'Live Broadcast';
+        sendToAppInventor({ action: 'OPEN_LIVE', url: liveStreamData.streamUrl, title: liveStreamData.title });
       } else {
         if (liveTag) liveTag.style.display = 'none';
         if (activeBox) activeBox.style.display = 'none';
@@ -1785,9 +1880,7 @@
             pastList.innerHTML += `
               <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
                 <div class="video-player-container" style="height:140px;">
-                  <video controls playsinline preload="metadata">
-                    <source src="${s.streamUrl}" type="video/mp4">
-                  </video>
+                  ${renderMediaPlayer(s.streamUrl)}
                 </div>
                 <div style="font-weight:800; font-size:0.85rem;">${s.title}</div>
               </div>
@@ -2065,11 +2158,7 @@
 
     function saveUserProfileToDb() {
       const dataStr = JSON.stringify(currentUser);
-      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
-        window.AppInventor.setWebViewString(dataStr);
-      } else {
-        window.WebViewerString = dataStr;
-      }
+      sendToAppInventor(currentUser);
       if (currentUser.id) {
         fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
       }
