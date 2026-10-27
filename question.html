@@ -105,7 +105,6 @@
       box-shadow: 0 0 8px #22c55e;
     }
 
-    /* TOAST POPUP (GREEN/RED) */
     #custom-toast {
       position: fixed;
       top: -70px;
@@ -317,6 +316,7 @@
     #paper-modal { z-index: 999990; }
     #responses-modal { z-index: 999995; }
     #profile-modal { z-index: 999999; }
+    #image-lightbox-modal { z-index: 9999999; }
 
     .modal-card {
       background: rgba(225, 248, 230, 0.95); border: 1.5px solid var(--card-border); padding: 22px; border-radius: 32px; width: 88%; max-width: 360px; text-align: center;
@@ -327,6 +327,14 @@
     }
     .is-online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
     .is-offline { background: #94a3b8; }
+
+    .video-thumb-container {
+      width: 100%; height: 180px; border-radius: 18px; overflow: hidden; background: #000; position: relative; cursor: pointer; margin-bottom: 10px; border: 1.5px solid var(--card-border);
+    }
+    .video-thumb-container img { width: 100%; height: 100%; object-fit: cover; }
+    .play-icon-overlay {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); color: #fff; font-size: 2.2rem;
+    }
   </style>
 </head>
 <body onclick="hideAllPopups(event)">
@@ -379,6 +387,7 @@
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchHomeTab('norm-q')"><i class="fa-solid fa-file-circle-question"></i> Questions</div>
           <div class="sub-nav-btn" onclick="switchHomeTab('more-q')"><i class="fa-solid fa-layer-group"></i> More Qs</div>
+          <div class="sub-nav-btn" onclick="switchHomeTab('video-q')"><i class="fa-solid fa-video"></i> Videos</div>
           <div class="sub-nav-btn" onclick="switchHomeTab('final-rank')"><i class="fa-solid fa-trophy"></i> Overall Rank</div>
         </div>
 
@@ -402,6 +411,12 @@
           </div>
         </div>
 
+        <div id="home-view-video" class="sub-view">
+          <div id="videos-posts-list">
+            <div class="card" style="text-align: center;"><p style="color: var(--text-muted); font-weight: 600;">No videos available.</p></div>
+          </div>
+        </div>
+
         <div id="home-view-final" class="sub-view">
           <div class="card">
             <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px; color: #15803d;"><i class="fa-solid fa-crown" style="color: #eab308;"></i> Final Overall Leaderboard</h3>
@@ -417,7 +432,8 @@
         
         <div class="sub-nav-bar">
           <div class="sub-nav-btn active" onclick="switchPubTab('pub-norm')"><i class="fa-solid fa-plus"></i> Normal Q</div>
-          <div class="sub-nav-btn" onclick="switchPubTab('pub-more')"><i class="fa-solid fa-code"></i> More Q (HTML)</div>
+          <div class="sub-nav-btn" onclick="switchPubTab('pub-more')"><i class="fa-solid fa-code"></i> More Q</div>
+          <div class="sub-nav-btn" onclick="switchPubTab('pub-video')"><i class="fa-solid fa-video"></i> Video</div>
         </div>
 
         <div id="pub-view-norm" class="sub-view active">
@@ -463,6 +479,16 @@
           </div>
         </div>
 
+        <div id="pub-view-video" class="sub-view">
+          <div class="card">
+            <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Publish Video</h3>
+            <div class="form-group"><label>Video Title</label><input type="text" id="pub-v-title" class="input-field" placeholder="Enter video title..."></div>
+            <div class="form-group"><label>YouTube or Video URL</label><input type="text" id="pub-v-url" class="input-field" placeholder="https://www.youtube.com/watch?v=..."></div>
+            <div class="form-group"><label>Thumbnail URL</label><input type="text" id="pub-v-thumb" class="input-field" placeholder="https://img.youtube.com/vi/.../hqdefault.jpg"></div>
+            <button class="btn-submit" type="button" onclick="publishVideoPost()">Publish Video</button>
+          </div>
+        </div>
+
       </div>
 
       <!-- 3. CHAT SCREEN -->
@@ -474,8 +500,11 @@
       <div id="view-profile" class="view-section">
         <div class="card">
           <div style="text-align: center; padding: 10px 0;">
-            <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto; cursor:pointer;" onclick="initAvatarSelector()">
+            <div style="position:relative; width:85px; height:85px; margin:0 auto 8px auto;">
               <img id="p-dp-img" src="https://api.dicebear.com/7.x/micah/svg?seed=Default" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--card-border); object-fit: cover;">
+              <div style="position:absolute; bottom:0; right:0; background:#15803d; color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid #fff; font-size:0.8rem;" onclick="triggerProfileImagePicker()">
+                <i class="fa-solid fa-pencil"></i>
+              </div>
               <div id="p-badge-container"></div>
             </div>
             <h3 id="p-name">Student Profile</h3>
@@ -500,7 +529,7 @@
 
     </div>
 
-    <!-- Online Students Modal -->
+    <!-- Modals -->
     <div id="online-modal" class="modal-overlay" onclick="closeOnlineStudentsModal()">
       <div class="modal-card" style="max-width: 340px;" onclick="event.stopPropagation()">
         <h3 style="margin-bottom: 12px; font-size: 1rem;">👥 Registered Online Students</h3>
@@ -509,7 +538,6 @@
       </div>
     </div>
 
-    <!-- Student Details Modal -->
     <div id="profile-modal" class="modal-overlay" onclick="closeProfileModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
         <div style="position:relative; width:80px; height:80px; margin:0 auto 8px auto;">
@@ -527,7 +555,6 @@
       </div>
     </div>
 
-    <!-- Responses Modal -->
     <div id="responses-modal" class="modal-overlay" onclick="closeResponsesModal()">
       <div class="modal-card" onclick="event.stopPropagation()">
         <h3 id="responses-modal-title" style="margin-bottom: 12px; font-size: 1rem;">Student Responses</h3>
@@ -536,7 +563,6 @@
       </div>
     </div>
 
-    <!-- Paper View Modal -->
     <div id="paper-modal" class="modal-overlay" onclick="closePaperModal()">
       <div class="modal-card" style="max-width: 380px; width: 92%; max-height: 82vh; overflow-y: auto;" onclick="event.stopPropagation()">
         <h3 id="paper-modal-title" style="margin-bottom: 10px; font-size: 1rem;">Paper Title</h3>
@@ -545,7 +571,16 @@
       </div>
     </div>
 
-    <!-- About Modal -->
+    <!-- Image Lightbox Modal -->
+    <div id="image-lightbox-modal" class="modal-overlay" style="background: rgba(0,0,0,0.9); z-index:9999999;" onclick="closeImageLightbox()">
+      <div style="position: absolute; top: 15px; left: 15px; z-index: 10000; cursor: pointer; color: #fff; background: rgba(0,0,0,0.6); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 800;" onclick="closeImageLightbox()">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </div>
+      <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; padding: 20px;" onclick="event.stopPropagation()">
+        <img id="lightbox-img-element" src="" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px;">
+      </div>
+    </div>
+
     <div id="about-modal" class="modal-overlay" onclick="closeAboutModal()">
       <div class="modal-card" onclick="event.stopPropagation()" style="text-align: center;">
         <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(200, 240, 210, 0.85); border: 1.5px solid rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: #1f3a2b; font-size: 1.4rem; font-weight: 800;"><i class="fa-solid fa-users-gear"></i></div>
@@ -563,7 +598,9 @@
 
     <!-- Chat Bar -->
     <div id="chat-bar-wrapper" class="chat-input-bar">
-      <div id="active-chat-input-group" style="display: flex; gap: 10px; width: 100%;">
+      <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
+        <input type="file" id="chat-image-file-input" style="display:none;" accept="image/*" onchange="sendChatImageFile(this)">
+        <button class="send-btn" type="button" style="background: rgba(255,255,255,0.7); flex-shrink:0;" onclick="triggerChatImagePicker()"><i class="fa-solid fa-plus"></i></button>
         <input type="text" id="chat-input-msg" class="input-field" placeholder="Type a message...">
         <button class="send-btn" type="button" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
@@ -595,9 +632,45 @@
     let userProfilesMap = {};
     let normQuizzesList = [];
     let morePapersList = [];
+    let videoPostsList = [];
     let currentChatList = [];
     let overallRankMap = {};
     let toastTimer = null;
+
+    let activeImagePickerMode = 'profile'; // 'profile' or 'chat'
+
+    function sendToAppInventor(payloadObj) {
+      const payloadStr = JSON.stringify(payloadObj);
+      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
+        window.AppInventor.setWebViewString(payloadStr);
+      } else {
+        window.WebViewerString = payloadStr;
+      }
+    }
+
+    function triggerProfileImagePicker() {
+      activeImagePickerMode = 'profile';
+      sendToAppInventor({ action: 'PICK_IMAGE' });
+      showToast('Opening Image Picker...');
+    }
+
+    function triggerChatImagePicker() {
+      activeImagePickerMode = 'chat';
+      sendToAppInventor({ action: 'PICK_IMAGE' });
+      showToast('Opening Image Picker...');
+    }
+
+    // Called from MIT App Inventor when image is picked
+    function receiveImageFromAppInventor(imageUrl) {
+      if (!imageUrl) return;
+      if (activeImagePickerMode === 'profile') {
+        currentUser.dp = imageUrl;
+        document.getElementById('p-dp-img').src = imageUrl;
+        showToast('DP selected! Tap "Update Profile" to save permanently.');
+      } else if (activeImagePickerMode === 'chat') {
+        sendChatImageMessage(imageUrl);
+      }
+    }
 
     function showToast(msg, type = 'success') {
       const toast = document.getElementById('custom-toast');
@@ -633,7 +706,6 @@
       if (!name || !roll || !pass) { showToast('Please fill all details!', 'error'); return; }
 
       const uid = 'usr_' + roll;
-      
       let res = await fetch(`${FIREBASE_URL}/UsersMap/${uid}.json`);
       let existingUser = await res.json();
 
@@ -754,8 +826,11 @@
       } else if (tabName === 'more-q') {
         btns[1].classList.add('active');
         document.getElementById('home-view-more').classList.add('active');
-      } else {
+      } else if (tabName === 'video-q') {
         btns[2].classList.add('active');
+        document.getElementById('home-view-video').classList.add('active');
+      } else {
+        btns[3].classList.add('active');
         document.getElementById('home-view-final').classList.add('active');
       }
     }
@@ -769,9 +844,12 @@
       if (tabName === 'pub-norm') {
         btns[0].classList.add('active');
         document.getElementById('pub-view-norm').classList.add('active');
-      } else {
+      } else if (tabName === 'pub-more') {
         btns[1].classList.add('active');
         document.getElementById('pub-view-more').classList.add('active');
+      } else {
+        btns[2].classList.add('active');
+        document.getElementById('pub-view-video').classList.add('active');
       }
     }
 
@@ -793,11 +871,8 @@
         if (q.responses) {
           Object.keys(q.responses).forEach(uid => {
             if (calcNormScores[uid] === undefined) calcNormScores[uid] = 0;
-            if (q.responses[uid] === q.correctIndex) {
-              calcNormScores[uid] += 1;
-            } else {
-              calcNormScores[uid] -= 1;
-            }
+            if (q.responses[uid] === q.correctIndex) calcNormScores[uid] += 1;
+            else calcNormScores[uid] -= 1;
           });
         }
       });
@@ -809,11 +884,8 @@
             if (qRes) {
               Object.keys(qRes).forEach(uid => {
                 if (calcMoreScores[uid] === undefined) calcMoreScores[uid] = 0;
-                if (qRes[uid] === q.correctIndex) {
-                  calcMoreScores[uid] += 1;
-                } else {
-                  calcMoreScores[uid] -= 1;
-                }
+                if (qRes[uid] === q.correctIndex) calcMoreScores[uid] += 1;
+                else calcMoreScores[uid] -= 1;
               });
             }
           });
@@ -846,7 +918,6 @@
           const savedScrollTop = mainScroll ? mainScroll.scrollTop : 0;
 
           if (data.UsersMap) {
-            // Filter out corrupted/undefined guest entries
             let cleanMap = {};
             Object.keys(data.UsersMap).forEach(k => {
               if (data.UsersMap[k] && data.UsersMap[k].name && data.UsersMap[k].id) {
@@ -856,17 +927,9 @@
             userProfilesMap = cleanMap;
           }
 
-          if (data.NormQuizzes) {
-            normQuizzesList = Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes);
-          } else {
-            normQuizzesList = [];
-          }
-
-          if (data.MorePapers) {
-            morePapersList = Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers);
-          } else {
-            morePapersList = [];
-          }
+          normQuizzesList = data.NormQuizzes ? (Array.isArray(data.NormQuizzes) ? data.NormQuizzes : Object.values(data.NormQuizzes)) : [];
+          morePapersList = data.MorePapers ? (Array.isArray(data.MorePapers) ? data.MorePapers : Object.values(data.MorePapers)) : [];
+          videoPostsList = data.VideoPosts ? (Array.isArray(data.VideoPosts) ? data.VideoPosts : Object.values(data.VideoPosts)) : [];
 
           recalculateScoresFromRemainingData();
           calculateOverallLeaderboards();
@@ -876,6 +939,7 @@
           renderMyPublishedNorm();
           renderMorePapers();
           renderMyPublishedPapers();
+          renderVideoPosts();
 
           if (data.GlobalChat) {
             currentChatList = Array.isArray(data.GlobalChat) ? data.GlobalChat : Object.values(data.GlobalChat);
@@ -890,15 +954,11 @@
     function updateOnlineCounterUI() {
       const now = Date.now();
       let onlineCount = 0;
-      
-      // Ensure current user counts as online at minimum
       userProfilesMap[currentUser.id] = currentUser;
 
       Object.keys(userProfilesMap).forEach(uid => {
         const u = userProfilesMap[uid];
-        if (u && u.name && u.lastSeen && (now - u.lastSeen < 30000)) {
-          onlineCount++;
-        }
+        if (u && u.name && u.lastSeen && (now - u.lastSeen < 30000)) onlineCount++;
       });
 
       if (onlineCount < 1) onlineCount = 1;
@@ -929,72 +989,52 @@
       const finalContainer = document.getElementById('final-rankings-container');
       if (finalContainer) {
         finalContainer.innerHTML = '';
-        if (finalSorted.length === 0) {
-          finalContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center;">No registered users on leaderboard.</p>';
-        } else {
-          finalSorted.forEach(u => {
-            const isMe = u.id === currentUser.id;
-            finalContainer.innerHTML += `
-              <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-                <span style="font-weight:800; width:28px;">#${overallRankMap[u.id]}</span>
-                <div style="position:relative; width:38px; height:38px;">
-                  <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
-                  ${getBadgeHtml(u.id)}
-                </div>
-                <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-                <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.totalScore} pts</div>
-              </div>`;
-          });
-        }
-      }
-
-      const normSorted = [...usersArr].sort((a, b) => b.normScore - a.normScore);
-      const normList = document.getElementById('norm-rankings-container');
-      if (normList) {
-        normList.innerHTML = '';
-        normSorted.forEach((u, idx) => {
+        finalSorted.forEach(u => {
           const isMe = u.id === currentUser.id;
-          normList.innerHTML += `
+          finalContainer.innerHTML += `
             <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-              <span style="font-weight:800; width:28px;">#${idx+1}</span>
-              <div style="position:relative; width:36px; height:36px;">
-                <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+              <span style="font-weight:800; width:28px;">#${overallRankMap[u.id]}</span>
+              <div style="position:relative; width:38px; height:38px;">
+                <img src="${u.dp}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
                 ${getBadgeHtml(u.id)}
               </div>
               <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.normScore} pts</div>
+              <div style="font-weight:800; font-size:0.85rem; color:#15803d;">${u.totalScore} pts</div>
             </div>`;
         });
       }
 
-      const moreSorted = [...usersArr].sort((a, b) => b.moreScore - a.moreScore);
-      const moreList = document.getElementById('more-rankings-container');
-      if (moreList) {
-        moreList.innerHTML = '';
-        moreSorted.forEach((u, idx) => {
-          const isMe = u.id === currentUser.id;
-          moreList.innerHTML += `
-            <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
-              <span style="font-weight:800; width:28px;">#${idx+1}</span>
-              <div style="position:relative; width:36px; height:36px;">
-                <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
-                ${getBadgeHtml(u.id)}
-              </div>
-              <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
-              <div style="font-weight:800; font-size:0.85rem; color:#3b82f6;">${u.moreScore} pts</div>
-            </div>`;
-        });
-      }
+      renderSpecificLeaderboard('norm-rankings-container', usersArr, 'normScore', '#15803d');
+      renderSpecificLeaderboard('more-rankings-container', usersArr, 'moreScore', '#3b82f6');
 
       document.getElementById('p-overall-score').innerText = `Total Score: ${(currentUser.normScore||0) + (currentUser.moreScore||0)} pts`;
       document.getElementById('p-badge-container').innerHTML = getBadgeHtml(currentUser.id);
+    }
+
+    function renderSpecificLeaderboard(containerId, usersArr, scoreField, color) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const sorted = [...usersArr].sort((a, b) => b[scoreField] - a[scoreField]);
+      container.innerHTML = '';
+      sorted.forEach((u, idx) => {
+        const isMe = u.id === currentUser.id;
+        container.innerHTML += `
+          <div class="rank-list-item ${isMe ? 'is-me':''}" onclick="showStudentProfileModal('${u.id}')">
+            <span style="font-weight:800; width:28px;">#${idx+1}</span>
+            <div style="position:relative; width:36px; height:36px;">
+              <img src="${u.dp}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+              ${getBadgeHtml(u.id)}
+            </div>
+            <div style="flex:1; font-weight:800; font-size:0.85rem;">${u.name} ${isMe ? '(You)':''}</div>
+            <div style="font-weight:800; font-size:0.85rem; color:${color};">${u[scoreField]} pts</div>
+          </div>`;
+      });
     }
 
     function openOnlineStudentsModal() {
       const container = document.getElementById('online-students-list-container');
       if (!container) return;
       container.innerHTML = '';
-
       const uKeys = Object.keys(userProfilesMap).filter(uid => userProfilesMap[uid] && userProfilesMap[uid].name);
       
       uKeys.forEach(uid => {
@@ -1009,8 +1049,7 @@
             </div>
             <span style="font-size:0.85rem; font-weight:800; flex:1;">${u.name} ${uid === currentUser.id ? '(You)' : ''}</span>
             <div class="user-online-badge ${online ? 'is-online' : 'is-offline'}"></div>
-          </div>
-        `;
+          </div>`;
       });
       document.getElementById('online-modal').style.display = 'flex';
     }
@@ -1028,12 +1067,69 @@
       document.getElementById('m-total-score').innerText = total;
       document.getElementById('m-overall-rank').innerText = overallRankMap[uid] ? '#' + overallRankMap[uid] : 'N/A';
       document.getElementById('m-dp').src = u.dp || 'https://api.dicebear.com/7.x/micah/svg?seed=User';
-      
       document.getElementById('m-badge-container').innerHTML = getBadgeHtml(uid);
       document.getElementById('profile-modal').style.display = 'flex';
     }
 
     function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
+
+    // --- VIDEOS MODULE ---
+    async function publishVideoPost() {
+      const title = document.getElementById('pub-v-title').value.trim();
+      const url = document.getElementById('pub-v-url').value.trim();
+      const thumb = document.getElementById('pub-v-thumb').value.trim();
+
+      if (!title || !url || !thumb) { showToast('Please fill all video details!', 'error'); return; }
+
+      const newVideo = {
+        id: 'vid_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+        creatorId: currentUser.id,
+        title: title,
+        videoUrl: url,
+        thumbUrl: thumb
+      };
+
+      videoPostsList.push(newVideo);
+      await fetch(`${FIREBASE_URL}/VideoPosts.json`, { method: 'PUT', body: JSON.stringify(videoPostsList) });
+      showToast('Video Published Successfully!', 'success');
+      document.getElementById('pub-v-title').value = '';
+      document.getElementById('pub-v-url').value = '';
+      document.getElementById('pub-v-thumb').value = '';
+      renderVideoPosts();
+    }
+
+    function renderVideoPosts() {
+      const container = document.getElementById('videos-posts-list');
+      if (!container) return;
+      if (videoPostsList.length === 0) {
+        container.innerHTML = '<div class="card" style="text-align:center;"><p style="font-weight:700; color:var(--text-muted);">No videos available</p></div>';
+        return;
+      }
+      container.innerHTML = '';
+      const reversed = [...videoPostsList].reverse();
+
+      reversed.forEach(v => {
+        const creatorProf = userProfilesMap[v.creatorId] || { name: 'Admin', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=Admin' };
+        container.innerHTML += `
+          <div class="card">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+              <img src="${creatorProf.dp}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--card-border);">
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:800;">Published by ${creatorProf.name}</span>
+            </div>
+            <div class="video-thumb-container" onclick="handleVideoItemClick('${v.videoUrl}')">
+              <img src="${v.thumbUrl}" alt="Thumbnail">
+              <div class="play-icon-overlay"><i class="fa-solid fa-circle-play"></i></div>
+            </div>
+            <div style="font-weight:800; font-size:0.95rem;">${v.title}</div>
+          </div>
+        `;
+      });
+    }
+
+    function handleVideoItemClick(vUrl) {
+      sendToAppInventor({ action: 'OPEN_VIDEO', url: vUrl });
+      showToast('Opening video in player...');
+    }
 
     async function publishNormalQuestion() {
       const qText = document.getElementById('pub-q-text').value.trim();
@@ -1065,19 +1161,12 @@
 
     async function deleteNormQuestion(qId) {
       const q = normQuizzesList.find(item => item.id === qId);
-      if (!q) return;
-
-      if (q.creatorId !== currentUser.id) {
-        showToast('You can only delete your own questions!', 'error');
-        return;
-      }
+      if (!q || q.creatorId !== currentUser.id) { showToast('Unauthorized!', 'error'); return; }
 
       normQuizzesList = normQuizzesList.filter(item => item.id !== qId);
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
-      
       recalculateScoresFromRemainingData();
       await fetch(`${FIREBASE_URL}/UsersMap.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap) });
-
       showToast('Question Deleted!', 'error');
       fetchFirebaseData();
     }
@@ -1090,7 +1179,6 @@
         return;
       }
       container.innerHTML = '';
-      
       const reversedList = [...normQuizzesList].reverse();
       
       reversedList.forEach(q => {
@@ -1102,11 +1190,8 @@
         q.options.forEach((o, idx) => {
           let st = "background: rgba(255,255,255,0.7); color: var(--text-dark);";
           if (hasAnswered) {
-            if (idx === q.correctIndex) {
-              st = "background: rgba(34,197,94,0.95) !important; color:#fff !important; font-weight:800;";
-            } else if (idx === myAns) {
-              st = "background: rgba(239,68,68,0.95) !important; color:#fff !important; font-weight:800;";
-            }
+            if (idx === q.correctIndex) st = "background: rgba(34,197,94,0.95) !important; color:#fff !important; font-weight:800;";
+            else if (idx === myAns) st = "background: rgba(239,68,68,0.95) !important; color:#fff !important; font-weight:800;";
           }
           optsHtml += `<button class="btn-submit" style="margin-bottom:8px; ${st}" onclick="submitNormAnswer('${q.id}', ${idx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
@@ -1134,10 +1219,8 @@
       const q = normQuizzesList.find(item => item.id === qId);
       if (!q) return;
       q.responses = q.responses || {};
-      
       if (q.responses[currentUser.id] !== undefined) return;
 
-      // INSTANT ZERO-LAG LOCAL UPDATE
       q.responses[currentUser.id] = optIdx;
       recalculateScoresFromRemainingData();
       renderNormQuizzes();
@@ -1145,18 +1228,11 @@
 
       showToast(optIdx === q.correctIndex ? 'Correct Answer! +1 Pt' : 'Wrong Answer! -1 Pt', optIdx === q.correctIndex ? 'success' : 'error');
 
-      // ASYNC FIREBASE SYNC (In Background without freezing)
       const quizIndex = normQuizzesList.findIndex(item => item.id === qId);
       if (quizIndex !== -1) {
-        fetch(`${FIREBASE_URL}/NormQuizzes/${quizIndex}/responses/${currentUser.id}.json`, { 
-          method: 'PUT', 
-          body: JSON.stringify(optIdx) 
-        });
+        fetch(`${FIREBASE_URL}/NormQuizzes/${quizIndex}/responses/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(optIdx) });
       }
-      fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { 
-        method: 'PUT', 
-        body: JSON.stringify(currentUser) 
-      });
+      fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
     }
 
     function renderMyPublishedNorm() {
@@ -1172,7 +1248,7 @@
         container.innerHTML += `
           <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
             <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${q.question}</div>
-            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteNormQuestion('${q.id}')"><i class="fa-solid fa-trash"></i> Delete Question</button>
+            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteNormQuestion('${q.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
           </div>
         `;
       });
@@ -1199,7 +1275,7 @@
 
         const uKeys = Object.keys(userPaperScores);
         if (uKeys.length === 0) {
-          container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No attempts for this paper yet.</p>';
+          container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No attempts yet.</p>';
         } else {
           uKeys.forEach(uid => {
             const uProf = userProfilesMap[uid] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
@@ -1219,22 +1295,13 @@
         document.getElementById('responses-modal-title').innerText = "Question Responses";
         let responses = {};
         let correctIdx = 0;
-        let hasMyAnswered = false;
 
         if (type === 'norm') {
           const q = normQuizzesList.find(item => item.id === targetId);
-          if (!q) return;
-          responses = q.responses || {};
-          correctIdx = q.correctIndex;
-          hasMyAnswered = (responses[currentUser.id] !== undefined);
+          if (q) { responses = q.responses || {}; correctIdx = q.correctIndex; }
         } else if (type === 'more') {
           const p = morePapersList.find(item => item.id === paperId);
-          if (!p) return;
-          p.responses = p.responses || {};
-          responses = p.responses[targetId] || {};
-          const q = p.questions.find(item => item.qId === targetId);
-          if (q) correctIdx = q.correctIndex;
-          hasMyAnswered = (responses[currentUser.id] !== undefined);
+          if (p && p.responses) { responses = p.responses[targetId] || {}; const q = p.questions.find(item => item.qId === targetId); if (q) correctIdx = q.correctIndex; }
         }
 
         const uKeys = Object.keys(responses);
@@ -1245,23 +1312,13 @@
             const uProf = userProfilesMap[uid] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
             const givenOpt = responses[uid];
             const isCorrect = (givenOpt === correctIdx);
-
-            let statusBadge = '';
-            if (!hasMyAnswered) {
-              statusBadge = isCorrect 
-                ? `<span style="color:#15803d; font-weight:800; font-size:0.8rem; background:#dcfce7; padding:3px 8px; border-radius:10px;">Correct ✔</span>` 
-                : `<span style="color:#dc2626; font-weight:800; font-size:0.8rem; background:#fee2e2; padding:3px 8px; border-radius:10px;">Wrong ✖</span>`;
-            } else {
-              statusBadge = `<span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'}; background:${isCorrect ? '#dcfce7' : '#fee2e2'}; padding:3px 8px; border-radius:10px;">
-                Opt ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
-              </span>`;
-            }
-
             container.innerHTML += `
               <div style="display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:14px; border:1px solid var(--card-border); cursor:pointer;" onclick="showStudentProfileModal('${uid}')">
                 <img src="${uProf.dp}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
                 <span style="font-size:0.82rem; font-weight:800; flex:1;">${uProf.name}</span>
-                ${statusBadge}
+                <span style="font-weight:800; font-size:0.75rem; color:${isCorrect ? '#15803d' : '#dc2626'}; background:${isCorrect ? '#dcfce7' : '#fee2e2'}; padding:3px 8px; border-radius:10px;">
+                  Option ${String.fromCharCode(65 + givenOpt)} (${isCorrect ? 'Correct' : 'Wrong'})
+                </span>
               </div>
             `;
           });
@@ -1280,7 +1337,6 @@
 
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlText;
-
       const qNodes = tempDiv.querySelectorAll('.paper-q-item');
       let extractedQuestions = [];
 
@@ -1318,20 +1374,13 @@
 
     async function deleteMorePaper(pId) {
       const p = morePapersList.find(item => item.id === pId);
-      if (!p) return;
-
-      if (p.creatorId !== currentUser.id) {
-        showToast('You can only delete your own papers!', 'error');
-        return;
-      }
+      if (!p || p.creatorId !== currentUser.id) { showToast('Unauthorized!', 'error'); return; }
 
       morePapersList = morePapersList.filter(item => item.id !== pId);
       await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
-
       recalculateScoresFromRemainingData();
       await fetch(`${FIREBASE_URL}/UsersMap.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap) });
-
-      showToast('Paper Set Deleted!', 'error');
+      showToast('Paper Deleted!', 'error');
       fetchFirebaseData();
     }
 
@@ -1343,12 +1392,10 @@
         return;
       }
       container.innerHTML = '';
-
       const reversedPapers = [...morePapersList].reverse();
 
       reversedPapers.forEach(p => {
         const creatorProf = userProfilesMap[p.creatorId] || { name: 'Student', dp: 'https://api.dicebear.com/7.x/micah/svg?seed=User' };
-        
         let attemptedUsers = new Set();
         if (p.questions && p.responses) {
           p.questions.forEach(q => {
@@ -1393,11 +1440,8 @@
         q.options.forEach((o, oIdx) => {
           let st = "background: rgba(255,255,255,0.7); color: var(--text-dark);";
           if (hasAnswered) {
-            if (oIdx === q.correctIndex) {
-              st = "background: rgba(34,197,94,0.95) !important; color:#fff !important; font-weight:800;";
-            } else if (oIdx === myAns) {
-              st = "background: rgba(239,68,68,0.95) !important; color:#fff !important; font-weight:800;";
-            }
+            if (oIdx === q.correctIndex) st = "background: rgba(34,197,94,0.95) !important; color:#fff !important; font-weight:800;";
+            else if (oIdx === myAns) st = "background: rgba(239,68,68,0.95) !important; color:#fff !important; font-weight:800;";
           }
           optsHtml += `<button class="btn-submit" style="margin-bottom:6px; padding:8px; ${st}" onclick="submitPaperQuestionAnswer('${p.id}', '${q.qId}', ${oIdx})" ${hasAnswered ? 'disabled':''}>${o}</button>`;
         });
@@ -1425,10 +1469,8 @@
       if (!p) return;
       p.responses = p.responses || {};
       p.responses[qId] = p.responses[qId] || {};
-      
       if (p.responses[qId][currentUser.id] !== undefined) return;
 
-      // INSTANT UI UPDATE
       p.responses[qId][currentUser.id] = optIdx;
       const q = p.questions.find(item => item.qId === qId);
       
@@ -1438,18 +1480,11 @@
 
       showToast(optIdx === q.correctIndex ? 'Correct Answer! +1 Pt' : 'Wrong Answer! -1 Pt', optIdx === q.correctIndex ? 'success' : 'error');
 
-      // ASYNC FIREBASE SYNC
       const paperIndex = morePapersList.findIndex(item => item.id === paperId);
       if (paperIndex !== -1) {
-        fetch(`${FIREBASE_URL}/MorePapers/${paperIndex}/responses/${qId}/${currentUser.id}.json`, { 
-          method: 'PUT', 
-          body: JSON.stringify(optIdx) 
-        });
+        fetch(`${FIREBASE_URL}/MorePapers/${paperIndex}/responses/${qId}/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(optIdx) });
       }
-      fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { 
-        method: 'PUT', 
-        body: JSON.stringify(currentUser) 
-      });
+      fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
     }
 
     function renderMyPublishedPapers() {
@@ -1465,7 +1500,7 @@
         container.innerHTML += `
           <div style="background:rgba(255,255,255,0.6); padding:10px; border-radius:14px; margin-bottom:8px; border:1px solid var(--card-border);">
             <div style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">${p.title}</div>
-            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteMorePaper('${p.id}')"><i class="fa-solid fa-trash"></i> Delete Paper Set</button>
+            <button class="btn-submit" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444; padding:6px; font-size:0.75rem;" onclick="deleteMorePaper('${p.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
           </div>
         `;
       });
@@ -1517,7 +1552,6 @@
         msgId: 'msg_' + Date.now() + '_' + Math.random(),
         senderId: currentUser.id,
         text: text,
-        seenBy: { [currentUser.id]: true },
         reactions: {},
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -1526,6 +1560,31 @@
       renderChatMessages(currentChatList);
       input.value = '';
       await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
+    }
+
+    async function sendChatImageMessage(imageUrl) {
+      const msgObj = {
+        msgId: 'msg_' + Date.now() + '_' + Math.random(),
+        senderId: currentUser.id,
+        text: '',
+        imageUrl: imageUrl,
+        reactions: {},
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      currentChatList.push(msgObj);
+      renderChatMessages(currentChatList);
+      await fetch(`${FIREBASE_URL}/GlobalChat.json`, { method: 'PUT', body: JSON.stringify(currentChatList) });
+      showToast('Image Sent!');
+    }
+
+    function openImageLightbox(url) {
+      document.getElementById('lightbox-img-element').src = url;
+      document.getElementById('image-lightbox-modal').style.display = 'flex';
+    }
+
+    function closeImageLightbox() {
+      document.getElementById('image-lightbox-modal').style.display = 'none';
     }
 
     function renderChatMessages(messages) {
@@ -1547,6 +1606,11 @@
           Object.keys(counts).forEach(emo => {
             reactionsHtml += `<div class="reaction-pill"><span>${emo}</span> <span>${counts[emo]}</span></div>`;
           });
+        }
+
+        let contentHtml = `<div>${msg.text}</div>`;
+        if (msg.imageUrl) {
+          contentHtml = `<img src="${msg.imageUrl}" style="max-width:180px; border-radius:14px; display:block; margin-bottom:4px; object-fit:cover; cursor:pointer;" onclick="openImageLightbox('${msg.imageUrl}')">${msg.text ? `<div>${msg.text}</div>` : ''}`;
         }
 
         const msgDiv = document.createElement('div');
@@ -1571,7 +1635,7 @@
                  onmouseup="handleTouchEnd()" 
                  ontouchstart="handleTouchStart(event, '${msg.msgId}')" 
                  ontouchend="handleTouchEnd()">
-              <div>${msg.text}</div>
+              ${contentHtml}
             </div>
             <div class="reactions-bar">${reactionsHtml}</div>
             ${isMy ? `<div id="del_btn_${msg.msgId}" class="delete-msg-btn" onclick="deleteMyMessage('${msg.msgId}', event)"><i class="fa-solid fa-trash"></i> Delete</div>` : ''}
@@ -1604,12 +1668,7 @@
     }
 
     function saveUserProfileToDb() {
-      const dataStr = JSON.stringify(currentUser);
-      if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
-        window.AppInventor.setWebViewString(dataStr);
-      } else {
-        window.WebViewerString = dataStr;
-      }
+      sendToAppInventor(currentUser);
       if (currentUser.id) {
         fetch(`${FIREBASE_URL}/UsersMap/${currentUser.id}.json`, { method: 'PUT', body: JSON.stringify(currentUser) });
       }
