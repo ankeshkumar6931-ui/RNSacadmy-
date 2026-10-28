@@ -105,7 +105,6 @@
       box-shadow: 0 0 8px #22c55e;
     }
 
-    /* TOAST POPUP (GREEN/RED) */
     #custom-toast {
       position: fixed;
       top: -70px;
@@ -778,6 +777,7 @@
     function openAboutModal() { document.getElementById('about-modal').style.display = 'flex'; }
     function closeAboutModal() { document.getElementById('about-modal').style.display = 'none'; }
 
+    // DYNAMIC SCORE RE-CALCULATION & UNDO LOGIC ON QUESTION/PAPER DELETION
     function recalculateScoresFromRemainingData() {
       let calcNormScores = {};
       let calcMoreScores = {};
@@ -789,6 +789,7 @@
         }
       });
 
+      // Recalculate normal questions based strictly on existing question responses
       normQuizzesList.forEach(q => {
         if (q.responses) {
           Object.keys(q.responses).forEach(uid => {
@@ -802,6 +803,7 @@
         }
       });
 
+      // Recalculate more papers based strictly on existing paper questions & responses
       morePapersList.forEach(p => {
         if (p.questions && p.responses) {
           p.questions.forEach(q => {
@@ -822,8 +824,8 @@
 
       Object.keys(userProfilesMap).forEach(uid => {
         if (userProfilesMap[uid]) {
-          userProfilesMap[uid].normScore = Math.max(0, calcNormScores[uid] || 0);
-          userProfilesMap[uid].moreScore = Math.max(0, calcMoreScores[uid] || 0);
+          userProfilesMap[uid].normScore = calcNormScores[uid] || 0;
+          userProfilesMap[uid].moreScore = calcMoreScores[uid] || 0;
         }
       });
 
@@ -846,7 +848,6 @@
           const savedScrollTop = mainScroll ? mainScroll.scrollTop : 0;
 
           if (data.UsersMap) {
-            // Filter out corrupted/undefined guest entries
             let cleanMap = {};
             Object.keys(data.UsersMap).forEach(k => {
               if (data.UsersMap[k] && data.UsersMap[k].name && data.UsersMap[k].id) {
@@ -891,7 +892,6 @@
       const now = Date.now();
       let onlineCount = 0;
       
-      // Ensure current user counts as online at minimum
       userProfilesMap[currentUser.id] = currentUser;
 
       Object.keys(userProfilesMap).forEach(uid => {
@@ -1072,13 +1072,17 @@
         return;
       }
 
+      // Remove question locally
       normQuizzesList = normQuizzesList.filter(item => item.id !== qId);
+      
+      // Sync deletion to Firebase
       await fetch(`${FIREBASE_URL}/NormQuizzes.json`, { method: 'PUT', body: JSON.stringify(normQuizzesList) });
       
+      // Recalculate scores to handle Undo and update database map
       recalculateScoresFromRemainingData();
       await fetch(`${FIREBASE_URL}/UsersMap.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap) });
 
-      showToast('Question Deleted!', 'error');
+      showToast('Question Deleted & Scores Undone!', 'error');
       fetchFirebaseData();
     }
 
@@ -1137,7 +1141,7 @@
       
       if (q.responses[currentUser.id] !== undefined) return;
 
-      // INSTANT ZERO-LAG LOCAL UPDATE
+      // INSTANT LOCAL UPDATE & LEADERBOARD RE-RENDER
       q.responses[currentUser.id] = optIdx;
       recalculateScoresFromRemainingData();
       renderNormQuizzes();
@@ -1145,7 +1149,7 @@
 
       showToast(optIdx === q.correctIndex ? 'Correct Answer! +1 Pt' : 'Wrong Answer! -1 Pt', optIdx === q.correctIndex ? 'success' : 'error');
 
-      // ASYNC FIREBASE SYNC (In Background without freezing)
+      // ASYNC FIREBASE SYNC
       const quizIndex = normQuizzesList.findIndex(item => item.id === qId);
       if (quizIndex !== -1) {
         fetch(`${FIREBASE_URL}/NormQuizzes/${quizIndex}/responses/${currentUser.id}.json`, { 
@@ -1325,13 +1329,17 @@
         return;
       }
 
+      // Remove paper locally
       morePapersList = morePapersList.filter(item => item.id !== pId);
+      
+      // Sync deletion to Firebase
       await fetch(`${FIREBASE_URL}/MorePapers.json`, { method: 'PUT', body: JSON.stringify(morePapersList) });
 
+      // Recalculate scores to handle Undo and update database map
       recalculateScoresFromRemainingData();
       await fetch(`${FIREBASE_URL}/UsersMap.json`, { method: 'PUT', body: JSON.stringify(userProfilesMap) });
 
-      showToast('Paper Set Deleted!', 'error');
+      showToast('Paper Set Deleted & Scores Undone!', 'error');
       fetchFirebaseData();
     }
 
@@ -1428,7 +1436,7 @@
       
       if (p.responses[qId][currentUser.id] !== undefined) return;
 
-      // INSTANT UI UPDATE
+      // INSTANT UI UPDATE & LEADERBOARD RE-RENDER
       p.responses[qId][currentUser.id] = optIdx;
       const q = p.questions.find(item => item.qId === qId);
       
