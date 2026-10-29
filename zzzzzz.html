@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image & Video Picker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            padding: 20px;
+        }
+        .box {
+            background: #1f1f1f;
+            margin: 15px auto;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 350px;
+            border: 1px solid #444;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+            color: white;
+        }
+        img, video {
+            width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-top: 10px;
+            background: black;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>इमेज और वीडियो पिकर</h2>
+
+    <!-- इमेज चुनने और दिखाने का सेक्शन -->
+    <div class="box">
+        <h3>तस्वीर चुनें (Image)</h3>
+        <input type="file" id="imagePicker" accept="image/*">
+        <br>
+        <img id="imagePreview" alt="चुनी गई तस्वीर यहाँ दिखेगी" style="display:none;">
+    </div>
+
+    <!-- वीडियो चुनने और दिखाने का सेक्शन -->
+    <div class="box">
+        <h3>वीडियो चुनें (Video)</h3>
+        <input type="file" id="videoPicker" accept="video/*">
+        <br>
+        <video id="videoPreview" controls style="display:none;"></video>
+    </div>
+
+    <script>
+        // इमेज पिकर का जावास्क्रिप्ट
+        const imagePicker = document.getElementById('imagePicker');
+        const imagePreview = document.getElementById('imagePreview');
+
+        imagePicker.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const imageURL = URL.createObjectURL(file);
+                imagePreview.src = imageURL;
+                imagePreview.style.display = 'block';
+            }
+        });
+
+        // वीडियो पिकर का जावास्क्रिप्ट
+        const videoPicker = document.getElementById('videoPicker');
+        const videoPreview = document.getElementById('videoPreview');
+
+        videoPicker.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const videoURL = URL.createObjectURL(file);
+                videoPreview.src = videoURL;
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    </script>
+
+</body>
+</html>
